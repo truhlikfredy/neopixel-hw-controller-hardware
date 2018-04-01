@@ -18,8 +18,6 @@ double sc_time_stamp () {
 int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv);
   uut = new Vanton_neopixel_top;
-  uut->eval();
-  uut->eval();
 
   Verilated::traceEverOn(true);
   VerilatedVcdC *tfp = new VerilatedVcdC;
@@ -31,9 +29,7 @@ int main(int argc, char** argv) {
   vcdname += ".vcd";
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
-
   uut->CLK_10MHZ = 0;
-  uut->eval();
 
   while (!Verilated::gotFinish()) {
     uut->CLK_10MHZ = uut->CLK_10MHZ ? 0 : 1;
