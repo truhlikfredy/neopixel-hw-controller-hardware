@@ -39,9 +39,9 @@ Is implementing the [WS2812](https://cdn-shop.adafruit.com/datasheets/WS2812.pdf
 
 There is some leeway in the timing so it doesn't have to absolutely precise, for properly correct timing see the datasheet:
 
-![protocol-timing1](/hardware/images/2812-1.png)
+![protocol-timing1](/hardware/images/ws2812-1.png)
 
-![protocol-timing2](/hardware/images/2812-2.png)
+![protocol-timing2](/hardware/images/ws2812-2.png)
 
 
 # Dependencies
