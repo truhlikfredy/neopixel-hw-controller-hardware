@@ -3,12 +3,12 @@ module anton_neopixel_top (
   output NEO_DATA,
   output VERBOSE_STATE);
 
-  reg [31:0] data        = 32'hff00d5;  // Blue Red Green, order is from right to left and the MSB are sent first
+  reg [31:0] data        = 24'hff00d5;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [11:0] neo_lookup  = 'd0;
 
-  reg [5:0]  counter     = 'd0;  // 6 bits are enough when i need to count only to 50
+  reg [8:0]  counter     = 'd0;  // 9 bits are enough when i need to count 500
   reg [3:0]  bit_clk     = 'd0;  // counting 0 - 11
-  reg [4:0]  bit_counter = 'd0;  // 0 - 31 to count whole 32bits of a RGB pixel
+  reg [4:0]  bit_counter = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg [1:0]  pixel       = 'd0;  // index to the current pixel transmitting
   reg        state       = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg        data_int    = 'b0;
@@ -41,11 +41,11 @@ module anton_neopixel_top (
         // for the 'd11 = 12th last sub-bit start with new bit and start sub-bit ticks from beging
         bit_clk <= 'b0;
 
-        if (bit_counter < 'd31) begin
-          // for 'd0 - 'd31 => 32bits of a pixel just go for the next bit
+        if (bit_counter < 'd23) begin
+          // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
           bit_counter <= bit_counter + 'b1;
         end else begin
-          // on 'd31 => 32th bit do start on a new pixel with bit 'd0
+          // on 'd23 => 24th bit do start on a new pixel with bit 'd0
           bit_counter <= 'b0;
 
           if (pixel < 'd1) begin
@@ -61,7 +61,7 @@ module anton_neopixel_top (
     end else begin
       // when in the reset state, count 50ns
       counter <= counter + 'b1;
-      if (counter > 50) begin
+      if (counter > 500) begin
         state <= 'd0;
         $finish;                // stop simulation here, went through all pixels and 1 reset
       end
