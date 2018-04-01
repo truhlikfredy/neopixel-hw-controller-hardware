@@ -27,7 +27,7 @@ And to startup gtk-wave for the very first time (for refresh ctrl+shift R is eno
 ```
 npm run-script wave
 ```
-![wave](/images/wave.png)
+![wave](/hardware/images/wave.png)
 
 # Dependencies
 
