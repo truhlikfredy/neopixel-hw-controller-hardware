@@ -1,0 +1,19 @@
+scale_to_time_dimension u
+
+enable_horiz_grid 0
+enable_vert_grid 0
+
+color_back white
+
+color_trans black
+color_0 gray
+color_1 black
+
+color_timeb white
+color_time black
+
+color_value black
+color_vbox gray
+color_vtrans gray
+#color_vtrans blue
+

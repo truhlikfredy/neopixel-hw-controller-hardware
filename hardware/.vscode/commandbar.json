@@ -1,0 +1,28 @@
+{
+	"skipTerminateQuickPick": true,
+	"skipSwitchToOutput": false,
+	"skipErrorMessage": true,
+	"commands": [
+		{
+			"text": "Lint",
+			"command": "npm run-script lint",
+			"skipTerminateQuickPick": false,
+      "priority": 10000,
+      "alignment": "left"
+		},
+		{
+			"text": "Monitor",
+			"command": "npm run-script monitor",
+			"skipTerminateQuickPick": false,
+			"priority": 9000,
+			"alignment": "left"
+		},
+		{
+			"text": "GTK-Wave",
+			"command": "npm run-script wave",
+			"skipTerminateQuickPick": false,
+			"priority": 8000,
+			"alignment": "left"
+		}
+	]
+}
