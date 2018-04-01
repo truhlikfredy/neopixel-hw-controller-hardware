@@ -1,47 +1,74 @@
 module anton_neopixel_top (
   input CLK_10MHZ,
-	output NEODATA);
+  output NEO_DATA,
+  output VERBOSE_STATE);
 
-  reg [31:0] data = 32'b111111111000000001010101;
-  reg [11:0] neolookup[1:0] = '{ 12'b000000000111, 12'b000011111111};
+  reg [31:0] data        = 32'hff00d5;  // Blue Red Green, order is from right to left and the MSB are sent first
+  reg [11:0] neo_lookup  = 'd0;
 
-  reg [10:0] counter     = 'd0;
-  reg [3:0]  bit_clk     = 'd0;
-  reg [4:0]  bit_counter = 'd0;
-  reg [1:0]  pixel       = 'd0;
-  reg 			 data_int    = 'b0;
-  reg        state       = 'b0;
+  reg [5:0]  counter     = 'd0;  // 6 bits are enough when i need to count only to 50
+  reg [3:0]  bit_clk     = 'd0;  // counting 0 - 11
+  reg [4:0]  bit_counter = 'd0;  // 0 - 31 to count whole 32bits of a RGB pixel
+  reg [1:0]  pixel       = 'd0;  // index to the current pixel transmitting
+  reg        state       = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg        data_int    = 'b0;
  			     
   always @(posedge CLK_10MHZ) begin
     if (state == 'd0) begin
-      data_int = neolookup[data[bit_counter]][bit_clk];
+      // push bits of a pixel
+
+      case (data[bit_counter])
+        // depending on the current bit decide what pattern to push
+        // patterns are ordered from right to left
+        1'b0: neo_lookup = 12'b000000000111;
+        1'b1: neo_lookup = 12'b000011111111;
+      endcase
+
+      data_int = neo_lookup[bit_clk];
     end else begin
+      // reset state
       data_int = 'd0;
     end
   end
 
   always @(posedge CLK_10MHZ) begin
-    bit_clk <= bit_clk + 'b1;
+    if (state == 'd0) begin
 
-    if (bit_clk >= 11) begin  // from 0 to 11 = 12
-      bit_clk <= 'b0;
-      if (bit_counter < 'd31) begin
-        bit_counter <= bit_counter + 'b1;
+      if (bit_clk < 'd11) begin
+        // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
+        bit_clk <= bit_clk + 'b1;
       end else begin
-        bit_counter <= 'b0;
-        pixel <= pixel + 'b1;
-        state = 'd1;
+        // for the 'd11 = 12th last sub-bit start with new bit and start sub-bit ticks from beging
+        bit_clk <= 'b0;
+
+        if (bit_counter < 'd31) begin
+          // for 'd0 - 'd31 => 32bits of a pixel just go for the next bit
+          bit_counter <= bit_counter + 'b1;
+        end else begin
+          // on 'd31 => 32th bit do start on a new pixel with bit 'd0
+          bit_counter <= 'b0;
+
+          if (pixel < 'd1) begin
+            // for all pixels go to the next pixel
+            pixel <= pixel + 'b1;
+          end else begin
+            // for the very last pixel overflow 0 and start reset
+            pixel <= 'd0;
+            state <= 'd1;
+          end
+        end        
+      end
+    end else begin
+      // when in the reset state, count 50ns
+      counter <= counter + 'b1;
+      if (counter > 50) begin
+        state <= 'd0;
+        $finish;                // stop simulation here, went through all pixels and 1 reset
       end
     end
   end
 
-  assign NEODATA = data_int;   
-
-  always @(posedge CLK_10MHZ) begin
-    counter <= counter + 'b1;
-    if (counter > 700) begin
-      $finish;
-    end  
-  end
-
+  assign NEO_DATA      = data_int;
+  assign VERBOSE_STATE = state;
+  
 endmodule
