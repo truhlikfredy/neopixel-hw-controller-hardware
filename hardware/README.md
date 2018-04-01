@@ -29,6 +29,21 @@ npm run-script wave
 ```
 ![wave](/hardware/images/wave.png)
 
+# Protocol 
+
+Is implementing the [WS2812](https://cdn-shop.adafruit.com/datasheets/WS2812.pdf) NZR protocol.
+3 things can be happening on the data wire:
+* Transmit 1 (**HIGH** for 0.7us followed with **LOW** for 0.6us)
+* Transmit 0 (**HIGH** for 0.4us followed with **LOW** for 0.8us)
+* Reset (stay **LOW** for at least 50us)
+
+There is some leeway in the timing so it doesn't have to absolutely precise, for properly correct timing see the datasheet:
+
+![protocol-timing1](/hardware/images/2812-1.png)
+
+![protocol-timing2](/hardware/images/2812-2.png)
+
+
 # Dependencies
 
 * verilator to compile simulation
