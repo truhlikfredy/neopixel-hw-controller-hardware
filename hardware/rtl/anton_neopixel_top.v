@@ -1,3 +1,8 @@
+// TODO: Downgrade the clock to 7MHz, allow for the 0 = 2 + 6 ticks and for 1 = 5 + 3 ticks
+// in both cases they will be 8 ticks (power of 2) and simplify the counter (no logic to compare)
+// needed and it will just overflow. Total time to transmit 1 pixel will be 1.14us instead 1.2us 
+// so it should be faster on longer chains. To update 200 pixels will save 12uS (which is worth about 
+// another 10 pixels of time)
 
 module anton_neopixel_top (
   input CLK_10MHZ,
