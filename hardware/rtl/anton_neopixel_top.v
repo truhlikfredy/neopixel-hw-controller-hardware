@@ -13,7 +13,9 @@ module anton_neopixel_top (
   reg        state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg        data_int           = 'b0;
 
-
+  parameter enum_state_transmit = 0;   // If I will make SystemVerilog variant then use proper enums for this
+  parameter enum_state_reset    = 1;
+  
   always @(pixel_value[pixel_bit_index]) begin
     case (pixel_value[pixel_bit_index])
       // depending on the current bit decide what pattern to push
@@ -25,7 +27,7 @@ module anton_neopixel_top (
 
 
   always @(posedge CLK_10MHZ) begin
-    if (state == 'd0) begin
+    if (state == enum_state_transmit) begin
       // push patterns of the bit inside a pixel 
       data_int = neo_pattern_lookup[bit_pattern_index];
     end else begin
@@ -36,7 +38,7 @@ module anton_neopixel_top (
 
 
   always @(posedge CLK_10MHZ) begin
-    if (state == 'd0) begin
+    if (state == enum_state_transmit) begin
 
       if (bit_pattern_index < 'd11) begin
         // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
@@ -58,7 +60,7 @@ module anton_neopixel_top (
           end else begin
             // for the very last pixel overflow 0 and start reset
             pixel_index <= 'd0;
-            state <= 'd1;
+            state <= enum_state_reset;
           end
         end        
       end
