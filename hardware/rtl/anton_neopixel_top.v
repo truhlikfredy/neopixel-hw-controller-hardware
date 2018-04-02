@@ -57,7 +57,7 @@ module anton_neopixel_top (
   end
 
 
-  always @(posedge CLK_10MHZ) begin
+  always @(negedge CLK_10MHZ) begin
     if (state == enum_state_transmit) begin
 
       if (bit_pattern_index < 'd11) begin
