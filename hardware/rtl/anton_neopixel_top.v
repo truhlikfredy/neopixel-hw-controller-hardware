@@ -6,14 +6,14 @@ module anton_neopixel_top (
 
   parameter PIXELS_MAX  = 3;   // maximum number of LEDs in a strip
   parameter PIXELS_BITS = 2;   // minimum required amount of bits to store the PIXELS_MAX
-  parameter RESET_DELAY = 510; // how long the reset delay will be happening 500 == 50us
+  parameter RESET_DELAY = 600; // how long the reset delay will be happening 500 == 50us
 
   //reg [PIXELS_BITS-1:0][7:0] pixels;
 
   reg [23:0]             pixel_value        = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [11:0]             neo_pattern_lookup = 'd0;
             
-  reg [8:0]              reset_delay_count  = 'd0;  // 9 bits can go to 512 so should be enough to count ~500 (50us)
+  reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [3:0]              bit_pattern_index  = 'd0;  // counting 0 - 11
   reg [PIXELS_BITS-1:0]  pixel_index        = 'd0;  // index to the current pixel transmitting
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
