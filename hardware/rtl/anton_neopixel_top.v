@@ -4,20 +4,22 @@ module anton_neopixel_top (
   output NEO_DATA,
   output VERBOSE_STATE);
 
-  parameter PIXELS_MAX  = 3; // maximum number of LEDs in a strip
-  parameter PIXELS_BITS = 2; // minimum required amount of bits to store the PIXELS_MAX
+  parameter PIXELS_MAX  = 3;   // maximum number of LEDs in a strip
+  parameter PIXELS_BITS = 2;   // minimum required amount of bits to store the PIXELS_MAX
+  parameter RESET_DELAY = 510; // how long the reset delay will be happening 500 == 50us
 
   //reg [PIXELS_BITS-1:0][7:0] pixels;
 
-  reg [23:0]             pixel_value        = 24'hff00d5;  // Blue Red Green, order is from right to left and the MSB are sent first
+  reg [23:0]             pixel_value        = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [11:0]             neo_pattern_lookup = 'd0;
             
-  reg [8:0]              reset_delay        = 'd0;  // 9 bits are enough when i need to count 500
+  reg [8:0]              reset_delay_count  = 'd0;  // 9 bits can go to 512 so should be enough to count ~500 (50us)
   reg [3:0]              bit_pattern_index  = 'd0;  // counting 0 - 11
   reg [PIXELS_BITS-1:0]  pixel_index        = 'd0;  // index to the current pixel transmitting
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    data_int           = 'b0;
+  reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
   parameter  enum_state_transmit = 0;   // If I will make SystemVerilog variant then use proper enums for this
   parameter  enum_state_reset    = 1;
@@ -83,11 +85,15 @@ module anton_neopixel_top (
         end        
       end
     end else begin
-      // when in the reset state, count 50ns
-      reset_delay <= reset_delay + 'b1;
-      if (reset_delay > 500) begin
+      // when in the reset state, count 50ns (RESET_DELAY / 10)
+      reset_delay_count <= reset_delay_count + 'b1;
+
+      if (reset_delay_count > RESET_DELAY) begin  
+        // predefined wait in reset state was reached, let's 
         state <= 'd0;
-        $finish;                // stop simulation here, went through all pixels and 1 reset
+        if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
+        cycle <= cycle + 'd1;
+        reset_delay_count <= 'd0;
       end
     end
   end
