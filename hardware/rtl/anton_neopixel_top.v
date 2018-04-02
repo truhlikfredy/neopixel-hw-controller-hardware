@@ -3,19 +3,20 @@ module anton_neopixel_top (
   output NEO_DATA,
   output VERBOSE_STATE);
 
-  reg [23:0] pixel_value        = 24'hff00d5;  // Blue Red Green, order is from right to left and the MSB are sent first
-  reg [11:0] neo_pattern_lookup = 'd0;
+  reg [23:0] pixel_value         = 24'hff00d5;  // Blue Red Green, order is from right to left and the MSB are sent first
+  reg [11:0] neo_pattern_lookup  = 'd0;
 
-  reg [8:0]  reset_delay        = 'd0;  // 9 bits are enough when i need to count 500
-  reg [3:0]  bit_pattern_index  = 'd0;  // counting 0 - 11
-  reg [4:0]  pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
-  reg [1:0]  pixel_index        = 'd0;  // index to the current pixel transmitting
-  reg        state              = 'b0;  // 0 = transmit bits, 1 = reset mode
-  reg        data_int           = 'b0;
+  reg [8:0]  reset_delay         = 'd0;  // 9 bits are enough when i need to count 500
+  reg [3:0]  bit_pattern_index   = 'd0;  // counting 0 - 11
+  reg [4:0]  pixel_bit_index     = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
+  reg [1:0]  pixel_index         = 'd0;  // index to the current pixel transmitting
+  reg        state               = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg        data_int            = 'b0;
 
-  parameter enum_state_transmit = 0;   // If I will make SystemVerilog variant then use proper enums for this
-  parameter enum_state_reset    = 1;
+  parameter  enum_state_transmit = 0;   // If I will make SystemVerilog variant then use proper enums for this
+  parameter  enum_state_reset    = 1;
   
+
   always @(pixel_value[pixel_bit_index]) begin
     case (pixel_value[pixel_bit_index])
       // depending on the current bit decide what pattern to push
