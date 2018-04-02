@@ -8,5 +8,7 @@ lappend signals "TOP.anton_neopixel_top.pixel_bit_index"
 lappend signals "TOP.anton_neopixel_top.pixel_index"
 lappend signals "TOP.anton_neopixel_top.pixel_value"
 
+#lappend signals "TOP.anton_neopixel_top.pixels"
+
 
 set num_added [ gtkwave::addSignalsFromList $signals ]
