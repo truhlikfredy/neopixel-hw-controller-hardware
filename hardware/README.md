@@ -43,6 +43,8 @@ There is some leeway in the timing so it doesn't have to absolutely precise, for
 
 ![protocol-timing2](/hardware/images/ws2812-2.png)
 
+Notice the order of the colors **GRB** and the fact that the most significant bits are transmitted first.
+
 
 # Dependencies
 
