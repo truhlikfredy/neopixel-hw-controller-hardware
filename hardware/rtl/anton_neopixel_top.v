@@ -9,21 +9,22 @@ module anton_neopixel_top (
   reg [8:0]  counter     = 'd0;  // 9 bits are enough when i need to count 500
   reg [3:0]  bit_clk     = 'd0;  // counting 0 - 11
   reg [4:0]  bit_counter = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
-  reg [1:0]  pixel       = 'd0;  // index to the current pixel transmitting
+  reg [1:0]  pixel_index = 'd0;  // index to the current pixel transmitting
   reg        state       = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg        data_int    = 'b0;
- 			     
+
+  always @(data[bit_counter]) begin
+    case (data[bit_counter])
+      // depending on the current bit decide what pattern to push
+      // patterns are ordered from right to left
+      1'b0: neo_lookup = 12'b000000000111;
+      1'b1: neo_lookup = 12'b000011111111;
+    endcase
+  end
+
   always @(posedge CLK_10MHZ) begin
     if (state == 'd0) begin
       // push bits of a pixel
-
-      case (data[bit_counter])
-        // depending on the current bit decide what pattern to push
-        // patterns are ordered from right to left
-        1'b0: neo_lookup = 12'b000000000111;
-        1'b1: neo_lookup = 12'b000011111111;
-      endcase
-
       data_int = neo_lookup[bit_clk];
     end else begin
       // reset state
@@ -48,12 +49,12 @@ module anton_neopixel_top (
           // on 'd23 => 24th bit do start on a new pixel with bit 'd0
           bit_counter <= 'b0;
 
-          if (pixel < 'd1) begin
+          if (pixel_index < 'd1) begin
             // for all pixels go to the next pixel
-            pixel <= pixel + 'b1;
+            pixel_index <= pixel_index + 'b1;
           end else begin
             // for the very last pixel overflow 0 and start reset
-            pixel <= 'd0;
+            pixel_index <= 'd0;
             state <= 'd1;
           end
         end        
