@@ -30,7 +30,9 @@ module anton_neopixel_top (
   parameter  enum_state_reset    = 1;
   
 
-  always @(pixel_value[pixel_bit_index]) begin
+  // as combinational logic should be enough
+  // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
+  always @(*) begin
     case (pixel_value[pixel_bit_index])
       // depending on the current bit decide what pattern to push
       // patterns are ordered from right to left
@@ -40,7 +42,7 @@ module anton_neopixel_top (
   end
 
 
-  always @(pixel_index) begin
+  always @(*) begin
     // hardcoded predefined colors for 3 pixels in a strip
     case (pixel_index)
       'd0: pixel_value = 24'hff00d5;
@@ -62,7 +64,7 @@ module anton_neopixel_top (
   end
 
 
-  always @(negedge CLK_10MHZ) begin
+  always @(posedge CLK_10MHZ) begin
     if (state == enum_state_transmit) begin
 
       if (bit_pattern_index < 'd11) begin
