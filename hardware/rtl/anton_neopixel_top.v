@@ -53,7 +53,7 @@ module anton_neopixel_top (
   end
 
 
-  always @(posedge CLK_10MHZ) begin
+  always @(*) begin
     if (state == enum_state_transmit) begin
       // push patterns of the bit inside a pixel 
       data_int = neo_pattern_lookup[bit_pattern_index];
