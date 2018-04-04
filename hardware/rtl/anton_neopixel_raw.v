@@ -41,7 +41,7 @@ module anton_neopixel_raw (
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [3:0]              bit_pattern_index  = 'd0;  // counting 0 - 11
-  reg [PIXELS_BITS-1:0]  pixel_index        = 'd0;  // index to the current pixel transmitting
+  reg [PIXELS_BITS-1:0]  pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    data_int           = 'b0;
@@ -50,7 +50,7 @@ module anton_neopixel_raw (
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
   localparam  ENUM_STATE_RESET    = 1;
   
-  
+
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
   always @(*) begin
