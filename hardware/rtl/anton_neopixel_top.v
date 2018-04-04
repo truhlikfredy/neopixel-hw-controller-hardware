@@ -16,6 +16,8 @@
 
 // TODO: get rid if you can of the nested overflow checkers
 
+// TODO: nodemon killall first
+
 module anton_neopixel_top (
   input CLK_10MHZ,
   output NEO_DATA,
@@ -112,7 +114,7 @@ module anton_neopixel_top (
   always @(posedge CLK_10MHZ) begin
     if (wr_enable) begin
       // TODO: write tester for these writes
-      pixels[APB_PADDR] = APB_PWDATA;
+      pixels[APB_PADDR[2:0]] = APB_PWDATA;
     end else begin
       if (state == enum_state_transmit) begin
 

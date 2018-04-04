@@ -11,17 +11,24 @@
       "alignment": "left"
 		},
 		{
-			"text": "Monitor",
-			"command": "npm run-script monitor",
+			"text": "MonitorLint",
+			"command": "npm run-script monitor-lint",
 			"skipTerminateQuickPick": false,
 			"priority": 9000,
+			"alignment": "left"
+		},
+		{
+			"text": "MonitorAll",
+			"command": "npm run-script monitor-all",
+			"skipTerminateQuickPick": false,
+			"priority": 8000,
 			"alignment": "left"
 		},
 		{
 			"text": "GTK-Wave",
 			"command": "npm run-script wave",
 			"skipTerminateQuickPick": false,
-			"priority": 8000,
+			"priority": 7000,
 			"alignment": "left"
 		}
 	]
