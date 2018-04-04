@@ -6,12 +6,32 @@
 
 //`define HARDCODED_PIXELS 1
 
-// use bits and size properly https://stackoverflow.com/questions/13340301/size-bits-verilog
+// TODO: use bits and size properly https://stackoverflow.com/questions/13340301/size-bits-verilog
+
+// TODO: splitup modules
+
+// TODO: mss ready / reset signals
+
+// TODO: idle state, writing state, ready state, do no repeately flash the content but only after finished write
+
+// TODO: get rid if you can of the nested overflow checkers
 
 module anton_neopixel_top (
   input CLK_10MHZ,
   output NEO_DATA,
-  output VERBOSE_STATE
+  output VERBOSE_STATE,
+
+  input [7:0]APB_PADDR,
+  input APB_PCLK,
+  input APB_PENABLE,
+  input APB_PSELx,
+  input APB_PRESERN,
+  input [7:0]APB_PWDATA,
+  input APB_PWRITE,
+
+  output APB_PREADY,
+  output APB_PSLVERR,
+  output [7:0]APB_PRDATA
   );
 
   parameter PIXELS_MAX  = 5;   // maximum number of LEDs in a strip
@@ -32,9 +52,19 @@ module anton_neopixel_top (
   reg                    data_int           = 'b0;
   reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
+  wire wr_enable;
+  wire rd_enable;
+
   parameter  enum_state_transmit = 0;   // If I will make SystemVerilog variant then use proper enums for this
   parameter  enum_state_reset    = 1;
   
+  assign APB_PREADY = 1'd0;
+  assign APB_PSLVERR = 1'd0;
+  assign APB_PRDATA = 8'd0;
+
+  assign wr_enable = (APB_PENABLE && APB_PWRITE && APB_PSELx);
+  assign rd_enable = (!APB_PWRITE && APB_PSELx);
+
 
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
@@ -51,6 +81,7 @@ module anton_neopixel_top (
   always @(*) begin
     `ifdef HARDCODED_PIXELS
       // hardcoded predefined colors for 3 pixels in a strip
+      // TODO: use casez so bigger arrays could be auto filled with these values
       case (pixel_index)
         'd0: pixel_value = 24'hff00d5;
         'd1: pixel_value = 24'h008800;
@@ -79,42 +110,47 @@ module anton_neopixel_top (
 
 
   always @(posedge CLK_10MHZ) begin
-    if (state == enum_state_transmit) begin
-
-      if (bit_pattern_index < 'd11) begin
-        // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
-        bit_pattern_index <= bit_pattern_index + 'b1;
-      end else begin
-        // for the 'd11 = 12th last sub-bit start with new bit and start sub-bit ticks from beging
-        bit_pattern_index <= 'b0;
-
-        if (pixel_bit_index < 'd23) begin
-          // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-          pixel_bit_index <= pixel_bit_index + 'b1;
-        end else begin
-          // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-          pixel_bit_index <= 'b0;
-
-          if (pixel_index < PIXELS_MAX-1) begin
-            // for all pixels go to the next pixel
-            pixel_index <= pixel_index + 'b1;
-          end else begin
-            // for the very last pixel overflow 0 and start reset
-            pixel_index <= 'd0;
-            state <= enum_state_reset;
-          end
-        end        
-      end
+    if (wr_enable) begin
+      // TODO: write tester for these writes
+      pixels[APB_PADDR] = APB_PWDATA;
     end else begin
-      // when in the reset state, count 50ns (RESET_DELAY / 10)
-      reset_delay_count <= reset_delay_count + 'b1;
+      if (state == enum_state_transmit) begin
 
-      if (reset_delay_count > RESET_DELAY) begin  
-        // predefined wait in reset state was reached, let's 
-        state <= 'd0;
-        if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
-        cycle <= cycle + 'd1;
-        reset_delay_count <= 'd0;
+        if (bit_pattern_index < 'd11) begin
+          // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
+          bit_pattern_index <= bit_pattern_index + 'b1;
+        end else begin
+          // for the 'd11 = 12th last sub-bit start with new bit and start sub-bit ticks from beging
+          bit_pattern_index <= 'b0;
+
+          if (pixel_bit_index < 'd23) begin
+            // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
+            pixel_bit_index <= pixel_bit_index + 'b1;
+          end else begin
+            // on 'd23 => 24th bit do start on a new pixel with bit 'd0
+            pixel_bit_index <= 'b0;
+
+            if (pixel_index < PIXELS_MAX-1) begin
+              // for all pixels go to the next pixel
+              pixel_index <= pixel_index + 'b1;
+            end else begin
+              // for the very last pixel overflow 0 and start reset
+              pixel_index <= 'd0;
+              state <= enum_state_reset;
+            end
+          end        
+        end
+      end else begin
+        // when in the reset state, count 50ns (RESET_DELAY / 10)
+        reset_delay_count <= reset_delay_count + 'b1;
+
+        if (reset_delay_count > RESET_DELAY) begin  
+          // predefined wait in reset state was reached, let's 
+          state <= 'd0;
+          if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
+          cycle <= cycle + 'd1;
+          reset_delay_count <= 'd0;
+        end
       end
     end
   end
