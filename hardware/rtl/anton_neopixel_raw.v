@@ -18,22 +18,15 @@
 
 // TODO: nodemon killall first
 
-module anton_neopixel_top (
-  input CLK_10MHZ,
-  output NEO_DATA,
-  output VERBOSE_STATE,
+module anton_neopixel_raw (
+  input clk10mhz,
+  output neoData,
+  output neoState,
 
-  input [7:0]APB_PADDR,
-  input APB_PCLK,
-  input APB_PENABLE,
-  input APB_PSELx,
-  input APB_PRESERN,
-  input [7:0]APB_PWDATA,
-  input APB_PWRITE,
-
-  output APB_PREADY,
-  output APB_PSLVERR,
-  output [7:0]APB_PRDATA
+  input [7:0]busAddr,
+  input [7:0]busData,
+  input busClk,
+  input busWrite
   );
 
   parameter PIXELS_MAX  = 5;   // maximum number of LEDs in a strip
@@ -54,20 +47,10 @@ module anton_neopixel_top (
   reg                    data_int           = 'b0;
   reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
-  wire wr_enable;
-  wire rd_enable;
-
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
   localparam  ENUM_STATE_RESET    = 1;
   
-  assign APB_PREADY  = 1'd0;
-  assign APB_PSLVERR = 1'd0;
-  assign APB_PRDATA  = 8'd0;
-
-  assign wr_enable = (APB_PENABLE && APB_PWRITE && APB_PSELx);
-  assign rd_enable = (!APB_PWRITE && APB_PSELx);
-
-
+  
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
   always @(*) begin
@@ -111,10 +94,10 @@ module anton_neopixel_top (
   end
 
 
-  always @(posedge CLK_10MHZ) begin
-    if (wr_enable) begin
+  always @(posedge clk10mhz) begin
+    if (busWrite) begin
       // TODO: write tester for these writes
-      pixels[APB_PADDR[2:0]] <= APB_PWDATA;
+      pixels[busAddr[2:0]] <= busData;
     end else begin
       if (state == ENUM_STATE_TRANSMIT) begin
 
@@ -158,7 +141,7 @@ module anton_neopixel_top (
   end
 
 
-  assign NEO_DATA      = data_int;
-  assign VERBOSE_STATE = state;
+  assign neoData  = data_int;
+  assign neoState = state;
   
 endmodule
