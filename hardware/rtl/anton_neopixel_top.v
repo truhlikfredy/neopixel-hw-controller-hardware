@@ -4,17 +4,23 @@
 // so it should be faster on longer chains. To update 200 pixels will save 12uS (which is worth about 
 // another 10 pixels of time)
 
+//`define HARDCODED_PIXELS 1
+
+// use bits and size properly https://stackoverflow.com/questions/13340301/size-bits-verilog
+
 module anton_neopixel_top (
   input CLK_10MHZ,
   output NEO_DATA,
-  output VERBOSE_STATE);
+  output VERBOSE_STATE
+  );
 
-  parameter PIXELS_MAX  = 3;   // maximum number of LEDs in a strip
-  parameter PIXELS_BITS = 2;   // minimum required amount of bits to store the PIXELS_MAX
+  parameter PIXELS_MAX  = 5;   // maximum number of LEDs in a strip
+  parameter PIXELS_BITS = 3;   // minimum required amount of bits to store the PIXELS_MAX
   parameter RESET_DELAY = 600; // how long the reset delay will be happening 500 == 50us
 
   //reg [PIXELS_BITS-1:0][7:0] pixels;
 
+  reg [7:0]              pixels[PIXELS_MAX-1:0];
   reg [23:0]             pixel_value        = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [11:0]             neo_pattern_lookup = 'd0;
             
@@ -43,13 +49,21 @@ module anton_neopixel_top (
 
 
   always @(*) begin
-    // hardcoded predefined colors for 3 pixels in a strip
-    case (pixel_index)
-      'd0: pixel_value = 24'hff00d5;
-      'd1: pixel_value = 24'h008800;
-      'd2: pixel_value = 24'h000090;
-      default:  pixel_value = 24'h101010;  // slightly light to show there might be problem in configuration
-    endcase
+    `ifdef HARDCODED_PIXELS
+      // hardcoded predefined colors for 3 pixels in a strip
+      case (pixel_index)
+        'd0: pixel_value = 24'hff00d5;
+        'd1: pixel_value = 24'h008800;
+        'd2: pixel_value = 24'h000090;
+        default:  pixel_value = 24'h101010;  // slightly light to show there might be problem in configuration
+      endcase
+    `else
+      pixel_value = { 
+                      5'b00000,  pixels[pixel_index][7:5], 
+                      6'b000000, pixels[pixel_index][1:0], 
+                      5'b00000,  pixels[pixel_index][4:2] 
+                    };
+    `endif
   end
 
 
