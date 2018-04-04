@@ -57,12 +57,12 @@ module anton_neopixel_top (
   wire wr_enable;
   wire rd_enable;
 
-  parameter  enum_state_transmit = 0;   // If I will make SystemVerilog variant then use proper enums for this
-  parameter  enum_state_reset    = 1;
+  localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
+  localparam  ENUM_STATE_RESET    = 1;
   
-  assign APB_PREADY = 1'd0;
+  assign APB_PREADY  = 1'd0;
   assign APB_PSLVERR = 1'd0;
-  assign APB_PRDATA = 8'd0;
+  assign APB_PRDATA  = 8'd0;
 
   assign wr_enable = (APB_PENABLE && APB_PWRITE && APB_PSELx);
   assign rd_enable = (!APB_PWRITE && APB_PSELx);
@@ -101,7 +101,7 @@ module anton_neopixel_top (
 
 
   always @(*) begin
-    if (state == enum_state_transmit) begin
+    if (state == ENUM_STATE_TRANSMIT) begin
       // push patterns of the bit inside a pixel 
       data_int = neo_pattern_lookup[bit_pattern_index];
     end else begin
@@ -114,9 +114,9 @@ module anton_neopixel_top (
   always @(posedge CLK_10MHZ) begin
     if (wr_enable) begin
       // TODO: write tester for these writes
-      pixels[APB_PADDR[2:0]] = APB_PWDATA;
+      pixels[APB_PADDR[2:0]] <= APB_PWDATA;
     end else begin
-      if (state == enum_state_transmit) begin
+      if (state == ENUM_STATE_TRANSMIT) begin
 
         if (bit_pattern_index < 'd11) begin
           // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
@@ -138,7 +138,7 @@ module anton_neopixel_top (
             end else begin
               // for the very last pixel overflow 0 and start reset
               pixel_index <= 'd0;
-              state <= enum_state_reset;
+              state <= ENUM_STATE_RESET;
             end
           end        
         end
