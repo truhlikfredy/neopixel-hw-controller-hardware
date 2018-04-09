@@ -29,9 +29,48 @@ int main(int argc, char** argv) {
   vcdname += ".vcd";
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
-  uut->clk10mhz = 0;
+  uut->clk10mhz   = 0;
 
-  while (!Verilated::gotFinish()) {
+  uut->apbPenable = 1;
+  uut->apbPwrite  = 1;
+  uut->apbPselx   = 1;
+
+  uut->apbPclk    = 0;
+  uut->apbPaddr   = 0;
+  uut->apbPwData  = 0xF0;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+  uut->apbPclk = 1;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  uut->apbPclk    = 0;
+  uut->apbPaddr   = 1;
+  uut->apbPwData  = 0x02;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+  uut->apbPclk = 1;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  uut->apbPclk    = 0;
+  uut->apbPaddr   = 2;
+  uut->apbPwData  = 0x18;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+  uut->apbPclk = 1;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  uut->apbPclk    = 0;
+  uut->apbPenable = 0;
+  uut->apbPwrite  = 0;
+  uut->apbPselx   = 0;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  while (!Verilated::gotFinish())
+  {
     uut->clk10mhz = uut->clk10mhz ? 0 : 1;
     uut->eval();
     tfp->dump (sim_time);
