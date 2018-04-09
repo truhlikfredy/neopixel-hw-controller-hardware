@@ -4,7 +4,7 @@ module anton_neopixel_apb (
   output neoData,
   output neoState,
 
-  input aobPenable,
+  input apbPenable,
   input [7:0]apbPaddr,
   input [7:0]apbPwData,
   input apbPclk,
@@ -24,7 +24,7 @@ module anton_neopixel_apb (
   assign apbPslverr = 1'd0;
   assign apbPrData  = 8'd0;
 
-  assign wr_enable = (aobPenable && apbPwrite && apbPselx);
+  assign wr_enable = (apbPenable && apbPwrite && apbPselx);
   assign rd_enable = (!apbPwrite && apbPselx);
 
   anton_neopixel_raw neopixel(
