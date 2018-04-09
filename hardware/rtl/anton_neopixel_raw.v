@@ -74,10 +74,12 @@ module anton_neopixel_raw (
         default:  pixel_value = 24'h101010;  // slightly light to show there might be problem in configuration
       endcase
     `else
+      // 2B, 3G, 3R source format => 7-6B,  5-3G, 2-0R
+      // 8B, 8R, 8G destination format =>  xxxxxBBx xxxxRRRx xxxxGGGx  high bits are sent first
       pixel_value = { 
-                      5'b00000,  pixels[pixel_index][7:5], 
-                      6'b000000, pixels[pixel_index][1:0], 
-                      5'b00000,  pixels[pixel_index][4:2] 
+                      5'b00000, pixels[pixel_index][6], pixels[pixel_index][7], 1'b0,                           // 2bits Blues
+                      4'b0000,  pixels[pixel_index][0], pixels[pixel_index][1], pixels[pixel_index][2], 1'b0,   // 3bits Red
+                      4'b0000,  pixels[pixel_index][3], pixels[pixel_index][4], pixels[pixel_index][5], 1'b0    // 3bits Green
                     };
     `endif
   end
