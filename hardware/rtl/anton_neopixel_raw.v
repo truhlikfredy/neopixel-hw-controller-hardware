@@ -96,48 +96,51 @@ module anton_neopixel_raw (
   end
 
 
-  always @(posedge clk10mhz) begin
+  always @(posedge busClk) begin
     if (busWrite) begin
       // TODO: write tester for these writes
-      pixels[busAddr[2:0]] <= busData;
-    end else begin
-      if (state == ENUM_STATE_TRANSMIT) begin
+      pixels[busAddr[PIXELS_BITS-1:0]] <= busData;
+    end
+  end
 
-        if (bit_pattern_index < 'd11) begin
-          // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
-          bit_pattern_index <= bit_pattern_index + 'b1;
-        end else begin
-          // for the 'd11 = 12th last sub-bit start with new bit and start sub-bit ticks from beging
-          bit_pattern_index <= 'b0;
 
-          if (pixel_bit_index < 'd23) begin
-            // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-            pixel_bit_index <= pixel_bit_index + 'b1;
-          end else begin
-            // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-            pixel_bit_index <= 'b0;
+  always @(posedge clk10mhz) begin
+    if (state == ENUM_STATE_TRANSMIT) begin
 
-            if (pixel_index < PIXELS_MAX-1) begin
-              // for all pixels go to the next pixel
-              pixel_index <= pixel_index + 'b1;
-            end else begin
-              // for the very last pixel overflow 0 and start reset
-              pixel_index <= 'd0;
-              state <= ENUM_STATE_RESET;
-            end
-          end        
-        end
+      if (bit_pattern_index < 'd11) begin
+        // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
+        bit_pattern_index <= bit_pattern_index + 'b1;
       end else begin
-        // when in the reset state, count 50ns (RESET_DELAY / 10)
-        reset_delay_count <= reset_delay_count + 'b1;
+        // for the 'd11 = 12th last sub-bit start with new bit and start sub-bit ticks from beging
+        bit_pattern_index <= 'b0;
 
-        if (reset_delay_count > RESET_DELAY) begin  
-          // predefined wait in reset state was reached, let's 
-          state <= 'd0;
-          if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
-          cycle <= cycle + 'd1;
-          reset_delay_count <= 'd0;
-        end
+        if (pixel_bit_index < 'd23) begin
+          // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
+          pixel_bit_index <= pixel_bit_index + 'b1;
+        end else begin
+          // on 'd23 => 24th bit do start on a new pixel with bit 'd0
+          pixel_bit_index <= 'b0;
+
+          if (pixel_index < PIXELS_MAX-1) begin
+            // for all pixels go to the next pixel
+            pixel_index <= pixel_index + 'b1;
+          end else begin
+            // for the very last pixel overflow 0 and start reset
+            pixel_index <= 'd0;
+            state <= ENUM_STATE_RESET;
+          end
+        end        
+      end
+    end else begin
+      // when in the reset state, count 50ns (RESET_DELAY / 10)
+      reset_delay_count <= reset_delay_count + 'b1;
+
+      if (reset_delay_count > RESET_DELAY) begin  
+        // predefined wait in reset state was reached, let's 
+        state <= 'd0;
+        if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
+        cycle <= cycle + 'd1;
+        reset_delay_count <= 'd0;
       end
     end
   end
