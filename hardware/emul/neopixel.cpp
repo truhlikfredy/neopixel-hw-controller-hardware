@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
   tfp->dump(sim_time += 50);
 
   uut->apbPclk    = 0;
-  uut->apbPaddr   = 1;
+  uut->apbPaddr   = 4;
   uut->apbPwData  = 0x02;
   uut->eval();
   tfp->dump(sim_time += 50);
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   tfp->dump(sim_time += 50);
 
   uut->apbPclk    = 0;
-  uut->apbPaddr   = 2;
+  uut->apbPaddr   = 8;
   uut->apbPwData  = 0x18;
   uut->eval();
   tfp->dump(sim_time += 50);
