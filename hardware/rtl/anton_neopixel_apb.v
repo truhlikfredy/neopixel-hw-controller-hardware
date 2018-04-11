@@ -20,7 +20,7 @@ module anton_neopixel_apb (
   wire wr_enable;
   wire rd_enable;
 
-  assign apbPready  = 1'd0;
+  assign apbPready  = 1'd1;
   assign apbPslverr = 1'd0;
   assign apbPrData  = 8'd0;
 
