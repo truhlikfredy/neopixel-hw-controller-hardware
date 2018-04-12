@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
   uut->apbPclk    = 0;
   uut->apbPaddr   = 0;
-  uut->apbPwData  = 0xF0;
+  uut->apbPwData  = 0xff;
   uut->eval();
   tfp->dump(sim_time += 50);
   uut->apbPclk = 1;
