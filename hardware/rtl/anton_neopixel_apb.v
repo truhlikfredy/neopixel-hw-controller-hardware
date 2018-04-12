@@ -19,24 +19,25 @@ module anton_neopixel_apb (
 
   wire wr_enable;
   wire rd_enable;
-  wire address;
+  wire [7:0]address;
 
-  assign apbPready  = 1'd1;
-  assign apbPslverr = 1'd0;
-  assign apbPrData  = 8'd0;
-
+  assign apbPready  = 1'd1;   // always ready, never delaying with a waiting state
+  assign apbPslverr = 1'd0;   // never report errors
+  
   assign wr_enable = (apbPenable && apbPwrite && apbPselx);
   assign rd_enable = (!apbPwrite && apbPselx);
-  assign address = { 2'd00, apbPaddr[7:2] };
+  assign address   = { 2'd00, apbPaddr[7:2] };  // 4 bytes (word) aligned to 1 byte aligned
 
   anton_neopixel_raw neopixel(
     .clk10mhz(clk10mhz),
     .neoData(neoData),
     .neoState(neoState),
     .busAddr(address),
-    .busData(apbPwData),
+    .busDataIn(apbPwData),
     .busClk(apbPclk),
-    .busWrite(wr_enable) 
+    .busWrite(wr_enable),
+    .busRead(rd_enable),
+    .busDataOut(apbPrData)
   );
 
 endmodule

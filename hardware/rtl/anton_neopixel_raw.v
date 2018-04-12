@@ -24,17 +24,20 @@ module anton_neopixel_raw (
   output neoState,
 
   input [7:0]busAddr,
-  input [7:0]busData,
+  input [7:0]busDataIn,
   input busClk,
-  input busWrite
+  input busWrite,
+  input busRead,
+  output [7:0]busDataOut
   );
 
-  parameter PIXELS_MAX  = 5;   // maximum number of LEDs in a strip
-  parameter PIXELS_BITS = 3;   // minimum required amount of bits to store the PIXELS_MAX
-  parameter RESET_DELAY = 600; // how long the reset delay will be happening 500 == 50us
+  parameter PIXELS_MAX  = 50;  // maximum number of LEDs in a strip
+  parameter PIXELS_BITS = 6;   // minimum required amount of bits to store the PIXELS_MAX
+  parameter RESET_DELAY = 600; // how long the reset delay will be happening 600 == 60us (50us is minimum)
 
   //reg [PIXELS_BITS-1:0][7:0] pixels;
 
+  reg [7:0]              busDataOutBuffer;
   reg [7:0]              pixels[PIXELS_MAX-1:0];
   reg [23:0]             pixel_value        = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [11:0]             neo_pattern_lookup = 'd0;
@@ -66,7 +69,7 @@ module anton_neopixel_raw (
   always @(*) begin
     `ifdef HARDCODED_PIXELS
       // hardcoded predefined colors for 3 pixels in a strip
-      // TODO: use casez so bigger arrays could be auto filled with these values
+      // TODO: use casez so bigger arrays could be auto filled with these values in tiling/overflow method
       case (pixel_index)
         'd0: pixel_value = 24'hff00d5;
         'd1: pixel_value = 24'h008800;
@@ -75,12 +78,12 @@ module anton_neopixel_raw (
       endcase
     `else
       // 2B, 3G, 3R source format => 7-6B,  5-3G, 2-0R
-      // 8B, 8R, 8G destination format =>  xxxxxBBx xxxxRRRx xxxxGGGx  high bits are sent first
+      // 8B, 8R, 8G destination format =>  xxxxxBBx xxxxRRRx xxxxGGGx  high bits are sent first (so reorder them)
       pixel_value = { 
-                      5'b00000, pixels[pixel_index][6], pixels[pixel_index][7], 1'b0,                           // 2bits Blues
-                      4'b0000,  pixels[pixel_index][0], pixels[pixel_index][1], pixels[pixel_index][2], 1'b0,   // 3bits Red
-                      4'b0000,  pixels[pixel_index][3], pixels[pixel_index][4], pixels[pixel_index][5], 1'b0    // 3bits Green
-                    };
+        5'b00000, pixels[pixel_index][6], pixels[pixel_index][7], 1'b0,                           // 2bits Blues
+        4'b0000,  pixels[pixel_index][0], pixels[pixel_index][1], pixels[pixel_index][2], 1'b0,   // 3bits Red
+        4'b0000,  pixels[pixel_index][3], pixels[pixel_index][4], pixels[pixel_index][5], 1'b0    // 3bits Green
+      };
     `endif
   end
 
@@ -97,9 +100,12 @@ module anton_neopixel_raw (
 
 
   always @(posedge busClk) begin
+    // TODO: write better tester for these writes/reads
     if (busWrite) begin
-      // TODO: write tester for these writes
-      pixels[busAddr[PIXELS_BITS-1:0]] <= busData;
+      pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
+    end
+    if (busRead) begin
+      busDataOutBuffer <= pixels[busAddr[PIXELS_BITS-1:0]];
     end
   end
 
@@ -146,7 +152,8 @@ module anton_neopixel_raw (
   end
 
 
-  assign neoData  = data_int;
-  assign neoState = state;
+  assign neoData    = data_int;
+  assign neoState   = state;
+  assign busDataOut = busDataOutBuffer;
   
 endmodule
