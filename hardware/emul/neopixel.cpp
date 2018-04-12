@@ -6,9 +6,9 @@
 
 #include "verilated_vcd_c.h"
 
-#include "Vanton_neopixel_top.h"
+#include "Vanton_neopixel_apb.h"
 
-Vanton_neopixel_top *uut;
+Vanton_neopixel_apb *uut;
 vluint64_t sim_time = 0;
 
 double sc_time_stamp () {
@@ -17,7 +17,7 @@ double sc_time_stamp () {
 
 int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv);
-  uut = new Vanton_neopixel_top;
+  uut = new Vanton_neopixel_apb;
 
   Verilated::traceEverOn(true);
   VerilatedVcdC *tfp = new VerilatedVcdC;
@@ -29,10 +29,49 @@ int main(int argc, char** argv) {
   vcdname += ".vcd";
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
-  uut->CLK_10MHZ = 0;
+  uut->clk10mhz   = 0;
 
-  while (!Verilated::gotFinish()) {
-    uut->CLK_10MHZ = uut->CLK_10MHZ ? 0 : 1;
+  uut->apbPenable = 1;
+  uut->apbPwrite  = 1;
+  uut->apbPselx   = 1;
+
+  uut->apbPclk    = 0;
+  uut->apbPaddr   = 0;
+  uut->apbPwData  = 0xff;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+  uut->apbPclk = 1;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  uut->apbPclk    = 0;
+  uut->apbPaddr   = 4;
+  uut->apbPwData  = 0x02;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+  uut->apbPclk = 1;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  uut->apbPclk    = 0;
+  uut->apbPaddr   = 8;
+  uut->apbPwData  = 0x18;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+  uut->apbPclk = 1;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  uut->apbPclk    = 0;
+  uut->apbPenable = 0;
+  uut->apbPwrite  = 0;
+  uut->apbPselx   = 0;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+
+  while (!Verilated::gotFinish())
+  {
+    uut->clk10mhz = uut->clk10mhz ? 0 : 1;
     uut->eval();
     tfp->dump (sim_time);
 

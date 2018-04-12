@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "config": {
-    "verilog_top": "anton_neopixel_top",
+    "verilog_top": "anton_neopixel_apb",
+    "neopixel_raw": "anton_neopixel_raw",
     "cpp": "neopixel.cpp",
     "cflags": "-g -O3"
   },
@@ -12,9 +13,11 @@
     "lint": "cd rtl && verilator --lint-only $npm_package_config_verilog_top.v",
     "clean": "cd emul && rm -rf *.o build/* *~ *.txt *.vcd *.mif *.orig",
     "build": "cd emul && verilator -Wno-fatal -I../rtl --cc $npm_package_config_verilog_top.v --trace --exe ../$npm_package_config_cpp  -Mdir build -CFLAGS \"-g -O3\" && make -C build -f V$npm_package_config_verilog_top.mk",
-    "run": "npm run-script clean && npm run-script build && cd emul/build && ./V$npm_package_config_verilog_top",
+    "run": "cd emul/build && ./V$npm_package_config_verilog_top",
+    "all": "npm run-script clean && npm run-script build && npm run-script run",
     "wave": "gtkwave ./emul/build/V$npm_package_config_verilog_top.vcd -S signals.tcl",
-    "monitor": "nodemon -V --watch \"rtl/$npm_package_config_verilog_top.v\" --watch \"emul/$npm_package_config_cpp\" --ignore 'emul/build' --exec 'npm run-script run'"
+    "monitor-lint": "nodemon -V --watch \"rtl/$npm_package_config_verilog_top.v\" --watch \"rtl/$npm_package_config_neopixel_raw.v\" --watch \"emul/$npm_package_config_cpp\" --ignore 'emul/build' --exec 'npm run-script lint'",
+    "monitor-all": "nodemon -V --watch \"rtl/$npm_package_config_verilog_top.v\" --watch \"rtl/$npm_package_config_neopixel_raw.v\" --watch \"emul/$npm_package_config_cpp\" --ignore 'emul/build' --exec 'npm run-script all'"
   },
   "author": "",
   "license": "ISC",
