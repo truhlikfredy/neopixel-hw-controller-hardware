@@ -1,3 +1,5 @@
+`include "anton_common.v"
+
 // TODO: Downgrade the clock to 7MHz, allow for the 0 = 2 + 6 ticks and for 1 = 5 + 3 ticks
 // in both cases they will be 8 ticks (power of 2) and simplify the counter (no logic to compare)
 // needed and it will just overflow. Total time to transmit 1 pixel will be 1.14us instead 1.2us 
@@ -23,7 +25,7 @@ module anton_neopixel_raw (
   output neoData,
   output neoState,
 
-  input [7:0]busAddr,
+  input [PIXELS_BITS-1:0]busAddr,
   input [7:0]busDataIn,
   input busClk,
   input busWrite,
@@ -31,9 +33,9 @@ module anton_neopixel_raw (
   output [7:0]busDataOut
   );
 
-  parameter PIXELS_MAX  = 50;  // maximum number of LEDs in a strip
-  parameter PIXELS_BITS = 6;   // minimum required amount of bits to store the PIXELS_MAX
-  parameter RESET_DELAY = 600; // how long the reset delay will be happening 600 == 60us (50us is minimum)
+  parameter  PIXELS_MAX  = 66;  // maximum number of LEDs in a strip
+  parameter  RESET_DELAY = 600; // how long the reset delay will be happening 600 == 60us (50us is minimum)
+  localparam PIXELS_BITS = `CLOG2(PIXELS_MAX);   // minimum required amount of bits to store the PIXELS_MAX
 
   //reg [PIXELS_BITS-1:0][7:0] pixels;
 
