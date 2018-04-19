@@ -10,9 +10,21 @@
 
 Vanton_neopixel_apb *uut;
 vluint64_t sim_time = 0;
+VerilatedVcdC *tfp;
 
 double sc_time_stamp () {
   return sim_time*50;
+}
+
+void writeApbByte(unsigned int addr, unsigned char data) {
+  uut->apbPclk   = 0;
+  uut->apbPaddr  = addr;
+  uut->apbPwData = data;
+  uut->eval();
+  tfp->dump(sim_time += 50);
+  uut->apbPclk   = 1;
+  uut->eval();
+  tfp->dump(sim_time += 50);
 }
 
 int main(int argc, char** argv) {
@@ -20,7 +32,7 @@ int main(int argc, char** argv) {
   uut = new Vanton_neopixel_apb;
 
   Verilated::traceEverOn(true);
-  VerilatedVcdC *tfp = new VerilatedVcdC;
+  tfp = new VerilatedVcdC;
   // tfp->spTrace()->set_time_unit("1ns");
   // tfp->spTrace()->set_time_resolution("1ps");
   uut->trace(tfp, 99);
@@ -35,32 +47,9 @@ int main(int argc, char** argv) {
   uut->apbPwrite  = 1;
   uut->apbPselx   = 1;
 
-  uut->apbPclk    = 0;
-  uut->apbPaddr   = 0;
-  uut->apbPwData  = 0xff;
-  uut->eval();
-  tfp->dump(sim_time += 50);
-  uut->apbPclk = 1;
-  uut->eval();
-  tfp->dump(sim_time += 50);
-
-  uut->apbPclk    = 0;
-  uut->apbPaddr   = 4;
-  uut->apbPwData  = 0x02;
-  uut->eval();
-  tfp->dump(sim_time += 50);
-  uut->apbPclk = 1;
-  uut->eval();
-  tfp->dump(sim_time += 50);
-
-  uut->apbPclk    = 0;
-  uut->apbPaddr   = 8;
-  uut->apbPwData  = 0x18;
-  uut->eval();
-  tfp->dump(sim_time += 50);
-  uut->apbPclk = 1;
-  uut->eval();
-  tfp->dump(sim_time += 50);
+  writeApbByte(0, 0xff);
+  writeApbByte(4, 0x02);
+  writeApbByte(8, 0x18);
 
   uut->apbPclk    = 0;
   uut->apbPenable = 0;
