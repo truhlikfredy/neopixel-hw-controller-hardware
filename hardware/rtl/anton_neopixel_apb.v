@@ -4,6 +4,7 @@ module anton_neopixel_apb (
   input clk10mhz,
   output neoData,
   output neoState,
+  output pixelsSynch,
 
   input apbPenable,
   input [PIXELS_BITS+2-1:0]apbPaddr,
@@ -23,10 +24,10 @@ module anton_neopixel_apb (
 
   wire wr_enable;
   wire rd_enable;
-  wire [PIXELS_BITS-1:0]address;
+  wire [PIXELS_BITS-1:0]address; // correct address packed down from 32bit aligned access to 8bit access
 
-  assign apbPready  = 1'd1;   // always ready, never delaying with a waiting state
-  assign apbPslverr = 1'd0;   // never report errors
+  assign apbPready  = 1'd1;      // always ready, never delaying with a waiting state
+  assign apbPslverr = 1'd0;      // never report errors
   
   assign wr_enable = (apbPenable && apbPwrite && apbPselx);
   assign rd_enable = (!apbPwrite && apbPselx);
@@ -38,6 +39,7 @@ module anton_neopixel_apb (
     .clk10mhz(clk10mhz),
     .neoData(neoData),
     .neoState(neoState),
+    .pixelsSynch(pixelsSynch),
     .busAddr(address),
     .busDataIn(apbPwData),
     .busClk(apbPclk),

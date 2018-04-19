@@ -21,15 +21,16 @@
 // TODO: nodemon killall first
 
 module anton_neopixel_raw (
-  input clk10mhz,
+  input  clk10mhz,
   output neoData,
   output neoState,
+  output pixelsSynch,
 
-  input [PIXELS_BITS-1:0]busAddr,
-  input [7:0]busDataIn,
-  input busClk,
-  input busWrite,
-  input busRead,
+  input  [PIXELS_BITS-1:0]busAddr,
+  input  [7:0]busDataIn,
+  input  busClk,
+  input  busWrite,
+  input  busRead,
   output [7:0]busDataOut
   );
 
@@ -39,7 +40,7 @@ module anton_neopixel_raw (
 
   //reg [PIXELS_BITS-1:0][7:0] pixels;
 
-  reg [7:0]              busDataOutBuffer;
+  reg [7:0]              bus_data_out_buffer;
   reg [7:0]              pixels[PIXELS_MAX-1:0];
   reg [23:0]             pixel_value        = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [11:0]             neo_pattern_lookup = 'd0;
@@ -49,6 +50,7 @@ module anton_neopixel_raw (
   reg [PIXELS_BITS-1:0]  pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg                    pixels_synth_buf   = 'd0;
   reg                    data_int           = 'b0;
   reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
@@ -107,7 +109,7 @@ module anton_neopixel_raw (
       pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
     end
     if (busRead) begin
-      busDataOutBuffer <= pixels[busAddr[PIXELS_BITS-1:0]];
+      bus_data_out_buffer <= pixels[busAddr[PIXELS_BITS-1:0]];
     end
   end
 
@@ -149,13 +151,15 @@ module anton_neopixel_raw (
         if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
         cycle <= cycle + 'd1;
         reset_delay_count <= 'd0;
+        pixels_synth_buf <= !pixels_synth_buf;
       end
     end
   end
 
 
-  assign neoData    = data_int;
-  assign neoState   = state;
-  assign busDataOut = busDataOutBuffer;
+  assign neoData     = data_int;
+  assign neoState    = state;
+  assign busDataOut  = bus_data_out_buffer;
+  assign pixelsSynch = pixels_synth_buf;
   
 endmodule

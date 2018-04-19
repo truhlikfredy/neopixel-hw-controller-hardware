@@ -17,6 +17,7 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(0)"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(1)"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(2)"
 lappend signals "TOP.anton_neopixel_apb.apbPclk"
+lappend signals "TOP.anton_neopixel_apb.pixelsSynch"
 
 #lappend signals "TOP.anton_neopixel_apb.neopixel.pixels"
 
