@@ -1,4 +1,4 @@
-`include "anton_common.v"
+`include "anton_common.vh"
 
 module anton_neopixel_apb (
   input clk10mhz,

@@ -1,4 +1,4 @@
-`include "anton_common.v"
+`include "anton_common.vh"
 
 // TODO: Downgrade the clock to 7MHz, allow for the 0 = 2 + 6 ticks and for 1 = 5 + 3 ticks
 // in both cases they will be 8 ticks (power of 2) and simplify the counter (no logic to compare)
