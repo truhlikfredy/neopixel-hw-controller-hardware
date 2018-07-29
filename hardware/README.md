@@ -39,7 +39,38 @@ Is implementing the [WS2812](https://cdn-shop.adafruit.com/datasheets/WS2812.pdf
 
 There is some leeway in the timing so it doesn't have to absolutely precise, for properly correct timing see the datasheet:
 
-Notice the order of the colors **GRB** and the fact that the most significant bits are transmitted first.
+| Emitting color | Wavelength(nm) | Luminous intensity(mcd) | Current(ma) | Voltage(V) |
+| -------------  | -------------- | ----------------------- | ----------- | ---------- |
+| Red            | 620-630        | 550-700                 | 20          | 1.8-2.2    |
+| Green          | 515-530        | 1100-1400               | 20          | 3.0-3.2    |
+| Blue           | 465-475        | 200-400                 | 20          | 3.2-3.4    |
+
+Sequence chart:
+
+![sequence](/hardware/images/sequence.svg)
+
+| Label     | Description                         | Time(ns)    | 
+| --------- | ----------------------------------- | ----------- |
+| T0H       | 0 code, high voltage segment        | 350 +-150   |
+| T0L       | 0 code, low voltage segment         | 800 +-150   |
+| T0H + T0L | both high and low segments together | 1250 +-600  |
+| T1H       | 1 code, high voltage segment        | 700 +-150   |
+| T1L       | 1 code, low voltage segment         | 600 +-150   |
+| T1H + T1L | both high and low segments together | 1250 +-600  |
+| Reset     | low voltage                         | Above 50000 |
+
+DO of each LED pixel is feed to the following LED's DIN
+
+![cascade](/hardware/images/cascade.svg)
+
+
+![refresh-cycle](/hardware/images/refresh-cycle.svg)
+
+Each LED will keep the next LED in Reset until it processes and consumes its 1st datachunk and then it will passthrough all others datachunks (datachunks are pealed away in the chain like like layers of a onion). 
+
+Every single datachunk consists of 24 bits, their order is in figure below. Notice the order of the colors **GRB** and the fact that the most significant bits are transmitted first.
+
+![data-chunk](/hardware/images/data-chunk.svg)
 
 
 # Dependencies
