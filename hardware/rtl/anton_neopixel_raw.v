@@ -24,7 +24,7 @@ module anton_neopixel_raw (
   input  clk10mhz,
   output neoData,
   output neoState,
-  output pixelsSynch,
+  output pixelsSync,
 
   input  [PIXELS_BITS-1:0]busAddr,
   input  [7:0]busDataIn,
@@ -118,6 +118,12 @@ module anton_neopixel_raw (
   always @(posedge clk10mhz) begin
     if (state == ENUM_STATE_TRANSMIT) begin
 
+      if (bit_pattern_index == 'd12) begin
+        bit_pattern_index <= 0;
+      end else begin
+        bit_pattern_index <= bit_pattern_index + 1;
+      end
+
       if (bit_pattern_index < 'd11) begin
         // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
         bit_pattern_index <= bit_pattern_index + 'b1;
@@ -147,22 +153,23 @@ module anton_neopixel_raw (
     end else begin
       // when in the reset state, count 50ns (RESET_DELAY / 10)
       reset_delay_count <= reset_delay_count + 'b1;
+      pixels_synth_buf  <= 1;
 
       if (reset_delay_count > RESET_DELAY) begin  
         // predefined wait in reset state was reached, let's 
         state <= 'd0;
         if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
-        cycle <= cycle + 'd1;
+        cycle             <= cycle + 'd1;
         reset_delay_count <= 'd0;
-        pixels_synth_buf <= !pixels_synth_buf;
+        pixels_synth_buf  <= 0;
       end
     end
   end
 
 
-  assign neoData     = data_int;
-  assign neoState    = state;
-  assign busDataOut  = bus_data_out_buffer;
-  assign pixelsSynch = pixels_synth_buf;
+  assign neoData    = data_int;
+  assign neoState   = state;
+  assign busDataOut = bus_data_out_buffer;
+  assign pixelsSync = pixels_synth_buf;
   
 endmodule

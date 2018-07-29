@@ -1,6 +1,7 @@
 lappend signals "TOP.clk10mhz"
 lappend signals "TOP.neoData"
 lappend signals "TOP.neoState"
+lappend signals "TOP.pixelsSync"
 
 lappend signals "TOP.anton_neopixel_apb.neopixel.reset_delay"
 lappend signals "TOP.anton_neopixel_apb.neopixel.bit_pattern_index"

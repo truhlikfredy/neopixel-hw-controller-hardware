@@ -4,10 +4,10 @@ module anton_neopixel_apb (
   input clk10mhz,
   output neoData,
   output neoState,
-  output pixelsSynch,
+  output pixelsSync,
 
   input apbPenable,
-  input [PIXELS_BITS+2-1:0]apbPaddr,
+  input [31:0]apbPaddr,  // LED data + control registers
   input [7:0]apbPwData,
   input apbPclk,
   input apbPselx,
@@ -31,7 +31,7 @@ module anton_neopixel_apb (
   
   assign wr_enable = (apbPenable && apbPwrite && apbPselx);
   assign rd_enable = (!apbPwrite && apbPselx);
-  assign address   = apbPaddr[PIXELS_BITS+2-1:2];  // 4 bytes (word) aligned to 1 byte aligned
+  assign address   = apbPaddr[PIXELS_BITS + 2 - 1:2];  // 4 bytes (word) aligned to 1 byte aligned
 
   anton_neopixel_raw #(
     .PIXELS_MAX(PIXELS_MAX)
@@ -39,7 +39,7 @@ module anton_neopixel_apb (
     .clk10mhz(clk10mhz),
     .neoData(neoData),
     .neoState(neoState),
-    .pixelsSynch(pixelsSynch),
+    .pixelsSync(pixelsSync),
     .busAddr(address),
     .busDataIn(apbPwData),
     .busClk(apbPclk),
