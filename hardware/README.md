@@ -39,10 +39,6 @@ Is implementing the [WS2812](https://cdn-shop.adafruit.com/datasheets/WS2812.pdf
 
 There is some leeway in the timing so it doesn't have to absolutely precise, for properly correct timing see the datasheet:
 
-![protocol-timing1](/hardware/images/ws2812-1.png)
-
-![protocol-timing2](/hardware/images/ws2812-2.png)
-
 Notice the order of the colors **GRB** and the fact that the most significant bits are transmitted first.
 
 
