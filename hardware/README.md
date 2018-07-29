@@ -47,4 +47,5 @@ Notice the order of the colors **GRB** and the fact that the most significant bi
 * verilator to compile simulation
 * Node.js / npm (run npm install to get the nodemon installed automatically, which is required for the run-scrip monitor)
 * gtk-wave to see the waveforms
+* Phantomjs to build images for the documentation
 * visual studio code (not required, but commandbar settings are already premade for it)

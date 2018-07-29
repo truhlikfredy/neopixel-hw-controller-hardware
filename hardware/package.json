@@ -10,6 +10,7 @@
     "cflags": "-g -O3"
   },
   "scripts": {
+    "doc": "cd ./images_src && ./generate_images.sh",
     "lint": "cd rtl && verilator --lint-only $npm_package_config_verilog_top.v",
     "clean": "cd emul && rm -rf *.o build/* *~ *.txt *.vcd *.mif *.orig",
     "build": "cd emul && verilator -Wno-fatal -I../rtl --cc $npm_package_config_verilog_top.v --trace --exe ../$npm_package_config_cpp  -Mdir build -CFLAGS \"-g -O3\" && make -C build -f V$npm_package_config_verilog_top.mk",
@@ -22,8 +23,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "1.11.0"    
+    "nodemon": "1.11.0",
+    "wavedrom-cli": "^0.5.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

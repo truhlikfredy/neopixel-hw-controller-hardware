@@ -1,0 +1,36 @@
+{
+  config: {
+    hscale: 1,
+    skin: 'narrow'
+  },
+  head: {
+    text: 'Sequence chart'
+  },
+  signal: [
+    ['Data',
+      {
+        name: '0 code',
+        wave: '01......0...1xxx',
+        node: '.A......B...C'
+      },
+      {
+        name: '1 code',
+        wave: '01.....0.....1xx',
+        node: '.D.....E.....F'
+      },
+    ],
+    ['Ctrl',
+      {
+        name: 'Reset code',
+        wave: '10.........|...1',
+        node: '.G.............H'
+      }
+    ]
+  ],
+  edge: [
+    'A<-|->B T0H', 'B<-|->C T0L',
+    'D<-|->E T1H', 'E<-|->F T1L',
+    'G<-|->H Treset'
+  ]
+
+}

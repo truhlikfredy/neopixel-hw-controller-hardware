@@ -1,0 +1,20 @@
+{
+  signal: [{
+      node: '..A......................B.'
+    },
+
+    {
+      wave: 'x333333334444444455555555x',
+      data: [
+        'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'G1', 'G0',
+        'R7', 'R6', 'R5', 'R4', 'R3', 'R2', 'R1', 'R0',
+        'B7', 'B6', 'B5', 'B4', 'B3', 'B2', 'B1', 'B0',
+      ]
+    }
+  ],
+  edge: ['A<->B 24bit data chunk for one LED pixel '],
+  foot: {
+    text: 'Notice the order of data: MSB sent first in order G, R and B.',
+    tock: -1
+  },
+}

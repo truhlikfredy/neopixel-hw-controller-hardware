@@ -1,0 +1,61 @@
+{
+  config: {
+    skin: 'narrow'
+  },
+  signal: [{
+      node: '.A.................B.................C'
+    },
+
+    {
+      name: 'D1 into 1st LED DIN',
+      wave: '04...5...5...0.....4...5...5...0.....',
+      node: '.....H.......D.....E...J.......F.....G',
+      data: ['1st 24bit', '2nd 24bit', '3rd 24bit', '1st 24bit', '2nd 24bit', '3rd 24bit']
+    },
+    {},
+
+    {
+      name: 'D2 into 2nd LED DIN',
+      wave: '0....4...5...0.........4...5...0.....',
+      node: 'R....K...M...S.........L...N...T.....V',
+      data: ['2nd 24bit', '3rd 24bit', '2nd 24bit', '3rd 24bit']
+    },
+    {},
+
+    {
+      name: 'D3 into 3rd LED DIN',
+      wave: '0........4...0.............4...0.....',
+      node: 'U........O...W.............P...X.....Z',
+      data: ['3rd 24bit', '3rd 24bit']
+    },
+    {},
+
+    {
+      name: 'D4 from 3rd LED DO',
+      wave: '0....................................',
+      node: 'Q....................................Y'
+    },
+
+  ],
+  edge: [
+    'A<-|->B Data refresh cycle 1',
+    'B<-|->C Data refresh cycle 2',
+
+    'D<-|->E Reset code',
+    'F<-|->G Reset code',
+    'H->K 1st LED DO starts streaming data to 2nd LED DIN',
+    'J->L 1st LED DO starts streaming data to 2nd LED DIN',
+
+    'R<-|->K Reset code',
+    'S<-|->L Reset code',
+    'T<-|->V Reset code',
+    'M->O 2nd LED DO starts streaming data to 3rd LED DIN',
+    'N->P 2nd LED DO starts streaming data to 3rd LED DIN',
+
+    'U<-|->O Reset code',
+    'W<-|->P Reset code',
+    'X<-|->Z Reset code',
+
+    'Q<-|->Y Reset code',
+  ]
+}
