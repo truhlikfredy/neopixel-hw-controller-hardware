@@ -12,7 +12,7 @@
       ]
     }
   ],
-  edge: ['A<->B 24bit data chunk for one LED pixel '],
+  edge: ['A<->B 24bit data chunk'],
   foot: {
     text: 'Notice the order of data: MSB sent first in order G, R and B.',
     tock: -1

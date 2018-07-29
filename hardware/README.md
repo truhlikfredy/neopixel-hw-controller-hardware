@@ -66,9 +66,9 @@ DO of each LED pixel is feed to the following LED's DIN
 
 ![refresh-cycle](/hardware/images/refresh-cycle.svg)
 
-Each LED will keep the next LED in Reset until it processes and consumes its 1st datachunk and then it will passthrough all others datachunks (datachunks are pealed away in the chain like like layers of a onion). 
+Each LED will keep the next LED in Reset until it processes and consumes its first data chunk and then it will passthrough all others data chunks (data chunks are pealed away in the chain like like layers of a onion). This way the 3rd LED will see as its first data chunk the 3rd data chunk in the stream and will not even know there were 2 data chunks before.
 
-Every single datachunk consists of 24 bits, their order is in figure below. Notice the order of the colors **GRB** and the fact that the most significant bits are transmitted first.
+Every single data chunk consists of 24 bits, their order is in figure below. Notice the order of the colors **GRB** and the fact that the most significant bits are transmitted first.
 
 ![data-chunk](/hardware/images/data-chunk.svg)
 
