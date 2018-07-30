@@ -59,6 +59,8 @@ Sequence chart:
 | T1H + T1L | both high and low segments together | 1250 +-600  |
 | Reset     | low voltage                         | Above 50000 |
 
+Note that the datasheet might be off as the 0/1 code taking 1250ns +-600ns would be breaking the constrains of the contained high+low segments. I assume the segments are driving constraints while the total is driven constraint. The fastest time a code can be transmitted is 0 code (850ns) and slowest time is 1 code (1600ns). So the average and range would be 1225ns +-375ns.
+
 DO of each LED pixel is feed to the following LED's DIN
 
 ![cascade](/hardware/images/cascade.svg)
