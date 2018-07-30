@@ -47,7 +47,7 @@ module anton_neopixel_raw (
   reg [7:0]              neo_pattern_lookup = 'd0;
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
-  reg [3:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
+  reg [2:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [PIXELS_BITS-1:0]  pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
@@ -128,13 +128,7 @@ module anton_neopixel_raw (
   always @(posedge clk7mhz) begin
     if (state == ENUM_STATE_TRANSMIT) begin
 
-      if (bit_pattern_index == 'd7) begin
-        // for the 'd8 = 9th last sub-bit start with new bit and start sub-bit ticks from begining
-        bit_pattern_index <= 0;
-      end else begin
-        // from 'd0 to 'd7 => 8 sub-bit ticks increment by one
-        bit_pattern_index <= bit_pattern_index + 1;
-      end
+      bit_pattern_index <= bit_pattern_index + 1;
 
       if (bit_pattern_index == 'd7) begin
 
