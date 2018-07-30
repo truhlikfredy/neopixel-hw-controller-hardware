@@ -7,7 +7,7 @@
     },
 
     {
-      name: 'D1 into 1st LED DIN',
+      name: 'D1 into LED1 DIN',
       wave: '04...5...5...0.....4...5...5...0.....',
       node: '.....H.......D.....E...J.......F.....G',
       data: ['1st 24bit', '2nd 24bit', '3rd 24bit', '1st 24bit', '2nd 24bit', '3rd 24bit']
@@ -15,7 +15,7 @@
     {},
 
     {
-      name: 'D2 into 2nd LED DIN',
+      name: 'D2 into LED2 DIN',
       wave: '0....4...5...0.........4...5...0.....',
       node: 'R....K...M...S.........L...N...T.....V',
       data: ['2nd 24bit', '3rd 24bit', '2nd 24bit', '3rd 24bit']
@@ -23,7 +23,7 @@
     {},
 
     {
-      name: 'D3 into 3rd LED DIN',
+      name: 'D3 into LED3 DIN',
       wave: '0........4...0.............4...0.....',
       node: 'U........O...W.............P...X.....Z',
       data: ['3rd 24bit', '3rd 24bit']
@@ -31,7 +31,7 @@
     {},
 
     {
-      name: 'D4 from 3rd LED DO',
+      name: 'D4 from LED3 DO',
       wave: '0....................................',
       node: 'Q....................................Y'
     },
@@ -43,14 +43,14 @@
 
     'D<-|->E Reset code',
     'F<-|->G Reset code',
-    'H->K 1st LED DO starts streaming data to 2nd LED DIN',
-    'J->L 1st LED DO starts streaming data to 2nd LED DIN',
+    'H->K LED1 DO streaming data to LED2 DIN',
+    'J->L LED1 DO streaming data to LED2 DIN',
 
     'R<-|->K Reset code',
     'S<-|->L Reset code',
     'T<-|->V Reset code',
-    'M->O 2nd LED DO starts streaming data to 3rd LED DIN',
-    'N->P 2nd LED DO starts streaming data to 3rd LED DIN',
+    'M->O LED2 DO streaming data to LED3 DIN',
+    'N->P LED2 DO streaming data to LED3 DIN',
 
     'U<-|->O Reset code',
     'W<-|->P Reset code',
