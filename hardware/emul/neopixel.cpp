@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
   vcdname += ".vcd";
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
-  uut->clk10mhz   = 0;
+  uut->clk7mhz   = 0;
 
   uut->apbPenable = 1;
   uut->apbPwrite  = 1;
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
   while (!Verilated::gotFinish())
   {
-    uut->clk10mhz = uut->clk10mhz ? 0 : 1;
+    uut->clk7mhz = uut->clk7mhz ? 0 : 1;
     uut->eval();
     tfp->dump (sim_time);
 

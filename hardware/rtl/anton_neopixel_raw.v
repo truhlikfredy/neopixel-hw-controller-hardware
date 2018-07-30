@@ -21,12 +21,12 @@
 // TODO: nodemon killall first
 
 module anton_neopixel_raw (
-  input  clk10mhz,
+  input  clk7mhz,
   output neoData,
   output neoState,
   output pixelsSync,
 
-  input  [PIXELS_BITS-1:0]busAddr,
+  input  [13:0]busAddr,
   input  [7:0]busDataIn,
   input  busClk,
   input  busWrite,
@@ -44,16 +44,18 @@ module anton_neopixel_raw (
   reg [7:0]              pixels[PIXELS_MAX-1:0];
   reg [7:0]              pixel_value_8bit   = 'd0;  // pixel value before expanding
   reg [23:0]             pixel_value_32bit  = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
-  reg [11:0]             neo_pattern_lookup = 'd0;
+  reg [7:0]              neo_pattern_lookup = 'd0;
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
-  reg [3:0]              bit_pattern_index  = 'd0;  // counting 0 - 11
+  reg [3:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [PIXELS_BITS-1:0]  pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'd0;
   reg                    data_int           = 'b0;
   reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
+
+  reg [7:0]              registers[3:0]; // maxL, maxH, ready, cfg (autostart, start on write & palete mode)
 
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
   localparam  ENUM_STATE_RESET    = 1;
@@ -65,8 +67,8 @@ module anton_neopixel_raw (
     case (pixel_value_32bit[pixel_bit_index])
       // depending on the current bit decide what pattern to push
       // patterns are ordered from right to left
-      1'b0: neo_pattern_lookup = 12'b000000000111;
-      1'b1: neo_pattern_lookup = 12'b000011111111;
+      1'b0: neo_pattern_lookup = 8'b00000011;
+      1'b1: neo_pattern_lookup = 8'b00011111;
     endcase
   end
 
@@ -96,7 +98,7 @@ module anton_neopixel_raw (
   always @(*) begin
     if (state == ENUM_STATE_TRANSMIT) begin
       // push pattern of a single bit inside a pixel 
-      data_int = neo_pattern_lookup[bit_pattern_index];
+      data_int = neo_pattern_lookup[bit_pattern_index[2:0]];
     end else begin
       // reset state, stay LOW
       data_int = 'd0;
@@ -107,29 +109,34 @@ module anton_neopixel_raw (
   always @(posedge busClk) begin
     // TODO: write better tester for these writes/reads
     if (busWrite) begin
-      pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
+      if (busAddr[13] == 'b0) begin
+        pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
+      end else begin
+        registers[busAddr[1:0]]          <= busDataIn;
+      end
     end
     if (busRead) begin
-      bus_data_out_buffer <= pixels[busAddr[PIXELS_BITS-1:0]];
+      if (busAddr[13] == 'b0) begin
+        bus_data_out_buffer <= pixels[busAddr[PIXELS_BITS-1:0]];
+      end else begin
+        bus_data_out_buffer <= registers[busAddr[1:0]];
+      end
     end
   end
 
 
-  always @(posedge clk10mhz) begin
+  always @(posedge clk7mhz) begin
     if (state == ENUM_STATE_TRANSMIT) begin
 
-      if (bit_pattern_index == 'd12) begin
+      if (bit_pattern_index == 'd7) begin
+        // for the 'd8 = 9th last sub-bit start with new bit and start sub-bit ticks from begining
         bit_pattern_index <= 0;
       end else begin
+        // from 'd0 to 'd7 => 8 sub-bit ticks increment by one
         bit_pattern_index <= bit_pattern_index + 1;
       end
 
-      if (bit_pattern_index < 'd11) begin
-        // from 'd0 to 'd10 => 11 sub-bit ticks increment by one
-        bit_pattern_index <= bit_pattern_index + 'b1;
-      end else begin
-        // for the 'd11 = 12th last sub-bit start with new bit and start sub-bit ticks from beging
-        bit_pattern_index <= 'b0;
+      if (bit_pattern_index == 'd7) begin
 
         if (pixel_bit_index < 'd23) begin
           // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
