@@ -8,6 +8,15 @@
 
 #include "Vanton_neopixel_apb.h"
 
+#define CTRL_INIT  1
+#define CTRL_LIMIT 2
+#define CTRL_RUN   4
+#define CTRL_LOOP  8
+#define CTRL_24    16
+
+#define STATE_RESET 1
+#define STATE_OFF   2
+
 Vanton_neopixel_apb *uut;
 vluint64_t sim_time = 0;
 VerilatedVcdC *tfp;
@@ -25,6 +34,10 @@ void writeApbByte(unsigned int addr, unsigned char data) {
   uut->apbPclk   = 1;
   uut->eval();
   tfp->dump(sim_time += 50);
+}
+
+void writeRegister(unsigned int addr, unsigned char data) {
+  writeApbByte(addr | 1<<15, data);
 }
 
 int main(int argc, char** argv) {
@@ -46,6 +59,12 @@ int main(int argc, char** argv) {
   uut->apbPenable = 1;
   uut->apbPwrite  = 1;
   uut->apbPselx   = 1;
+
+  writeRegister(0, 0xde);
+  writeRegister(4, 0xad);
+  writeRegister(0, 0xfa);
+  writeRegister(4, 0xce);
+  writeRegister(8, CTRL_RUN | CTRL_LOOP);
 
   writeApbByte(0, 0xff);
   writeApbByte(4, 0x02);
