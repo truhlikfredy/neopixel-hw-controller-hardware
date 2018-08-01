@@ -74,6 +74,23 @@ Every single data chunk consists of 24 bits, their order is in figure below. Not
 
 ![data-chunk](/hardware/images/data-chunk.svg)
 
+# Peripheral protocol
+
+  Registers (highest bit =1)
+
+  Max_Low
+  Max_High
+
+  Ctrl 
+    Run
+    Loop
+    Init
+    Hard/Soft limit
+
+  State 
+    busy
+    off
+
 
 # Dependencies
 

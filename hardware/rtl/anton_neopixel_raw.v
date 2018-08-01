@@ -55,11 +55,42 @@ module anton_neopixel_raw (
   reg                    data_int           = 'b0;
   reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
-  reg [7:0]              registers[3:0]; // maxL, maxH, ready, cfg (autostart, start on write & palete mode)
-
+  wire [7:0]             registers[4]; // maxL, maxH, ready, cfg (autostart, start on write & palete mode)
+  reg [15:0]             reg_max;
+  reg                    reg_ctrl_init;
+  reg                    reg_ctrl_limit;
+  reg                    reg_ctrl_run;
+  reg                    reg_ctrl_loop;
+  reg                    reg_ctrl_24bit;
+  reg                    reg_ctrl_unused[3];
+  reg                    reg_state_reset;
+  reg                    reg_state_off;
+  reg                    reg_state_unused[6];
+  
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
   localparam  ENUM_STATE_RESET    = 1;
-  
+
+
+  always @* begin
+    assign registers[0]    = reg_max[7:0];
+    assign registers[1]    = reg_max[15:8];
+    assign registers[2][0] = reg_ctrl_init;
+    assign registers[2][1] = reg_ctrl_limit;
+    assign registers[2][2] = reg_ctrl_run;
+    assign registers[2][3] = reg_ctrl_loop;
+    assign registers[2][4] = reg_ctrl_24bit;
+    assign registers[2][5] = reg_ctrl_unused[0];
+    assign registers[2][6] = reg_ctrl_unused[1];
+    assign registers[2][7] = reg_ctrl_unused[2];
+    assign registers[3][0] = reg_state_reset;
+    assign registers[3][1] = reg_state_off;
+    assign registers[3][2] = reg_state_unused[0];
+    assign registers[3][3] = reg_state_unused[1];
+    assign registers[3][4] = reg_state_unused[2];
+    assign registers[3][5] = reg_state_unused[3];
+    assign registers[3][6] = reg_state_unused[4];
+    assign registers[3][7] = reg_state_unused[5];
+  end
 
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
@@ -155,9 +186,11 @@ module anton_neopixel_raw (
       // when in the reset state, count 50ns (RESET_DELAY / 10)
       reset_delay_count <= reset_delay_count + 'b1;
       pixels_synth_buf  <= 1;
+      reg_state_reset <= 1;
 
       if (reset_delay_count > RESET_DELAY) begin  
         // predefined wait in reset state was reached, let's 
+        reg_state_reset <= 0;
         state <= 'd0;
         if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
         cycle             <= cycle + 'd1;
