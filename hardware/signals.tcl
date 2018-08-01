@@ -21,6 +21,17 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(2)"
 lappend signals "TOP.anton_neopixel_apb.apbPclk"
 lappend signals "TOP.anton_neopixel_apb.pixelsSynch"
 
+lappend signals "TOP.anton_neopixel_apb.neopixel.registers(0)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.registers(1)"
+
+lappend signals "TOP.anton_neopixel_apb.neopixel.reg_ctrl_init"
+lappend signals "TOP.anton_neopixel_apb.neopixel.reg_ctrl_run"
+lappend signals "TOP.anton_neopixel_apb.neopixel.reg_ctrl_loop"
+lappend signals "TOP.anton_neopixel_apb.neopixel.reg_ctrl_24bit"
+
+lappend signals "TOP.anton_neopixel_apb.neopixel.reg_state_reset"
+lappend signals "TOP.anton_neopixel_apb.neopixel.reg_state_off"
+
 #lappend signals "TOP.anton_neopixel_apb.neopixel.pixels"
 
 set num_added [ gtkwave::addSignalsFromList $signals ]
