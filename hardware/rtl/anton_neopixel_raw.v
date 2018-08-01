@@ -72,16 +72,16 @@ module anton_neopixel_raw (
 
 
   always @* begin
-    assign registers[0]    = reg_max[7:0];
-    assign registers[1]    = reg_max[15:8];
-    assign registers[2][0] = reg_ctrl_init;
-    assign registers[2][1] = reg_ctrl_limit;
-    assign registers[2][2] = reg_ctrl_run;
-    assign registers[2][3] = reg_ctrl_loop;
-    assign registers[2][4] = reg_ctrl_24bit;
-    assign registers[2][5] = reg_ctrl_unused[0];
-    assign registers[2][6] = reg_ctrl_unused[1];
-    assign registers[2][7] = reg_ctrl_unused[2];
+    assign registers[0]       = reg_max[7:0];
+    assign registers[1]       = reg_max[15:8];
+    assign reg_ctrl_init      = registers[2][0];
+    assign reg_ctrl_limit     = registers[2][1];
+    assign reg_ctrl_run       = registers[2][2];
+    assign reg_ctrl_loop      = registers[2][3];
+    assign reg_ctrl_24bit     = registers[2][4];
+    assign reg_ctrl_unused[0] = registers[2][5];
+    assign reg_ctrl_unused[1] = registers[2][6];
+    assign reg_ctrl_unused[2] = registers[2][7];
     assign registers[3][0] = reg_state_reset;
     assign registers[3][1] = reg_state_off;
     assign registers[3][2] = reg_state_unused[0];
