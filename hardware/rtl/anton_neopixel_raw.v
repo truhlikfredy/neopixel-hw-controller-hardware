@@ -57,14 +57,14 @@ module anton_neopixel_raw (
 
   wire [7:0]             registers[4]; // maxL, maxH, ready, cfg (autostart, start on write & palete mode)
   reg [15:0]             reg_max;
-  reg                    reg_ctrl_init;
-  reg                    reg_ctrl_limit;
-  reg                    reg_ctrl_run;
-  reg                    reg_ctrl_loop;
-  reg                    reg_ctrl_24bit;
+  reg                    reg_ctrl_init      = 'b0;
+  reg                    reg_ctrl_limit     = 'b0;
+  reg                    reg_ctrl_run       = 'b0;
+  reg                    reg_ctrl_loop      = 'b0;
+  reg                    reg_ctrl_24bit     = 'b0;
   reg                    reg_ctrl_unused[3];
-  reg                    reg_state_reset;
-  reg                    reg_state_off;
+  reg                    reg_state_reset    = 'b0;
+  reg                    reg_state_off      = 'b0;
   reg                    reg_state_unused[6];
   
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
