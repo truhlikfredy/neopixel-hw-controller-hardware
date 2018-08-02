@@ -27,7 +27,7 @@ And to startup gtk-wave for the very first time (for refresh ctrl+shift R is eno
 ```
 npm run-script wave
 ```
-![wave](/hardware/images/wave.png)
+![wave](/images/wave.png)
 
 # Protocol 
 
@@ -47,7 +47,7 @@ There is some leeway in the timing so it doesn't have to absolutely precise, for
 
 Sequence chart:
 
-![sequence](/hardware/images/sequence.svg)
+![sequence](/images/sequence.svg)
 
 | Label     | Description                         | Time(ns)    | 
 | --------- | ----------------------------------- | ----------- |
@@ -63,16 +63,16 @@ Note that the datasheet might be off as the 0/1 code taking 1250ns +-600ns would
 
 DO of each LED pixel is feed to the following LED's DIN
 
-![cascade](/hardware/images/cascade.svg)
+![cascade](/images/cascade.svg)
 
 
-![refresh-cycle](/hardware/images/refresh-cycle.svg)
+![refresh-cycle](/images/refresh-cycle.svg)
 
 Each LED will keep the next LED in Reset until it processes and consumes its first data chunk and then it will passthrough all others data chunks (data chunks are pealed away in the chain like like layers of a onion). This way the 3rd LED will see as its first data chunk the 3rd data chunk in the stream and will not even know there were 2 data chunks before.
 
 Every single data chunk consists of 24 bits, their order is in figure below. Notice the order of the colors **GRB** and the fact that the most significant bits are transmitted first.
 
-![data-chunk](/hardware/images/data-chunk.svg)
+![data-chunk](/images/data-chunk.svg)
 
 # Peripheral protocol
 
