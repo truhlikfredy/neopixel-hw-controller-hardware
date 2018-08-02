@@ -55,7 +55,6 @@ module anton_neopixel_raw (
   reg                    data_int           = 'b0;
   reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
-  wire [7:0]             registers[4]; // maxL, maxH, ready, cfg (autostart, start on write & palete mode)
   reg [15:0]             reg_max;
   reg                    reg_ctrl_init      = 'b0;
   reg                    reg_ctrl_limit     = 'b0;
@@ -64,33 +63,9 @@ module anton_neopixel_raw (
   reg                    reg_ctrl_24bit     = 'b0;
   reg                    reg_ctrl_unused[3];
   reg                    reg_state_reset    = 'b0;
-  reg                    reg_state_off      = 'b0;
-  reg                    reg_state_unused[6];
   
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
   localparam  ENUM_STATE_RESET    = 1;
-
-
-  always @* begin
-    assign registers[0]       = reg_max[7:0];
-    assign registers[1]       = reg_max[15:8];
-    assign reg_ctrl_init      = registers[2][0];
-    assign reg_ctrl_limit     = registers[2][1];
-    assign reg_ctrl_run       = registers[2][2];
-    assign reg_ctrl_loop      = registers[2][3];
-    assign reg_ctrl_24bit     = registers[2][4];
-    assign reg_ctrl_unused[0] = registers[2][5];
-    assign reg_ctrl_unused[1] = registers[2][6];
-    assign reg_ctrl_unused[2] = registers[2][7];
-    assign registers[3][0] = reg_state_reset;
-    assign registers[3][1] = reg_state_off;
-    assign registers[3][2] = reg_state_unused[0];
-    assign registers[3][3] = reg_state_unused[1];
-    assign registers[3][4] = reg_state_unused[2];
-    assign registers[3][5] = reg_state_unused[3];
-    assign registers[3][6] = reg_state_unused[4];
-    assign registers[3][7] = reg_state_unused[5];
-  end
 
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
@@ -127,7 +102,7 @@ module anton_neopixel_raw (
 
 
   always @(*) begin
-    if (state == ENUM_STATE_TRANSMIT) begin
+    if (state == ENUM_STATE_TRANSMIT && reg_ctrl_run) begin
       // push pattern of a single bit inside a pixel 
       data_int = neo_pattern_lookup[bit_pattern_index[2:0]];
     end else begin
@@ -141,61 +116,85 @@ module anton_neopixel_raw (
     // TODO: write better tester for these writes/reads
     if (busWrite) begin
       if (busAddr[13] == 'b0) begin
+
+        // Write buffer
         pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
       end else begin
-        registers[busAddr[1:0]]          <= busDataIn;
+
+        // Write register
+        case (busAddr[1:0])
+          0: reg_max[7:0]  <= busDataIn;
+          1: reg_max[15:8] <= busDataIn;
+          2: {reg_ctrl_24bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
+        endcase
       end
     end
     if (busRead) begin
       if (busAddr[13] == 'b0) begin
+        
+        // Read buffer
         bus_data_out_buffer <= pixels[busAddr[PIXELS_BITS-1:0]];
       end else begin
-        bus_data_out_buffer <= registers[busAddr[1:0]];
+
+        // Read register
+        case (busAddr[1:0])
+          0: bus_data_out_buffer <= reg_max[7:0];
+          1: bus_data_out_buffer <= reg_max[15:8];
+          2: bus_data_out_buffer <= {3'b000, reg_ctrl_24bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
+          3: bus_data_out_buffer <= {7'b0000000, reg_state_reset};
+        endcase
       end
     end
   end
 
 
   always @(posedge clk7mhz) begin
-    if (state == ENUM_STATE_TRANSMIT) begin
+    if (reg_ctrl_run) begin
+      if (state == ENUM_STATE_TRANSMIT) begin
 
-      bit_pattern_index <= bit_pattern_index + 1;
+        bit_pattern_index <= bit_pattern_index + 1;
 
-      if (bit_pattern_index == 'd7) begin
+        if (bit_pattern_index == 'd7) begin
 
-        if (pixel_bit_index < 'd23) begin
-          // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-          pixel_bit_index <= pixel_bit_index + 'b1;
-        end else begin
-          // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-          pixel_bit_index <= 'b0;
-
-          if (pixel_index < PIXELS_MAX-1) begin
-            // for all pixels go to the next pixel
-            pixel_index <= pixel_index + 'b1;
+          if (pixel_bit_index < 'd23) begin
+            // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
+            pixel_bit_index <= pixel_bit_index + 'b1;
           end else begin
-            // for the very last pixel overflow 0 and start reset
-            pixel_index <= 'd0;
-            state <= ENUM_STATE_RESET;
-          end
-          
-          pixel_value_8bit <= pixels[pixel_index];
-        end        
-      end
-    end else begin
-      // when in the reset state, count 50ns (RESET_DELAY / 10)
-      reset_delay_count <= reset_delay_count + 'b1;
-      pixels_synth_buf  <= 1;
-      reg_state_reset <= 1;
+            // on 'd23 => 24th bit do start on a new pixel with bit 'd0
+            pixel_bit_index <= 'b0;
 
-      if (reset_delay_count > RESET_DELAY) begin  
-        // predefined wait in reset state was reached, let's 
-        reg_state_reset <= 0;
-        state <= 'd0;
-        if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
-        cycle             <= cycle + 'd1;
-        reset_delay_count <= 'd0;
-        pixels_synth_buf  <= 0;
+            if (pixel_index < PIXELS_MAX-1) begin
+              // for all pixels go to the next pixel
+              pixel_index <= pixel_index + 'b1;
+            end else begin
+              // for the very last pixel overflow 0 and start reset
+              pixel_index <= 'd0;
+              state <= ENUM_STATE_RESET;
+            end
+            
+            pixel_value_8bit <= pixels[pixel_index];
+          end        
+        end
+      end else begin
+        // when in the reset state, count 50ns (RESET_DELAY / 10)
+        reset_delay_count <= reset_delay_count + 'b1;
+        pixels_synth_buf  <= 1;
+        reg_state_reset   <= 1;
+
+        if (reset_delay_count > RESET_DELAY) begin  
+          // predefined wait in reset state was reached, let's 
+          reg_state_reset   <= 'b0;
+          state             <= 'd0;
+          if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
+          cycle             <= cycle + 'd1;
+          reset_delay_count <= 'd0;
+          pixels_synth_buf  <= 'd0;
+
+          if (!reg_ctrl_loop) begin
+            //reg_ctrl_run    <= 'b0;
+          end
+
+        end
       end
     end
   end
