@@ -51,7 +51,7 @@ module anton_neopixel_raw (
   reg [PIXELS_BITS-1:0] pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
   reg [4:0]             pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                   state              = 'b0;  // 0 = transmit bits, 1 = reset mode
-  reg                   pixels_synth_buf   = 'd0;
+  reg                   pixels_synth_buf   = 'b0;
   reg                   data_int           = 'b0;
   reg [1:0]             cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
@@ -60,12 +60,10 @@ module anton_neopixel_raw (
   reg                   reg_ctrl_limit     = 'b0;
   reg                   reg_ctrl_run       = 'b0;
   reg                   reg_ctrl_loop      = 'b0;
-  reg                   reg_ctrl_24bit     = 'b0;
-  reg                   reg_ctrl_unused[3];
+  reg                   reg_ctrl_32bit     = 'b0;
   reg                   reg_state_reset    = 'b0;
   
-  reg                   slow_reset_reg_ctrl_run = 'b0;
-  reg                   fast_reset_reg_ctrl_run = 'b0;
+  reg                   reset_reg_ctrl_run = 'b0;
   
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
   localparam  ENUM_STATE_RESET    = 1;
@@ -117,6 +115,20 @@ module anton_neopixel_raw (
 
 
   always @(posedge busClk) begin
+    if (reg_ctrl_init) begin
+      reg_ctrl_init   <= 'b0;
+      reg_ctrl_limit  <= 'b0;
+      reg_ctrl_run    <= 'b0;
+      reg_ctrl_loop   <= 'b0;
+      reg_ctrl_32bit  <= 'b0;
+  
+      pixel_index     <= {PIXELS_BITS{1'b0}};
+      pixel_bit_index <= 'd0;  
+    end
+  end
+
+
+  always @(posedge busClk) begin
     // TODO: write better tester for these writes/reads
     if (busWrite) begin
       if (busAddr[13] == 'b0) begin
@@ -129,7 +141,7 @@ module anton_neopixel_raw (
         case (busAddr[1:0])
           0: reg_max[7:0]  <= busDataIn;
           1: reg_max[15:8] <= busDataIn;
-          2: {reg_ctrl_24bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
+          2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
         endcase
       end
     end
@@ -144,7 +156,7 @@ module anton_neopixel_raw (
         case (busAddr[1:0])
           0: bus_data_out_buffer <= reg_max[7:0];
           1: bus_data_out_buffer <= reg_max[15:8];
-          2: bus_data_out_buffer <= {3'b000, reg_ctrl_24bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
+          2: bus_data_out_buffer <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
           3: bus_data_out_buffer <= {7'b0000000, reg_state_reset};
         endcase
       end
@@ -152,21 +164,15 @@ module anton_neopixel_raw (
   end
 
 
-  anton_scd reset_reg_ctrl_run_cd(
-    .inputFlag(slow_reset_reg_ctrl_run),
-    .clock(busClk),
-    .outputFlag(fast_reset_reg_ctrl_run)
-  );
-
-
   always @(posedge busClk) begin
-    if (fast_reset_reg_ctrl_run) begin
+    if (reset_reg_ctrl_run) begin
       reg_ctrl_run <= 0;
+      $finish;
     end
   end
 
   always @(posedge clk7mhz) begin
-    slow_reset_reg_ctrl_run <= 'b0; // fall the flags eventually
+    reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
     if (reg_ctrl_run) begin
       if (state == ENUM_STATE_TRANSMIT) begin
@@ -210,7 +216,7 @@ module anton_neopixel_raw (
           pixels_synth_buf  <= 'd0;
 
           if (!reg_ctrl_loop) begin
-            slow_reset_reg_ctrl_run <= 'b1;
+            reset_reg_ctrl_run <= 'b1;
           end
 
         end
