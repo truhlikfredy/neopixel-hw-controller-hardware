@@ -40,30 +40,31 @@ module anton_neopixel_raw (
 
   //reg [PIXELS_BITS-1:0][7:0] pixels;
 
-  reg [7:0]             bus_data_out_buffer;
-  reg [7:0]             pixels[PIXELS_MAX-1:0];
-  wire [7:0]            pixel_value_8bit   = 'd0;  // pixel value before expanding
-  reg [23:0]            pixel_value_32bit  = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
-  reg [7:0]             neo_pattern_lookup = 'd0;
+  reg [7:0]              bus_data_out_buffer;
+  reg [7:0]              pixels[PIXELS_MAX-1:0];
+  wire [7:0]             pixel_value_8bit   = 'd0;  // pixel value before expanding
+  reg [23:0]             pixel_value_32bit  = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
+  reg [7:0]              neo_pattern_lookup = 'd0;
             
-  reg [9:0]             reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
-  reg [2:0]             bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
-  reg [PIXELS_BITS-1:0] pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
-  reg [4:0]             pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
-  reg                   state              = 'b0;  // 0 = transmit bits, 1 = reset mode
-  reg                   pixels_synth_buf   = 'b0;
-  reg                   data_int           = 'b0;
-  reg [1:0]             cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
+  reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
+  reg [2:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
+  reg [PIXELS_BITS-1:0]  pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
+  wire [PIXELS_BITS-1:0] pixel_index_equiv  = {PIXELS_BITS{1'b0}};
+  reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
+  reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg                    pixels_synth_buf   = 'b0;
+  reg                    data_int           = 'b0;
+  reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
-  reg [15:0]            reg_max;
-  reg                   reg_ctrl_init      = 'b0;
-  reg                   reg_ctrl_limit     = 'b0;
-  reg                   reg_ctrl_run       = 'b0;
-  reg                   reg_ctrl_loop      = 'b0;
-  reg                   reg_ctrl_32bit     = 'b0;
-  reg                   reg_state_reset    = 'b0;
+  reg [15:0]             reg_max;
+  reg                    reg_ctrl_init      = 'b0;
+  reg                    reg_ctrl_limit     = 'b0;
+  reg                    reg_ctrl_run       = 'b0;
+  reg                    reg_ctrl_loop      = 'b0;
+  reg                    reg_ctrl_32bit     = 'b0;
+  reg                    reg_state_reset    = 'b0;
   
-  reg                   reset_reg_ctrl_run = 'b0;
+  reg                    reset_reg_ctrl_run = 'b0;
   
   localparam  ENUM_STATE_TRANSMIT = 0;   // If I will make SystemVerilog variant then use proper enums for this
   localparam  ENUM_STATE_RESET    = 1;
@@ -81,7 +82,6 @@ module anton_neopixel_raw (
   end
 
 
-  assign pixel_value_8bit = pixels[pixel_index];
 
 
   always @(*) begin
@@ -103,8 +103,10 @@ module anton_neopixel_raw (
           pixels[{pixel_index[PIXELS_BITS-3: 0], 2'b01}]  // Green
         };
       end else begin
+        // 8bit mode
         // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2-0]Red
         // 8B, 8R, 8G = 32bit destination format =>  xxxxxBBx xxxxRRRx xxxxGGGx  high bits are sent first (so reorder them to the right)
+        assign pixel_value_8bit = pixels[pixel_index];
         pixel_value_32bit = { 
           5'b00000, pixel_value_8bit[6], pixel_value_8bit[7], 1'b0,                        // 2bits Blues
           4'b0000,  pixel_value_8bit[0], pixel_value_8bit[1], pixel_value_8bit[2], 1'b0,   // 3bits Red
@@ -178,9 +180,12 @@ module anton_neopixel_raw (
     end
   end
 
+  // assign pixel_index_equiv = (reg_ctrl_32bit ? {pixel_index[PIXELS_BITS-3:0], 2'b11} : pixel_index);
+
 
   always @(posedge clk7mhz) begin
     reset_reg_ctrl_run <= 'b0; // fall the flags eventually
+    assign pixel_index_equiv = pixel_index;
 
     if (reg_ctrl_init) begin
       pixel_index     <= {PIXELS_BITS{1'b0}};
@@ -200,28 +205,13 @@ module anton_neopixel_raw (
               // on 'd23 => 24th bit do start on a new pixel with bit 'd0
               pixel_bit_index <= 'b0;
 
-              if (reg_ctrl_32bit) begin
-                // 32bit mode
-
-                if ({pixel_index, 2'b11} < PIXELS_MAX-1) begin
-                  // for all pixels go to the next pixel
-                  pixel_index <= pixel_index + 'b1;
-                end else begin
-                  // for the very last pixel overflow 0 and start reset
-                  pixel_index <= 'd0;
-                  state <= ENUM_STATE_RESET;
-                end
+              if (pixel_index_equiv < PIXELS_MAX-1) begin
+                // for all pixels go to the next pixel
+                pixel_index <= pixel_index + 'b1;
               end else begin
-                // 8 bit mode
-
-                if (pixel_index < PIXELS_MAX-1) begin
-                  // for all pixels go to the next pixel
-                  pixel_index <= pixel_index + 'b1;
-                end else begin
-                  // for the very last pixel overflow 0 and start reset
-                  pixel_index <= 'd0;
-                  state <= ENUM_STATE_RESET;
-                end
+                // for the very last pixel overflow 0 and start reset
+                pixel_index <= 'd0;
+                state <= ENUM_STATE_RESET;
               end
               
             end        
