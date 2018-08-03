@@ -42,7 +42,7 @@ module anton_neopixel_raw (
 
   reg [7:0]             bus_data_out_buffer;
   reg [7:0]             pixels[PIXELS_MAX-1:0];
-  reg [7:0]             pixel_value_8bit   = 'd0;  // pixel value before expanding
+  wire [7:0]            pixel_value_8bit   = 'd0;  // pixel value before expanding
   reg [23:0]            pixel_value_32bit  = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [7:0]             neo_pattern_lookup = 'd0;
             
@@ -81,6 +81,9 @@ module anton_neopixel_raw (
   end
 
 
+  assign pixel_value_8bit = pixels[pixel_index];
+
+
   always @(*) begin
     `ifdef HARDCODED_PIXELS
       // hardcoded predefined colors for 3 pixels in a strip
@@ -92,13 +95,22 @@ module anton_neopixel_raw (
         default:  pixel_value_32bit = 24'h101010;  // slightly light to show there might be problem in configuration
       endcase
     `else
-      // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2-0]Red
-      // 8B, 8R, 8G = 32bit destination format =>  xxxxxBBx xxxxRRRx xxxxGGGx  high bits are sent first (so reorder them to the right)
-      pixel_value_32bit = { 
-        5'b00000, pixel_value_8bit[6], pixel_value_8bit[7], 1'b0,                   // 2bits Blues
-        4'b0000,  pixel_value_8bit[0], pixel_value_8bit[1], pixel_value_8bit[2], 1'b0,   // 3bits Red
-        4'b0000,  pixel_value_8bit[3], pixel_value_8bit[4], pixel_value_8bit[5], 1'b0    // 3bits Green
-      };
+      if (reg_ctrl_32bit) begin
+        // In 32bit mode use 3 bytes to concatinate RGB values and reordered them to make it convient (4th byte is dropped)
+        pixel_value_32bit = { 
+          pixels[{pixel_index[PIXELS_BITS-3: 0], 2'b10}], // Blue
+          pixels[{pixel_index[PIXELS_BITS-3: 0], 2'b00}], // Red
+          pixels[{pixel_index[PIXELS_BITS-3: 0], 2'b01}]  // Green
+        };
+      end else begin
+        // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2-0]Red
+        // 8B, 8R, 8G = 32bit destination format =>  xxxxxBBx xxxxRRRx xxxxGGGx  high bits are sent first (so reorder them to the right)
+        pixel_value_32bit = { 
+          5'b00000, pixel_value_8bit[6], pixel_value_8bit[7], 1'b0,                        // 2bits Blues
+          4'b0000,  pixel_value_8bit[0], pixel_value_8bit[1], pixel_value_8bit[2], 1'b0,   // 3bits Red
+          4'b0000,  pixel_value_8bit[3], pixel_value_8bit[4], pixel_value_8bit[5], 1'b0    // 3bits Green
+        };
+      end
     `endif
   end
 
@@ -121,44 +133,39 @@ module anton_neopixel_raw (
       reg_ctrl_run    <= 'b0;
       reg_ctrl_loop   <= 'b0;
       reg_ctrl_32bit  <= 'b0;
-  
-      pixel_index     <= {PIXELS_BITS{1'b0}};
-      pixel_bit_index <= 'd0;  
-    end
-  end
+    end else begin
 
+      // TODO: write better tester for these writes/reads
+      if (busWrite) begin
+        if (busAddr[13] == 'b0) begin
 
-  always @(posedge busClk) begin
-    // TODO: write better tester for these writes/reads
-    if (busWrite) begin
-      if (busAddr[13] == 'b0) begin
+          // Write buffer
+          pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
+        end else begin
 
-        // Write buffer
-        pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
-      end else begin
-
-        // Write register
-        case (busAddr[1:0])
-          0: reg_max[7:0]  <= busDataIn;
-          1: reg_max[15:8] <= busDataIn;
-          2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
-        endcase
+          // Write register
+          case (busAddr[1:0])
+            0: reg_max[7:0]  <= busDataIn;
+            1: reg_max[15:8] <= busDataIn;
+            2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
+          endcase
+        end
       end
-    end
-    if (busRead) begin
-      if (busAddr[13] == 'b0) begin
-        
-        // Read buffer
-        bus_data_out_buffer <= pixels[busAddr[PIXELS_BITS-1:0]];
-      end else begin
+      if (busRead) begin
+        if (busAddr[13] == 'b0) begin
+          
+          // Read buffer
+          bus_data_out_buffer <= pixels[busAddr[PIXELS_BITS-1:0]];
+        end else begin
 
-        // Read register
-        case (busAddr[1:0])
-          0: bus_data_out_buffer <= reg_max[7:0];
-          1: bus_data_out_buffer <= reg_max[15:8];
-          2: bus_data_out_buffer <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
-          3: bus_data_out_buffer <= {7'b0000000, reg_state_reset};
-        endcase
+          // Read register
+          case (busAddr[1:0])
+            0: bus_data_out_buffer <= reg_max[7:0];
+            1: bus_data_out_buffer <= reg_max[15:8];
+            2: bus_data_out_buffer <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
+            3: bus_data_out_buffer <= {7'b0000000, reg_state_reset};
+          endcase
+        end
       end
     end
   end
@@ -171,57 +178,77 @@ module anton_neopixel_raw (
     end
   end
 
+
   always @(posedge clk7mhz) begin
     reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
-    if (reg_ctrl_run) begin
-      if (state == ENUM_STATE_TRANSMIT) begin
+    if (reg_ctrl_init) begin
+      pixel_index     <= {PIXELS_BITS{1'b0}};
+      pixel_bit_index <= 'd0;  
+    end else begin
+      if (reg_ctrl_run) begin
+        if (state == ENUM_STATE_TRANSMIT) begin
 
-        bit_pattern_index <= bit_pattern_index + 1;
+          bit_pattern_index <= bit_pattern_index + 1;
 
-        if (bit_pattern_index == 'd7) begin
+          if (bit_pattern_index == 'd7) begin
 
-          if (pixel_bit_index < 'd23) begin
-            // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-            pixel_bit_index <= pixel_bit_index + 'b1;
-          end else begin
-            // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-            pixel_bit_index <= 'b0;
-
-            if (pixel_index < PIXELS_MAX-1) begin
-              // for all pixels go to the next pixel
-              pixel_index <= pixel_index + 'b1;
+            if (pixel_bit_index < 'd23) begin
+              // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
+              pixel_bit_index <= pixel_bit_index + 'b1;
             end else begin
-              // for the very last pixel overflow 0 and start reset
-              pixel_index <= 'd0;
-              state <= ENUM_STATE_RESET;
-            end
-            
-            pixel_value_8bit <= pixels[pixel_index];
-          end        
-        end
-      end else begin
-        // when in the reset state, count 50ns (RESET_DELAY / 10)
-        reset_delay_count <= reset_delay_count + 'b1;
-        pixels_synth_buf  <= 1;
-        reg_state_reset   <= 1;
+              // on 'd23 => 24th bit do start on a new pixel with bit 'd0
+              pixel_bit_index <= 'b0;
 
-        if (reset_delay_count > RESET_DELAY) begin  
-          // predefined wait in reset state was reached, let's 
-          reg_state_reset   <= 'b0;
-          state             <= 'd0;
-          if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
-          cycle             <= cycle + 'd1;
-          reset_delay_count <= 'd0;
-          pixels_synth_buf  <= 'd0;
+              if (reg_ctrl_32bit) begin
+                // 32bit mode
 
-          if (!reg_ctrl_loop) begin
-            reset_reg_ctrl_run <= 'b1;
+                if ({pixel_index, 2'b11} < PIXELS_MAX-1) begin
+                  // for all pixels go to the next pixel
+                  pixel_index <= pixel_index + 'b1;
+                end else begin
+                  // for the very last pixel overflow 0 and start reset
+                  pixel_index <= 'd0;
+                  state <= ENUM_STATE_RESET;
+                end
+              end else begin
+                // 8 bit mode
+
+                if (pixel_index < PIXELS_MAX-1) begin
+                  // for all pixels go to the next pixel
+                  pixel_index <= pixel_index + 'b1;
+                end else begin
+                  // for the very last pixel overflow 0 and start reset
+                  pixel_index <= 'd0;
+                  state <= ENUM_STATE_RESET;
+                end
+              end
+              
+            end        
           end
+        end else begin
+          // when in the reset state, count 50ns (RESET_DELAY / 10)
+          reset_delay_count <= reset_delay_count + 'b1;
+          pixels_synth_buf  <= 1;
+          reg_state_reset   <= 1;
 
+          if (reset_delay_count > RESET_DELAY) begin  
+            // predefined wait in reset state was reached, let's 
+            reg_state_reset   <= 'b0;
+            state             <= 'd0;
+            if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
+            cycle             <= cycle + 'd1;
+            reset_delay_count <= 'd0;
+            pixels_synth_buf  <= 'd0;
+
+            if (!reg_ctrl_loop) begin
+              reset_reg_ctrl_run <= 'b1;
+            end
+
+          end
         end
       end
-    end
+    end 
   end
 
 
