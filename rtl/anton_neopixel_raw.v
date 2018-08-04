@@ -34,22 +34,22 @@ module anton_neopixel_raw (
   output [7:0]busDataOut
   );
 
-  parameter  PIXELS_MAX  = 8;  // maximum number of LEDs in a strip
+  parameter  BUFFER_SIZE = 8;  // maximum number of LEDs in a strip
   parameter  RESET_DELAY = 600; // how long the reset delay will be happening 600 == 60us (50us is minimum)
-  localparam PIXELS_BITS = `CLOG2(PIXELS_MAX);   // minimum required amount of bits to store the PIXELS_MAX
+  localparam BUFFER_BITS = `CLOG2(BUFFER_SIZE);   // minimum required amount of bits to store the BUFFER_SIZE
 
-  //reg [PIXELS_BITS-1:0][7:0] pixels;
+  //reg [BUFFER_BITS-1:0][7:0] pixels;
 
   reg [7:0]              bus_data_out_buffer;
-  reg [7:0]              pixels[PIXELS_MAX-1:0];
+  reg [7:0]              pixels[BUFFER_SIZE-1:0];
   wire [7:0]             pixel_value_8bit   = 'd0;  // pixel value before expanding
   reg [23:0]             pixel_value_32bit  = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [7:0]              neo_pattern_lookup = 'd0;
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [2:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
-  reg [PIXELS_BITS-1:0]  pixel_index        = {PIXELS_BITS{1'b0}};  // index to the current pixel transmitting
-  wire [PIXELS_BITS-1:0] pixel_index_equiv;
+  reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting
+  wire [BUFFER_BITS-1:0] pixel_index_equiv;
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
@@ -98,9 +98,9 @@ module anton_neopixel_raw (
       if (reg_ctrl_32bit) begin
         // In 32bit mode use 3 bytes to concatinate RGB values and reordered them to make it convient (4th byte is dropped)
         pixel_value_32bit = { 
-          pixels[{pixel_index[PIXELS_BITS-3: 0], 2'b10}], // Blue
-          pixels[{pixel_index[PIXELS_BITS-3: 0], 2'b00}], // Red
-          pixels[{pixel_index[PIXELS_BITS-3: 0], 2'b01}]  // Green
+          pixels[{pixel_index[BUFFER_BITS-3: 0], 2'b10}], // Blue
+          pixels[{pixel_index[BUFFER_BITS-3: 0], 2'b00}], // Red
+          pixels[{pixel_index[BUFFER_BITS-3: 0], 2'b01}]  // Green
         };
       end else begin
         // 8bit mode
@@ -142,7 +142,7 @@ module anton_neopixel_raw (
         if (busAddr[13] == 'b0) begin
 
           // Write buffer
-          pixels[busAddr[PIXELS_BITS-1:0]] <= busDataIn;
+          pixels[busAddr[BUFFER_BITS-1:0]] <= busDataIn;
         end else begin
 
           // Write register
@@ -157,7 +157,7 @@ module anton_neopixel_raw (
         if (busAddr[13] == 'b0) begin
           
           // Read buffer
-          bus_data_out_buffer <= pixels[busAddr[PIXELS_BITS-1:0]];
+          bus_data_out_buffer <= pixels[busAddr[BUFFER_BITS-1:0]];
         end else begin
 
           // Read register
@@ -180,13 +180,13 @@ module anton_neopixel_raw (
     end
   end
 
-  assign pixel_index_equiv = (reg_ctrl_32bit ? {pixel_index[PIXELS_BITS-3:0], 2'b11} : pixel_index);
+  assign pixel_index_equiv = (reg_ctrl_32bit ? {pixel_index[BUFFER_BITS-3:0], 2'b11} : pixel_index);
 
   always @(posedge clk7mhz) begin
     reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
     if (reg_ctrl_init) begin
-      pixel_index     <= {PIXELS_BITS{1'b0}};
+      pixel_index     <= {BUFFER_BITS{1'b0}};
       pixel_bit_index <= 'd0;  
     end else begin
       if (reg_ctrl_run) begin
@@ -206,7 +206,7 @@ module anton_neopixel_raw (
               // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
               // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
               // the size
-              if (pixel_index_equiv < () (`CLOG2(PIXELS_MAX) ==`CLOG2(PIXELS_MAX-1) ? PIXELS_MAX-1 : {1'b0, PIXELS_MAX-1} ) ) begin
+              if (pixel_index_equiv < () (`CLOG2(BUFFER_SIZE) ==`CLOG2(BUFFER_SIZE-1) ? BUFFER_SIZE-1 : {1'b0, BUFFER_SIZE-1} ) ) begin
                 // for all pixels go to the next pixel
                 pixel_index <= pixel_index + 'b1;
               end else begin
