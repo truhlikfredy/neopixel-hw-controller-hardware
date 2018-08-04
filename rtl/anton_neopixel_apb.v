@@ -19,7 +19,7 @@ module anton_neopixel_apb (
   output apbPslverr
   );
 
-  parameter  PIXELS_MAX  = 66;  // maximum number of LEDs in a strip, maximum 8192 pixels, which should have 4Hz refresh
+  parameter  PIXELS_MAX  = 8;  // maximum number of LEDs in a strip, maximum 8192 pixels, which should have 4Hz refresh
   localparam PIXELS_BITS = `CLOG2(PIXELS_MAX);   // minimum required amount of bits to store the PIXELS_MAX + 32bit aligned accesses
 
   wire wr_enable;

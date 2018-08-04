@@ -34,7 +34,7 @@ module anton_neopixel_raw (
   output [7:0]busDataOut
   );
 
-  parameter  PIXELS_MAX  = 66;  // maximum number of LEDs in a strip
+  parameter  PIXELS_MAX  = 8;  // maximum number of LEDs in a strip
   parameter  RESET_DELAY = 600; // how long the reset delay will be happening 600 == 60us (50us is minimum)
   localparam PIXELS_BITS = `CLOG2(PIXELS_MAX);   // minimum required amount of bits to store the PIXELS_MAX
 
@@ -203,7 +203,10 @@ module anton_neopixel_raw (
               // on 'd23 => 24th bit do start on a new pixel with bit 'd0
               pixel_bit_index <= 'b0;
 
-              if (pixel_index_equiv < PIXELS_MAX-1) begin
+              // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
+              // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
+              // the size
+              if (pixel_index_equiv < () (`CLOG2(PIXELS_MAX) ==`CLOG2(PIXELS_MAX-1) ? PIXELS_MAX-1 : {1'b0, PIXELS_MAX-1} ) ) begin
                 // for all pixels go to the next pixel
                 pixel_index <= pixel_index + 'b1;
               end else begin
