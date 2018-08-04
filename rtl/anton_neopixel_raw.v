@@ -180,7 +180,7 @@ module anton_neopixel_raw (
     end
   end
 
-  // assign pixel_index_equiv = (reg_ctrl_32bit ? {pixel_index[PIXELS_BITS-3:0], 2'b11} : pixel_index);
+  assign pixel_index_equiv = (reg_ctrl_32bit ? {pixel_index[PIXELS_BITS-3:0], 2'b11} : pixel_index);
 
   always @(posedge clk7mhz) begin
     reset_reg_ctrl_run <= 'b0; // fall the flags eventually
@@ -239,7 +239,6 @@ module anton_neopixel_raw (
     end 
   end
 
-  assign pixel_index_equiv = pixel_index;
 
   assign neoData    = data_int;
   assign neoState   = state;

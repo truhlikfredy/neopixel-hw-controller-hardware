@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
   writeRegister(4, 0xad);
   writeRegister(0, 0xfa);
   writeRegister(4, 0xce);
-  writeRegister(8, CTRL_RUN | CTRL_LOOP);
+  writeRegister(8, CTRL_RUN | CTRL_LOOP | CTRL_32);
   // writeRegister(8, CTRL_RUN);
 
   writeApbByte(0, 0xff);
