@@ -1,0 +1,10 @@
+language: generic
+script: 
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm install"
+
+  - mkdir -p ${TRAVIS_BUILD_DIR}/images
+  - chmod a+rw ${TRAVIS_BUILD_DIR}/images
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project wernight/phantomjs:2.1.1 bash -c "/project/images_src/generate_images.sh"
+
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm run-script lint"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm run-script build"
