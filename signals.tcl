@@ -10,6 +10,7 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.bit_pattern_index"
 lappend signals "TOP.anton_neopixel_apb.neopixel.neo_pattern_lookup"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_bit_index"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_index"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_index_equiv"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_value_8bit"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_value_32bit"
 
