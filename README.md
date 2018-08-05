@@ -17,12 +17,14 @@ npm run-script run
 
 Just to see where is an issue you can run it in linting mode:
 ```
-npm run-script lint
+npm run-script -s lint
 ```
+
+With -s the npm errors will not be displayed, so you will see only the linting errors
 
 To automatically trigger compilation on changes the vscode can be setup to save file on lost focus. By just ALT-TABing to the gtk-wave to see the waveforms it will trigger recompilation and run of the simulation
 ```
-npm run-script monitor
+npm run-script -s monitor
 ```
 
 And to startup gtk-wave for the very first time (for refresh ctrl+shift R is enough) run:
