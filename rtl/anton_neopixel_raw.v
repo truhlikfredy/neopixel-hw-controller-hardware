@@ -34,22 +34,21 @@ module anton_neopixel_raw (
   output [7:0]busDataOut
   );
 
-  parameter  BUFFER_SIZE = 8;  // maximum number of LEDs in a strip
-  parameter  RESET_DELAY = 600; // how long the reset delay will be happening 600 == 60us (50us is minimum)
-  localparam BUFFER_BITS = `CLOG2(BUFFER_SIZE);   // minimum required amount of bits to store the BUFFER_SIZE
+  parameter  BUFFER_END  = 7;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
+  parameter  RESET_DELAY = 385; // how long the reset delay will be happening, minimum is 50us so 50/(1/7) = 350 ticks. But giving bit margin 55us => 385 ticks
+  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   // minimum required amount of bits to store the BUFFER_END
 
   //reg [BUFFER_BITS-1:0][7:0] pixels;
 
   reg [7:0]              bus_data_out_buffer;
-  reg [7:0]              pixels[BUFFER_SIZE-1:0];
-  wire [7:0]             pixel_value_8bit   = 'd0;  // pixel value before expanding
-  reg [23:0]             pixel_value_32bit  = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
+  reg [7:0]              pixels[BUFFER_END:0];
+  reg [23:0]             pixel_colour_value = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   reg [7:0]              neo_pattern_lookup = 'd0;
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [2:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting
-  wire [BUFFER_BITS-1:0] pixel_index_equiv;
+  wire [BUFFER_BITS-1:0] pixel_index_max    = BUFFER_END; 
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
@@ -73,7 +72,7 @@ module anton_neopixel_raw (
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
   always @(*) begin
-    case (pixel_value_32bit[pixel_bit_index])
+    case (pixel_colour_value[pixel_bit_index])
       // depending on the current bit decide what pattern to push
       // patterns are ordered from right to left
       1'b0: neo_pattern_lookup = 8'b00000011;
@@ -86,31 +85,30 @@ module anton_neopixel_raw (
 
   always @(*) begin
     `ifdef HARDCODED_PIXELS
-      // hardcoded predefined colors for 3 pixels in a strip
+      // hardcoded predefined colours for 3 pixels in a strip
       // TODO: use casez so bigger arrays could be auto filled with these values in tiling/overflow method
       case (pixel_index)
-        'd0: pixel_value_32bit = 24'hff00d5;
-        'd1: pixel_value_32bit = 24'h008800;
-        'd2: pixel_value_32bit = 24'h000090;
-        default:  pixel_value_32bit = 24'h101010;  // slightly light to show there might be problem in configuration
+        'd0: pixel_colour_value = 24'hff00d5;
+        'd1: pixel_colour_value = 24'h008800;
+        'd2: pixel_colour_value = 24'h000090;
+        default:  pixel_colour_value = 24'h101010;  // slightly light to show there might be problem in configuration
       endcase
     `else
       if (reg_ctrl_32bit) begin
         // In 32bit mode use 3 bytes to concatinate RGB values and reordered them to make it convient (4th byte is dropped)
-        pixel_value_32bit = { 
-          pixels[{pixel_index[BUFFER_BITS-3: 0], 2'b10}], // Blue
-          pixels[{pixel_index[BUFFER_BITS-3: 0], 2'b00}], // Red
-          pixels[{pixel_index[BUFFER_BITS-3: 0], 2'b01}]  // Green
+        pixel_colour_value = { 
+          pixels[{pixel_index[BUFFER_BITS-1: 2], 2'b10}], // Blue
+          pixels[{pixel_index[BUFFER_BITS-1: 2], 2'b00}], // Red
+          pixels[{pixel_index[BUFFER_BITS-1: 2], 2'b01}]  // Green
         };
       end else begin
         // 8bit mode
         // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2-0]Red
         // 8B, 8R, 8G = 32bit destination format =>  xxxxxBBx xxxxRRRx xxxxGGGx  high bits are sent first (so reorder them to the right)
-        assign pixel_value_8bit = pixels[pixel_index];
-        pixel_value_32bit = { 
-          5'b00000, pixel_value_8bit[6], pixel_value_8bit[7], 1'b0,                        // 2bits Blues
-          4'b0000,  pixel_value_8bit[0], pixel_value_8bit[1], pixel_value_8bit[2], 1'b0,   // 3bits Red
-          4'b0000,  pixel_value_8bit[3], pixel_value_8bit[4], pixel_value_8bit[5], 1'b0    // 3bits Green
+        pixel_colour_value = { 
+          5'b00000, pixels[pixel_index][6], pixels[pixel_index][7], 1'b0,                           // 2bits Blues
+          4'b0000,  pixels[pixel_index][0], pixels[pixel_index][1], pixels[pixel_index][2], 1'b0,   // 3bits Red
+          4'b0000,  pixels[pixel_index][3], pixels[pixel_index][4], pixels[pixel_index][5], 1'b0    // 3bits Green
         };
       end
     `endif
@@ -180,8 +178,7 @@ module anton_neopixel_raw (
     end
   end
 
-  assign pixel_index_equiv = (reg_ctrl_32bit ? {pixel_index[BUFFER_BITS-3:0], 2'b11} : pixel_index);
-
+  
   always @(posedge clk7mhz) begin
     reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
@@ -206,13 +203,17 @@ module anton_neopixel_raw (
               // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
               // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
               // the size
-              if (pixel_index_equiv < () (`CLOG2(BUFFER_SIZE) ==`CLOG2(BUFFER_SIZE-1) ? BUFFER_SIZE-1 : {1'b0, BUFFER_SIZE-1} ) ) begin
+              if (pixel_index < BUFFER_END)  begin
                 // for all pixels go to the next pixel
-                pixel_index <= pixel_index + 'b1;
+                if (reg_ctrl_32bit) begin
+                  pixel_index <= pixel_index + 'd4;
+                end else begin
+                  pixel_index <= pixel_index + 'b1;
+                end
               end else begin
                 // for the very last pixel overflow 0 and start reset
                 pixel_index <= 'd0;
-                state <= ENUM_STATE_RESET;
+                state       <= ENUM_STATE_RESET;
               end
               
             end        
