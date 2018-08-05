@@ -48,7 +48,6 @@ module anton_neopixel_raw (
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [2:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting
-  wire [BUFFER_BITS-1:0] pixel_index_max    = BUFFER_END; 
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
@@ -57,10 +56,10 @@ module anton_neopixel_raw (
 
   reg [15:0]             reg_max;
   reg                    reg_ctrl_init      = 'b0;
-  reg                    reg_ctrl_limit     = 'b0;
+  reg                    reg_ctrl_limit     = 'b0; // Change this only when the pixel data are not streamed
   reg                    reg_ctrl_run       = 'b0;
   reg                    reg_ctrl_loop      = 'b0;
-  reg                    reg_ctrl_32bit     = 'b0;
+  reg                    reg_ctrl_32bit     = 'b0; // Change this only when the pixel data are not streamed
   reg                    reg_state_reset    = 'b0;
   
   reg                    reset_reg_ctrl_run = 'b0;
@@ -203,17 +202,26 @@ module anton_neopixel_raw (
               // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
               // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
               // the size
-              if (pixel_index < BUFFER_END)  begin
-                // for all pixels go to the next pixel
-                if (reg_ctrl_32bit) begin
+              if (reg_ctrl_32bit) begin
+                // In 32bit mode overflow slightly differently than in 8bit
+                if ({pixel_index[BUFFER_BITS-1:2], 2'b11} < BUFFER_END)  begin
+                  // for all pixels except the last one go to the next pixel
                   pixel_index <= pixel_index + 'd4;
                 end else begin
-                  pixel_index <= pixel_index + 'b1;
+                  // for the very last pixel overflow 0 and start reset
+                  pixel_index <= 'd0;
+                  state       <= ENUM_STATE_RESET;
                 end
               end else begin
-                // for the very last pixel overflow 0 and start reset
-                pixel_index <= 'd0;
-                state       <= ENUM_STATE_RESET;
+                // In 32bit mode overflow slightly differently than in 8bit
+                if (pixel_index < BUFFER_END)  begin
+                  // for all pixels except the last one go to the next pixel
+                  pixel_index <= pixel_index + 'b1;
+                end else begin
+                  // for the very last pixel overflow 0 and start reset
+                  pixel_index <= 'd0;
+                  state       <= ENUM_STATE_RESET;
+                end
               end
               
             end        
