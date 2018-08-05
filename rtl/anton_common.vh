@@ -27,4 +27,9 @@
   ) ? 1 : 0
 
 
+// If I will make SystemVerilog variant then use proper enums for this
+`define ENUM_STATE_TRANSMIT 1'b0  
+`define ENUM_STATE_RESET    1'b1
+
+
 `endif
