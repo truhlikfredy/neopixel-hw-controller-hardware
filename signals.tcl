@@ -20,9 +20,6 @@ lappend signals "TOP.anton_neopixel_apb.apbPwData"
 lappend signals "TOP.anton_neopixel_apb.apbPrData"
 lappend signals "TOP.anton_neopixel_apb.apbPaddr"
 lappend signals "TOP.anton_neopixel_apb.address"
-lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(0)"
-lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(1)"
-lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(2)"
 lappend signals "TOP.anton_neopixel_apb.pixelsSynch"
 
 lappend signals "TOP.anton_neopixel_apb.neopixel.reg_max"
@@ -39,5 +36,16 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.reset_reg_ctrl_run"
 lappend signals "TOP.anton_neopixel_apb.neopixel.cycle"
 
 #lappend signals "TOP.anton_neopixel_apb.neopixel.pixels"
+
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(0)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(1)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(2)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(3)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(4)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(5)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(6)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(7)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(8)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(9)"
 
 set num_added [ gtkwave::addSignalsFromList $signals ]
