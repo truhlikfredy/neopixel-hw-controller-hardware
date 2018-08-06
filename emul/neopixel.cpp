@@ -145,7 +145,11 @@ int main(int argc, char** argv) {
   while (!Verilated::gotFinish()) cycleClocks();
 
   // Done simulating
-  uut->final();               
+  uut->final();
+
+  #if VM_COVERAGE
+    VerilatedCov::write("line-coverage.dat");
+  #endif
 
   tfp->close();
   delete tfp;
