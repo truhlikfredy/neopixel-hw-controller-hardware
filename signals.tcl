@@ -10,10 +10,14 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.bit_pattern_index"
 lappend signals "TOP.anton_neopixel_apb.neopixel.neo_pattern_lookup"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_bit_index"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_index"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_index_equiv"
+lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_index_max"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_colour_value"
 
+lappend signals "TOP.anton_neopixel_apb.apbPselx"
 lappend signals "TOP.anton_neopixel_apb.wr_enable"
 lappend signals "TOP.anton_neopixel_apb.apbPwData"
+lappend signals "TOP.anton_neopixel_apb.apbPrData"
 lappend signals "TOP.anton_neopixel_apb.apbPaddr"
 lappend signals "TOP.anton_neopixel_apb.address"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(0)"
@@ -21,8 +25,7 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(1)"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixels(2)"
 lappend signals "TOP.anton_neopixel_apb.pixelsSynch"
 
-lappend signals "TOP.anton_neopixel_apb.neopixel.registers(0)"
-lappend signals "TOP.anton_neopixel_apb.neopixel.registers(1)"
+lappend signals "TOP.anton_neopixel_apb.neopixel.reg_max"
 
 lappend signals "TOP.anton_neopixel_apb.neopixel.reg_ctrl_init"
 lappend signals "TOP.anton_neopixel_apb.neopixel.reg_ctrl_run"
@@ -32,6 +35,8 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.reg_state_reset"
 lappend signals "TOP.anton_neopixel_apb.neopixel.reg_state_off"
 
 lappend signals "TOP.anton_neopixel_apb.neopixel.reset_reg_ctrl_run"
+
+lappend signals "TOP.anton_neopixel_apb.neopixel.cycle"
 
 #lappend signals "TOP.anton_neopixel_apb.neopixel.pixels"
 
