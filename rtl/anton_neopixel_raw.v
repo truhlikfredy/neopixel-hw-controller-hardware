@@ -45,12 +45,14 @@ module anton_neopixel_raw (
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [2:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting
+  wire [BUFFER_BITS-1:0] pixel_index_equiv;         // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
+  wire [BUFFER_BITS-1:0] pixel_index_max;           // what is the rechable maximum depending on the settings
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
-  reg [1:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
+  reg [3:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
-  reg [15:0]             reg_max;
+  reg [13:0]             reg_max;
   reg                    reg_ctrl_init      = 'b0;
   reg                    reg_ctrl_limit     = 'b0; // Change this only when the pixel data are not streamed
   reg                    reg_ctrl_run       = 'b0;
@@ -95,7 +97,7 @@ module anton_neopixel_raw (
           // Write register
           case (busAddr[1:0])
             0: reg_max[7:0]  <= busDataIn;
-            1: reg_max[15:8] <= busDataIn;
+            1: reg_max[13:8] <= busDataIn[5:0];
             2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
           endcase
         end
@@ -110,7 +112,7 @@ module anton_neopixel_raw (
           // Read register
           case (busAddr[1:0])
             0: bus_data_out_buffer <= reg_max[7:0];
-            1: bus_data_out_buffer <= reg_max[15:8];
+            1: bus_data_out_buffer <= { 2'b00, reg_max[13:8]};
             2: bus_data_out_buffer <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
             3: bus_data_out_buffer <= {7'b0000000, reg_state_reset};
           endcase
@@ -127,6 +129,12 @@ module anton_neopixel_raw (
     end
   end
 
+
+  // When 32bit mode enabled use
+  assign pixel_index_equiv = (reg_ctrl_32bit) ? {pixel_index[BUFFER_BITS-1:2], 2'b11} : pixel_index;
+
+  // When limit is enabled, use software limit, but when disabled use whole buffer
+  assign pixel_index_max = (reg_ctrl_limit)? reg_max[BUFFER_BITS-1:0] : BUFFER_END;
   
   always @(posedge clk7mhz) begin
     reset_reg_ctrl_run <= 'b0; // fall the flags eventually
@@ -154,7 +162,7 @@ module anton_neopixel_raw (
               // the size
               if (reg_ctrl_32bit) begin
                 // In 32bit mode overflow slightly differently than in 8bit
-                if ({pixel_index[BUFFER_BITS-1:2], 2'b11} < BUFFER_END)  begin
+                if ({pixel_index[BUFFER_BITS-1:2], 2'b11} < pixel_index_max)  begin
                   // for all pixels except the last one go to the next pixel
                   pixel_index <= pixel_index + 'd4;
                 end else begin
@@ -164,7 +172,7 @@ module anton_neopixel_raw (
                 end
               end else begin
                 // In 32bit mode overflow slightly differently than in 8bit
-                if (pixel_index < BUFFER_END)  begin
+                if (pixel_index < pixel_index_max)  begin
                   // for all pixels except the last one go to the next pixel
                   pixel_index <= pixel_index + 'b1;
                 end else begin
@@ -186,7 +194,7 @@ module anton_neopixel_raw (
             // predefined wait in reset state was reached, let's 
             reg_state_reset   <= 'b0;
             state             <= 'd0;
-            if (cycle == 'd3) $finish; // stop simulation here, went through all pixels and a reset twice
+            if (cycle == 'd5) $finish; // stop simulation here, went through all pixels and a reset twice
             cycle             <= cycle + 'd1;
             reset_delay_count <= 'd0;
             pixels_synth_buf  <= 'd0;

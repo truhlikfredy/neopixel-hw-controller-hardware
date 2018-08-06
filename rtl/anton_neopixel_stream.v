@@ -11,7 +11,7 @@ module anton_neopixel_stream (
   input                    reg_ctrl_32bit,
   input                    reg_ctrl_run,
 
-  output neoData
+  output                   neoData
   );
 
   reg [7:0]              neo_pattern_lookup = 'd0;  // move to wire
@@ -20,7 +20,6 @@ module anton_neopixel_stream (
   
   parameter  BUFFER_END  = 7;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   // minimum required amount of bits to store the BUFFER_END
-
 
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
