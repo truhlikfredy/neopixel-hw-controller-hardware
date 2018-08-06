@@ -120,9 +120,9 @@ int main(int argc, char** argv) {
   writeApbByte(12, 0xDE); // this shouldn't get displayed in 32bit mode
   writeApbByte(16, 0xCE);
   writeApbByte(20, 0xAD);
-  writeApbByte(16, 0x98);
-  writeApbByte(20, 0x01); // this shouldn't get displayed in 32bit mode
-  writeApbByte(24, 0x00);
+  writeApbByte(24, 0x98);
+  writeApbByte(28, 0x01); // this shouldn't get displayed in 32bit mode
+  writeApbByte(32, 0x00);
 
   writeRegisterMax(0xface);
   writeRegisterMax(7);
