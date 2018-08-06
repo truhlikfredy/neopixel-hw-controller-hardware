@@ -19,7 +19,7 @@ module anton_neopixel_apb (
   output apbPslverr
   );
 
-  parameter  BUFFER_END = 7; // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
+  parameter  BUFFER_END = 31; // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
   // reason why it's not buffer size is because the verilator is akward and for size which are power of 2 was expecting 1 bit bigger VARREF even when
   // the number was subtracted
 

@@ -33,7 +33,7 @@ module anton_neopixel_raw (
   output [7:0]busDataOut
   );
 
-  parameter  BUFFER_END  = 7;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
+  parameter  BUFFER_END  = 31;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
   parameter  RESET_DELAY = 385; // how long the reset delay will be happening, minimum is 50us so 50/(1/7) = 350 ticks. But giving bit margin 55us => 385 ticks
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   // minimum required amount of bits to store the BUFFER_END
 
@@ -52,7 +52,7 @@ module anton_neopixel_raw (
   reg                    pixels_synth_buf   = 'b0;
   reg [3:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
-  reg [13:0]             reg_max;
+  reg [12:0]             reg_max;          // 13 bits in total apb is using 16 bus but -2 bit are dropped for word alignment and 1 bit used to detect control registry accesses
   reg                    reg_ctrl_init      = 'b0;
   reg                    reg_ctrl_limit     = 'b0; // Change this only when the pixel data are not streamed
   reg                    reg_ctrl_run       = 'b0;
@@ -97,7 +97,7 @@ module anton_neopixel_raw (
           // Write register
           case (busAddr[1:0])
             0: reg_max[7:0]  <= busDataIn;
-            1: reg_max[13:8] <= busDataIn[5:0];
+            1: reg_max[12:8] <= busDataIn[4:0];
             2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
           endcase
         end
@@ -112,7 +112,7 @@ module anton_neopixel_raw (
           // Read register
           case (busAddr[1:0])
             0: bus_data_out_buffer <= reg_max[7:0];
-            1: bus_data_out_buffer <= { 2'b00, reg_max[13:8]};
+            1: bus_data_out_buffer <= { 3'b000, reg_max[12:8]};
             2: bus_data_out_buffer <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
             3: bus_data_out_buffer <= {7'b0000000, reg_state_reset};
           endcase
@@ -125,7 +125,6 @@ module anton_neopixel_raw (
   always @(posedge busClk) begin
     if (reset_reg_ctrl_run) begin
       reg_ctrl_run <= 0;
-      $finish;
     end
   end
 
@@ -190,6 +189,12 @@ module anton_neopixel_raw (
           pixels_synth_buf  <= 1;
           reg_state_reset   <= 1;
 
+          if (reset_delay_count == RESET_DELAY) begin
+            if (!reg_ctrl_loop) begin
+              reset_reg_ctrl_run <= 'b1;
+            end
+          end
+
           if (reset_delay_count > RESET_DELAY) begin  
             // predefined wait in reset state was reached, let's 
             reg_state_reset   <= 'b0;
@@ -198,11 +203,6 @@ module anton_neopixel_raw (
             cycle             <= cycle + 'd1;
             reset_delay_count <= 'd0;
             pixels_synth_buf  <= 'd0;
-
-            if (!reg_ctrl_loop) begin
-              reset_reg_ctrl_run <= 'b1;
-            end
-
           end
         end
       end
