@@ -2,6 +2,8 @@
 
 // TODO: use bits and size properly https://stackoverflow.com/questions/13340301/size-bits-verilog
 
+// TODO: rename stream_reset to stream_sync, stream_run = stream_output + stream_sync
+
 // TODO: mss ready / reset signals
 
 // TODO: nodemon killall first
@@ -179,7 +181,7 @@ module anton_neopixel_raw (
       if (reset_delay_count > RESET_DELAY) begin  
         // predefined wait in reset state was reached, let's 
         reg_state_reset   <= 'b0;
-        state             <= 'd0;
+        state             <= `ENUM_STATE_TRANSMIT;
         if (cycle == 'd5) $finish; // stop simulation here, went through all pixels and a reset twice
         cycle             <= cycle + 'd1;
         reset_delay_count <= 'd0;
