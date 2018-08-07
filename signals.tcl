@@ -14,6 +14,11 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_index_equiv"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_index_max"
 lappend signals "TOP.anton_neopixel_apb.neopixel.pixel_colour_value"
 
+lappend signals "TOP.anton_neopixel_apb.neopixel.stream_output"
+lappend signals "TOP.anton_neopixel_apb.neopixel.stream_reset"
+lappend signals "TOP.anton_neopixel_apb.neopixel.stream_pattern_of"
+lappend signals "TOP.anton_neopixel_apb.neopixel.stream_bit_of"
+
 lappend signals "TOP.anton_neopixel_apb.apbPselx"
 lappend signals "TOP.anton_neopixel_apb.wr_enable"
 lappend signals "TOP.anton_neopixel_apb.apbPwData"
