@@ -134,79 +134,86 @@ module anton_neopixel_raw (
 
   // When limit is enabled, use software limit, but when disabled use whole buffer
   assign pixel_index_max = (reg_ctrl_limit)? reg_max[BUFFER_BITS-1:0] : BUFFER_END;
-  
-  always @(posedge clk7mhz) begin
-    reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
+
+  wire stream_output       = !reg_ctrl_init && reg_ctrl_run && state == `ENUM_STATE_TRANSMIT; 
+  wire stream_reset        = !reg_ctrl_init && reg_ctrl_run && state == `ENUM_STATE_RESET;
+  wire stream_pattern_of   = stream_output && bit_pattern_index == 'd7;    // does sub-bit pattern overflowing
+  wire stream_bit_index_of = stream_pattern_of && pixel_bit_index == 'd23; // does bit index overflowing
+
+
+  always @(posedge clk7mhz) reset_reg_ctrl_run <= 'b0; // fall the flags eventually
+
+
+  always @(posedge clk7mhz) if (stream_output) bit_pattern_index <= bit_pattern_index + 1;
+
+
+  // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
+  // on 'd23 => 24th bit do start on a new pixel with bit 'd0
+  always @(posedge clk7mhz) if (stream_pattern_of) pixel_bit_index <= (stream_bit_of) ? 0 : pixel_bit_index +1;
+
+
+  always @(posedge clk7mhz) begin 
+    if (stream_bit_of) begin
+      // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
+      // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
+      // the size
+      if (reg_ctrl_32bit) begin
+        // In 32bit mode overflow slightly differently than in 8bit
+        if ({pixel_index[BUFFER_BITS-1:2], 2'b11} < pixel_index_max)  begin
+          // for all pixels except the last one go to the next pixel
+          pixel_index <= pixel_index + 'd4;
+        end else begin
+          // for the very last pixel overflow 0 and start reset
+          pixel_index <= 'd0;
+          state       <= `ENUM_STATE_RESET;
+        end
+      end else begin
+        // In 32bit mode overflow slightly differently than in 8bit
+        if (pixel_index < pixel_index_max)  begin
+          // for all pixels except the last one go to the next pixel
+          pixel_index <= pixel_index + 'b1;
+        end else begin
+          // for the very last pixel overflow 0 and start reset
+          pixel_index <= 'd0;
+          state       <= `ENUM_STATE_RESET;
+        end
+      end
+    end
+  end
+
+
+  always @(posedge clk7mhz) begin
     if (reg_ctrl_init) begin
       pixel_index     <= {BUFFER_BITS{1'b0}};
       pixel_bit_index <= 'd0;  
-    end else begin
-      if (reg_ctrl_run) begin
-        if (state == `ENUM_STATE_TRANSMIT) begin
+    end
+  end
 
-          bit_pattern_index <= bit_pattern_index + 1;
 
-          if (bit_pattern_index == 'd7) begin
+  always @(posedge clk7mhz) begin
+    if (stream_reset) begin
+      // when in the reset state, count 50ns (RESET_DELAY / 10)
+      reset_delay_count <= reset_delay_count + 'b1;
+      pixels_synth_buf  <= 1;
+      reg_state_reset   <= 1;
 
-            if (pixel_bit_index < 'd23) begin
-              // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-              pixel_bit_index <= pixel_bit_index + 'b1;
-            end else begin
-              // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-              pixel_bit_index <= 'b0;
-
-              // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
-              // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
-              // the size
-              if (reg_ctrl_32bit) begin
-                // In 32bit mode overflow slightly differently than in 8bit
-                if ({pixel_index[BUFFER_BITS-1:2], 2'b11} < pixel_index_max)  begin
-                  // for all pixels except the last one go to the next pixel
-                  pixel_index <= pixel_index + 'd4;
-                end else begin
-                  // for the very last pixel overflow 0 and start reset
-                  pixel_index <= 'd0;
-                  state       <= `ENUM_STATE_RESET;
-                end
-              end else begin
-                // In 32bit mode overflow slightly differently than in 8bit
-                if (pixel_index < pixel_index_max)  begin
-                  // for all pixels except the last one go to the next pixel
-                  pixel_index <= pixel_index + 'b1;
-                end else begin
-                  // for the very last pixel overflow 0 and start reset
-                  pixel_index <= 'd0;
-                  state       <= `ENUM_STATE_RESET;
-                end
-              end
-              
-            end        
-          end
-        end else begin
-          // when in the reset state, count 50ns (RESET_DELAY / 10)
-          reset_delay_count <= reset_delay_count + 'b1;
-          pixels_synth_buf  <= 1;
-          reg_state_reset   <= 1;
-
-          if (reset_delay_count == RESET_DELAY) begin
-            if (!reg_ctrl_loop) begin
-              reset_reg_ctrl_run <= 'b1;
-            end
-          end
-
-          if (reset_delay_count > RESET_DELAY) begin  
-            // predefined wait in reset state was reached, let's 
-            reg_state_reset   <= 'b0;
-            state             <= 'd0;
-            if (cycle == 'd5) $finish; // stop simulation here, went through all pixels and a reset twice
-            cycle             <= cycle + 'd1;
-            reset_delay_count <= 'd0;
-            pixels_synth_buf  <= 'd0;
-          end
+      if (reset_delay_count == RESET_DELAY) begin
+        if (!reg_ctrl_loop) begin
+          reset_reg_ctrl_run <= 'b1;
         end
       end
-    end 
+
+      if (reset_delay_count > RESET_DELAY) begin  
+        // predefined wait in reset state was reached, let's 
+        reg_state_reset   <= 'b0;
+        state             <= 'd0;
+        if (cycle == 'd5) $finish; // stop simulation here, went through all pixels and a reset twice
+        cycle             <= cycle + 'd1;
+        reset_delay_count <= 'd0;
+        pixels_synth_buf  <= 'd0;
+      end
+    end
   end
 
 
