@@ -24,12 +24,13 @@ module anton_neopixel_stream (
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
   always @(*) begin
-    case (pixel_colour_value[pixel_bit_index])
-      // depending on the current bit decide what pattern to push
-      // patterns are ordered from right to left
-      1'b0: neo_pattern_lookup = 8'b00000011;
-      1'b1: neo_pattern_lookup = 8'b00011111;
-    endcase
+    // depending on the current bit decide what pattern to push
+    // patterns are ordered from right to left
+    if (pixel_colour_value[pixel_bit_index]) begin
+      neo_pattern_lookup = 8'b00011111;
+    end else begin
+      neo_pattern_lookup = 8'b00000011;
+    end
   end
 
 
@@ -41,6 +42,7 @@ module anton_neopixel_stream (
         'd0: pixel_colour_value = 24'hff00d5;
         'd1: pixel_colour_value = 24'h008800;
         'd2: pixel_colour_value = 24'h000090;
+        'd3: pixel_colour_value = 24'h000010;
         default:  pixel_colour_value = 24'h101010;  // slightly light to show there might be problem in configuration
       endcase
     `else
