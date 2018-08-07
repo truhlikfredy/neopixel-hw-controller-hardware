@@ -2,10 +2,16 @@
 `ifndef _anton_common_vh_
 `define _anton_common_vh_
 
-// number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
-  // reason why it's not buffer size is because the verilator is akward and for size which are power of 2 was expecting 1 bit bigger VARREF even when
-  // the number was subtracted
+// number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192
+// pixels, which should have 4Hz refresh reason why it's not buffer size is 
+// because the verilator is akward and for size which are power of 2 was 
+// expecting 1 bit bigger VARREF even when the number was subtracted
 `define BUFFER_END_DEFAULT 31
+
+
+// how long the reset delay will be happening, minimum is 50us so 50/(1/7) = 350
+// ticks. But giving bit margin 55us => 385 ticks
+`define RESET_DELAY_DEFAULT 385
 
 // https://stackoverflow.com/questions/5269634/address-width-from-ram-depth
 `define CLOG2(x) \

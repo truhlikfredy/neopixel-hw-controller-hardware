@@ -18,8 +18,8 @@ module anton_neopixel_stream (
   reg                    data_int           = 'b0;
   reg [23:0]             pixel_colour_value = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   
-  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
-  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   // minimum required amount of bits to store the BUFFER_END
+  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;  // read anton_common.vh
+  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1); // minimum required amount of bits to store the BUFFER_END
 
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
@@ -37,17 +37,19 @@ module anton_neopixel_stream (
   always @(*) begin
     `ifdef HARDCODED_PIXELS
       // hardcoded predefined colours for 3 pixels in a strip
-      // TODO: use casez so bigger arrays could be auto filled with these values in tiling/overflow method
+      // TODO: use casez so bigger arrays could be auto filled with these 
+      // values in tiling/overflow method
       case (pixel_index)
         'd0: pixel_colour_value = 24'hff00d5;
         'd1: pixel_colour_value = 24'h008800;
         'd2: pixel_colour_value = 24'h000090;
         'd3: pixel_colour_value = 24'h000010;
-        default:  pixel_colour_value = 24'h101010;  // slightly light to show there might be problem in configuration
+        default:  pixel_colour_value = 24'h101010; // slightly light to show there might be problem in configuration
       endcase
     `else
       if (reg_ctrl_32bit) begin
-        // In 32bit mode use 3 bytes to concatinate RGB values and reordered them to make it convient (4th byte is dropped)
+        // In 32bit mode use 3 bytes to concatinate RGB values and reordered 
+        // them to make it convient (4th byte is dropped)
         pixel_colour_value = { 
           pixels[{pixel_index[BUFFER_BITS-1: 2], 2'b10}], // Blue
           pixels[{pixel_index[BUFFER_BITS-1: 2], 2'b00}], // Red

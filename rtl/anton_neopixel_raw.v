@@ -22,11 +22,17 @@ module anton_neopixel_raw (
   output [7:0]busDataOut
   );
 
-  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
-  parameter  RESET_DELAY = 385; // how long the reset delay will be happening, minimum is 50us so 50/(1/7) = 350 ticks. But giving bit margin 55us => 385 ticks
-  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   // minimum required amount of bits to store the BUFFER_END
+  // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 
+  // 8192 pixels, which should have 4Hz refresh
+  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;
 
-  //reg [BUFFER_BITS-1:0][7:0] pixels;
+  // how long the reset delay will be happening, minimum is 50us so 50/(1/7) =
+  // 350 ticks. But giving bit margin 55us => 385 ticks
+  parameter  RESET_DELAY = `RESET_DELAY_DEFAULT; 
+
+  // minimum required amount of bits to store the BUFFER_END
+  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   
+
 
   reg [7:0]              bus_data_out_buffer;
   reg [7:0]              pixels[BUFFER_END:0];
@@ -35,18 +41,25 @@ module anton_neopixel_raw (
   reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting  
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
-  reg [3:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
 
-  reg [12:0]             reg_max;          // 13 bits in total apb is using 16 bus but -2 bit are dropped for word alignment and 1 bit used to detect control registry accesses
+  // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
+  // alignment and 1 bit used to detect control registry accesses
+  reg [12:0]             reg_max; 
+  
   reg                    reg_ctrl_init      = 'b0;
   reg                    reg_ctrl_limit     = 'b0; // Change this only when the pixel data are not streamed
   reg                    reg_ctrl_run       = 'b0;
   reg                    reg_ctrl_loop      = 'b0;
   reg                    reg_ctrl_32bit     = 'b0; // Change this only when the pixel data are not streamed
+  
   reg                    reg_state_reset    = 'b0;
   
   reg                    reset_reg_ctrl_run = 'b0;
   
+  // TODO: detect verilator and use it only there
+  // for simulation to track few cycles of the whole process to make sure after 
+  // reset nothing funny is happening
+  reg [3:0]              cycle              = 'd0;  
   
   always @(posedge busClk) begin
     if (reg_ctrl_init) begin
@@ -149,9 +162,9 @@ module anton_neopixel_raw (
 
   always @(posedge clk7mhz) begin 
     if (stream_bit_of) begin
-      // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
-      // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
-      // the size
+      // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if 
+      // maximum buffer size was reached, but in cases the buffer size is power 
+      // of 2 it will need to be by 1 bit to match the size
         if (stream_pixel_of)  begin
           // for the very last pixel overflow 0 and start reset
           pixel_index <= 'd0;
@@ -182,7 +195,7 @@ module anton_neopixel_raw (
         // predefined wait in reset state was reached, let's 
         reg_state_reset   <= 'b0;
         state             <= `ENUM_STATE_TRANSMIT;
-        if (cycle == 'd5) $finish; // stop simulation here, went through all pixels and a reset twice
+        if (cycle == 'd5) $finish; // stop simulation here
         cycle             <= cycle + 'd1;
         reset_delay_count <= 'd0;
         pixels_synth_buf  <= 'd0;
