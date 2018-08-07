@@ -18,7 +18,7 @@ module anton_neopixel_stream (
   reg                    data_int           = 'b0;
   reg [23:0]             pixel_colour_value = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   
-  parameter  BUFFER_END  = 31;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
+  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 8192 pixels, which should have 4Hz refresh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   // minimum required amount of bits to store the BUFFER_END
 
   // as combinational logic should be enough
