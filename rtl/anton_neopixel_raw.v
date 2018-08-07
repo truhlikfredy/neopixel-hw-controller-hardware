@@ -31,7 +31,6 @@ module anton_neopixel_raw (
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting  
-  reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
   reg [3:0]              cycle              = 'd0;  // for simulation to track few cycles of the whole process to make sure after reset nothing funny is happening
@@ -113,6 +112,8 @@ module anton_neopixel_raw (
 
 
   wire [2:0] bit_pattern_index;
+  wire [4:0] pixel_bit_index;
+  wire [BUFFER_BITS-1:0] pixel_index_max;
   wire stream_output;
   wire stream_reset;
   wire stream_pattern_of;
@@ -123,11 +124,14 @@ module anton_neopixel_raw (
     .clk7mhz(clk7mhz),
     .reg_ctrl_init(reg_ctrl_init),
     .reg_ctrl_run(reg_ctrl_run),
+    .reg_ctrl_limit(reg_ctrl_limit),
     .reg_ctrl_32bit(reg_ctrl_32bit),
     .state(state),
-    .pixel_bit_index(pixel_bit_index),
+    .reg_max(reg_max),
 
-    .bit_pattern_index_out(bit_pattern_index),
+    .bit_pattern_index(bit_pattern_index),
+    .pixel_bit_index(pixel_bit_index),
+    .pixel_index_max(pixel_index_max),
     .stream_output(stream_output),
     .stream_reset(stream_reset),
     .stream_pattern_of(stream_pattern_of),
@@ -136,15 +140,6 @@ module anton_neopixel_raw (
 
   always @(posedge clk7mhz) reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
-
-  // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-  // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-  always @(posedge clk7mhz) if (stream_pattern_of) pixel_bit_index <= (stream_bit_of) ? 0 : pixel_bit_index +1;
-
-
-  // When limit is enabled, use software limit, but when disabled use whole buffer
-  // what is the rechable maximum depending on the settings
-  wire [BUFFER_BITS-1:0] pixel_index_max = (reg_ctrl_limit)? reg_max[BUFFER_BITS-1:0] : BUFFER_END;
 
 
   // When 32bit mode enabled use
@@ -166,14 +161,6 @@ module anton_neopixel_raw (
           pixel_index <= 'd0;
           state       <= `ENUM_STATE_RESET;
         end
-    end
-  end
-
-
-  always @(posedge clk7mhz) begin
-    if (reg_ctrl_init) begin
-      pixel_index     <= {BUFFER_BITS{1'b0}};
-      pixel_bit_index <= 'd0;  
     end
   end
 
