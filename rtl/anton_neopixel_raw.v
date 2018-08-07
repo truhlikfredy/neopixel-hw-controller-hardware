@@ -1,21 +1,8 @@
 `include "anton_common.vh"
 
-// TODO: Downgrade the clock to 7MHz, allow for the 0 = 2 + 6 ticks and for 1 = 5 + 3 ticks
-// in both cases they will be 8 ticks (power of 2) and simplify the counter (no logic to compare)
-// needed and it will just overflow. Total time to transmit 1 pixel will be 1.14us instead 1.2us 
-// so it should be faster on longer chains. To update 200 pixels will save 12uS (which is worth about 
-// another 10 pixels of time)
-
-
 // TODO: use bits and size properly https://stackoverflow.com/questions/13340301/size-bits-verilog
 
-// TODO: splitup modules
-
 // TODO: mss ready / reset signals
-
-// TODO: idle state, writing state, ready state, do no repeately flash the content but only after finished write
-
-// TODO: get rid if you can of the nested overflow checkers
 
 // TODO: nodemon killall first
 
@@ -84,7 +71,6 @@ module anton_neopixel_raw (
       reg_ctrl_32bit  <= 'b0;
     end else begin
 
-      // TODO: write better tester for these writes/reads
       if (busWrite) begin
         if (busAddr[13] == 'b0) begin
 
