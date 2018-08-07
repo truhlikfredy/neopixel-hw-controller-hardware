@@ -45,8 +45,6 @@ module anton_neopixel_raw (
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg [2:0]              bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting
-  wire [BUFFER_BITS-1:0] pixel_index_equiv;         // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
-  wire [BUFFER_BITS-1:0] pixel_index_max;           // what is the rechable maximum depending on the settings
   reg [4:0]              pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
@@ -129,17 +127,10 @@ module anton_neopixel_raw (
   end
 
 
-  // When 32bit mode enabled use
-  assign pixel_index_equiv = (reg_ctrl_32bit) ? {pixel_index[BUFFER_BITS-1:2], 2'b11} : pixel_index;
-
-  // When limit is enabled, use software limit, but when disabled use whole buffer
-  assign pixel_index_max = (reg_ctrl_limit)? reg_max[BUFFER_BITS-1:0] : BUFFER_END;
-
-
   wire stream_output       = !reg_ctrl_init && reg_ctrl_run && state == `ENUM_STATE_TRANSMIT; 
   wire stream_reset        = !reg_ctrl_init && reg_ctrl_run && state == `ENUM_STATE_RESET;
   wire stream_pattern_of   = stream_output && bit_pattern_index == 'd7;    // does sub-bit pattern overflowing
-  wire stream_bit_index_of = stream_pattern_of && pixel_bit_index == 'd23; // does bit index overflowing
+  wire stream_bit_of       = stream_pattern_of && pixel_bit_index == 'd23; // does bit index overflowing
 
 
   always @(posedge clk7mhz) reset_reg_ctrl_run <= 'b0; // fall the flags eventually
@@ -153,32 +144,30 @@ module anton_neopixel_raw (
   always @(posedge clk7mhz) if (stream_pattern_of) pixel_bit_index <= (stream_bit_of) ? 0 : pixel_bit_index +1;
 
 
+  // When limit is enabled, use software limit, but when disabled use whole buffer
+  // what is the rechable maximum depending on the settings
+  wire [BUFFER_BITS-1:0] pixel_index_max = (reg_ctrl_limit)? reg_max[BUFFER_BITS-1:0] : BUFFER_END;
+
+
+  // When 32bit mode enabled use
+  // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
+  wire [BUFFER_BITS-1:0] pixel_index_equiv = (reg_ctrl_32bit) ? {pixel_index[BUFFER_BITS-1:2], 2'b11} : pixel_index;
+
+
   always @(posedge clk7mhz) begin 
     if (stream_bit_of) begin
       // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
       // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
       // the size
-      if (reg_ctrl_32bit) begin
-        // In 32bit mode overflow slightly differently than in 8bit
-        if ({pixel_index[BUFFER_BITS-1:2], 2'b11} < pixel_index_max)  begin
-          // for all pixels except the last one go to the next pixel
-          pixel_index <= pixel_index + 'd4;
+        if (pixel_index_equiv < pixel_index_max)  begin
+          // for all pixels except the last one go to the next pixel          
+          // In 32bit mode overflow slightly differently than in 8bit
+          pixel_index <= (reg_ctrl_32bit) ? pixel_index + 'd4 : pixel_index + 'd1;
         end else begin
           // for the very last pixel overflow 0 and start reset
           pixel_index <= 'd0;
           state       <= `ENUM_STATE_RESET;
         end
-      end else begin
-        // In 32bit mode overflow slightly differently than in 8bit
-        if (pixel_index < pixel_index_max)  begin
-          // for all pixels except the last one go to the next pixel
-          pixel_index <= pixel_index + 'b1;
-        end else begin
-          // for the very last pixel overflow 0 and start reset
-          pixel_index <= 'd0;
-          state       <= `ENUM_STATE_RESET;
-        end
-      end
     end
   end
 
