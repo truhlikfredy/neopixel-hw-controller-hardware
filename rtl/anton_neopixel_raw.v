@@ -118,6 +118,7 @@ module anton_neopixel_raw (
   wire stream_reset;
   wire stream_pattern_of;
   wire stream_bit_of;
+  wire stream_pixel_of;
 
 
   anton_neopixel_stream_ctrl ctrl(
@@ -128,6 +129,7 @@ module anton_neopixel_raw (
     .reg_ctrl_32bit(reg_ctrl_32bit),
     .state(state),
     .reg_max(reg_max),
+    .pixel_index(pixel_index),
 
     .bit_pattern_index(bit_pattern_index),
     .pixel_bit_index(pixel_bit_index),
@@ -135,31 +137,27 @@ module anton_neopixel_raw (
     .stream_output(stream_output),
     .stream_reset(stream_reset),
     .stream_pattern_of(stream_pattern_of),
-    .stream_bit_of(stream_bit_of)
+    .stream_bit_of(stream_bit_of),
+    .stream_pixel_of(stream_pixel_of)
   );
 
   always @(posedge clk7mhz) reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
 
 
-  // When 32bit mode enabled use
-  // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
-  wire [BUFFER_BITS-1:0] pixel_index_equiv = (reg_ctrl_32bit) ? {pixel_index[BUFFER_BITS-1:2], 2'b11} : pixel_index;
-
-
   always @(posedge clk7mhz) begin 
     if (stream_bit_of) begin
-      // compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
+      // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if maximum buffer size
       // was reached, but in cases the buffer size is power of 2 it will need to be by 1 bit to match 
       // the size
-        if (pixel_index_equiv < pixel_index_max)  begin
-          // for all pixels except the last one go to the next pixel          
-          // In 32bit mode overflow slightly differently than in 8bit
-          pixel_index <= (reg_ctrl_32bit) ? pixel_index + 'd4 : pixel_index + 'd1;
-        end else begin
+        if (stream_pixel_of)  begin
           // for the very last pixel overflow 0 and start reset
           pixel_index <= 'd0;
           state       <= `ENUM_STATE_RESET;
+        end else begin
+          // For all pixels except the last one go to the next pixel.
+          // In 32bit mode increment differently than in 8bit
+          pixel_index <= (reg_ctrl_32bit) ? pixel_index + 'd4 : pixel_index + 'd1;
         end
     end
   end
