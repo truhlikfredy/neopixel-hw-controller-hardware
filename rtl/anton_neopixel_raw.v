@@ -51,8 +51,6 @@ module anton_neopixel_raw (
   reg                    reg_ctrl_loop      = 'b0;
   reg                    reg_ctrl_32bit     = 'b0; // Change this only when the pixel data are not streamed
   
-  reg                    reg_state_reset    = 'b0;
-  
   reg                    reset_reg_ctrl_run = 'b0;
   
   // TODO: detect verilator and use it only there
@@ -96,7 +94,7 @@ module anton_neopixel_raw (
             0: bus_data_out_buffer <= reg_max[7:0];
             1: bus_data_out_buffer <= { 3'b000, reg_max[12:8]};
             2: bus_data_out_buffer <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
-            3: bus_data_out_buffer <= {7'b0000000, reg_state_reset};
+            3: bus_data_out_buffer <= {7'b0000000, state};
           endcase
         end
       end
@@ -165,7 +163,6 @@ module anton_neopixel_raw (
       // when in the reset state, count 50ns (RESET_DELAY / 10)
       reset_delay_count <= reset_delay_count + 'b1;
       pixels_synth_buf  <= 1;
-      reg_state_reset   <= 1;
 
       if (reset_delay_count == RESET_DELAY) begin
         if (!reg_ctrl_loop) begin
@@ -175,7 +172,6 @@ module anton_neopixel_raw (
 
       if (reset_delay_count > RESET_DELAY) begin  
         // predefined wait in reset state was reached, let's 
-        reg_state_reset   <= 'b0;
         state             <= `ENUM_STATE_TRANSMIT;
         if (cycle == 'd5) $finish; // stop simulation here
         cycle             <= cycle + 'd1;

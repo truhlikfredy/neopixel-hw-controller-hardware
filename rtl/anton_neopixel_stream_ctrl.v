@@ -59,6 +59,7 @@ module anton_neopixel_stream_ctrl (
   // what is the rechable maximum depending on the settings
   assign pixel_index_max = (reg_ctrl_limit)? reg_max[BUFFER_BITS-1:0] : BUFFER_END;
 
+
   always @(posedge clk7mhz) begin 
     if (stream_bit_of) begin
       // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if 
