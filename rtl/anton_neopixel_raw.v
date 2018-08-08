@@ -131,7 +131,6 @@ module anton_neopixel_raw (
   wire [BUFFER_BITS-1:0] pixel_index_max;
   wire stream_output;
   wire stream_reset;
-  wire stream_pattern_of;
   wire stream_bit_of;
   wire stream_pixel_of;
 
@@ -151,8 +150,7 @@ module anton_neopixel_raw (
     .pixel_index_max(pixel_index_max),
     .stream_output(stream_output),
     .stream_reset(stream_reset),
-    .stream_pattern_of(stream_pattern_of), // could be kept internally
-    .stream_bit_of(stream_bit_of),         // could be kept internally
+    .stream_bit_of(stream_bit_of),
     .stream_pixel_of(stream_pixel_of)   
   );
 

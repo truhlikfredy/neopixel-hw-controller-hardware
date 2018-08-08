@@ -15,7 +15,6 @@ module anton_neopixel_stream_ctrl (
   output [BUFFER_BITS-1:0] pixel_index_max,
   output stream_output,
   output stream_reset,
-  output stream_pattern_of,
   output stream_bit_of,
   output stream_pixel_of
 );
@@ -34,7 +33,8 @@ module anton_neopixel_stream_ctrl (
 
   assign stream_output     = !reg_ctrl_init && reg_ctrl_run && state == `ENUM_STATE_TRANSMIT; 
   assign stream_reset      = !reg_ctrl_init && reg_ctrl_run && state == `ENUM_STATE_RESET;
-  assign stream_pattern_of = stream_output && bit_pattern_index == 'd7;    // does sub-bit pattern overflowing
+
+  wire   stream_pattern_of = stream_output && bit_pattern_index == 'd7;    // does sub-bit pattern overflowing
   assign stream_bit_of     = stream_pattern_of && pixel_bit_index == 'd23; // does bit index overflowing
   assign stream_pixel_of   = pixel_index_equiv == pixel_index_max;
 
