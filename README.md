@@ -1,4 +1,6 @@
-# Description
+![pixels](https://cdn.thingiverse.com/renders/e6/83/28/71/77/95750500f0ed643cc3a22dfcc7aa815d_preview_featured.jpg)
+
+# Project description
 
 [![Build Status](https://travis-ci.org/truhlikfredy/neopixel-hw-controler-hardware.svg?branch=develop)](https://travis-ci.org/truhlikfredy/neopixel-hw-controler-hardware)
 
