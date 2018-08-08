@@ -36,7 +36,8 @@ module anton_neopixel_stream_ctrl (
 
   wire   stream_pattern_of = stream_output && bit_pattern_index == 'd7;    // does sub-bit pattern overflowing
   assign stream_bit_of     = stream_pattern_of && pixel_bit_index == 'd23; // does bit index overflowing
-  assign stream_pixel_of   = pixel_index_equiv == pixel_index_max;
+  wire   stream_pixel_last = pixel_index_equiv == pixel_index_max;
+  assign stream_pixel_of   = stream_bit_of && stream_pixel_last;
 
 
   always @(posedge clk7mhz) begin
@@ -65,7 +66,7 @@ module anton_neopixel_stream_ctrl (
       // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if 
       // maximum buffer size was reached, but in cases the buffer size is power 
       // of 2 it will need to be by 1 bit to match the size
-        if (stream_pixel_of)  begin
+        if (stream_pixel_last)  begin
           // for the very last pixel overflow 0 and start reset
           pixel_index <= 'd0;
         end else begin

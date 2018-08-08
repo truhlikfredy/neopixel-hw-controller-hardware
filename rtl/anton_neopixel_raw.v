@@ -155,7 +155,7 @@ module anton_neopixel_raw (
   always @(posedge clk7mhz) reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
   // if last pixel is reached turn into reset state
-  always @(posedge clk7mhz) if (stream_bit_of && stream_pixel_of) state <= `ENUM_STATE_RESET;
+  always @(posedge clk7mhz) if (stream_pixel_of) state <= `ENUM_STATE_RESET;
 
 
   always @(posedge clk7mhz) begin

@@ -18,6 +18,8 @@ lappend signals "TOP.anton_neopixel_apb.neopixel.ctrl.stream_output"
 lappend signals "TOP.anton_neopixel_apb.neopixel.ctrl.stream_reset"
 lappend signals "TOP.anton_neopixel_apb.neopixel.ctrl.stream_pattern_of"
 lappend signals "TOP.anton_neopixel_apb.neopixel.ctrl.stream_bit_of"
+lappend signals "TOP.anton_neopixel_apb.neopixel.ctrl.stream_pixel_last"
+lappend signals "TOP.anton_neopixel_apb.neopixel.ctrl.stream_pixel_of"
 
 lappend signals "TOP.anton_neopixel_apb.apbPselx"
 lappend signals "TOP.anton_neopixel_apb.wr_enable"
