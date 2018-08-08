@@ -2,7 +2,6 @@ lappend signals "TOP.anton_neopixel_apb.apbPclk"
 lappend signals "TOP.clk7mhz"
 lappend signals "TOP.neoData"
 lappend signals "TOP.neoState"
-lappend signals "TOP.pixelsSync"
 
 lappend signals "TOP.anton_neopixel_apb.neopixel.reset_delay"
 lappend signals "TOP.anton_neopixel_apb.neopixel.reset_delay_count"

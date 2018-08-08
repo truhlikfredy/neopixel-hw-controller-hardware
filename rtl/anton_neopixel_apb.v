@@ -4,7 +4,6 @@ module anton_neopixel_apb (
   input clk7mhz,
   output neoData,
   output neoState,
-  output pixelsSync,
 
   input apbPenable,
   input [15:0]apbPaddr,  // control registers 15 + LED data 14:2 +  ignored 1:0
@@ -38,7 +37,6 @@ module anton_neopixel_apb (
     .clk7mhz(clk7mhz),
     .neoData(neoData),
     .neoState(neoState),
-    .pixelsSync(pixelsSync),
     .busAddr(address),
     .busDataIn(apbPwData),
     .busClk(apbPclk),

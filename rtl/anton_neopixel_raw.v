@@ -12,7 +12,6 @@ module anton_neopixel_raw (
   input  clk7mhz,
   output neoData,
   output neoState,
-  output pixelsSync,
 
   input  [13:0]busAddr,
   input  [7:0]busDataIn,
@@ -39,7 +38,6 @@ module anton_neopixel_raw (
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
-  reg                    pixels_synth_buf   = 'b0;
 
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
@@ -162,7 +160,6 @@ module anton_neopixel_raw (
     if (stream_reset) begin
       // when in the reset state, count 50ns (RESET_DELAY / 10)
       reset_delay_count <= reset_delay_count + 'b1;
-      pixels_synth_buf  <= 1;
 
       if (reset_delay_count == RESET_DELAY) begin
         if (!reg_ctrl_loop) begin
@@ -176,14 +173,12 @@ module anton_neopixel_raw (
         if (cycle == 'd5) $finish; // stop simulation here
         cycle             <= cycle + 'd1;
         reset_delay_count <= 'd0;
-        pixels_synth_buf  <= 'd0;
       end
     end
   end
 
 
   assign busDataOut = bus_data_out_buffer;
-  assign pixelsSync = pixels_synth_buf;
   assign neoState   = state;
   
 endmodule
