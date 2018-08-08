@@ -38,7 +38,6 @@ module anton_neopixel_raw (
   reg [7:0]              pixels[BUFFER_END:0];
             
   reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
-  reg [BUFFER_BITS-1:0]  pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting  
   reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg                    pixels_synth_buf   = 'b0;
 
@@ -128,6 +127,7 @@ module anton_neopixel_raw (
 
   wire [2:0] bit_pattern_index;
   wire [4:0] pixel_bit_index;
+  wire [BUFFER_BITS-1:0] pixel_index;
   wire [BUFFER_BITS-1:0] pixel_index_max;
   wire stream_output;
   wire stream_reset;
@@ -144,38 +144,22 @@ module anton_neopixel_raw (
     .reg_ctrl_32bit(reg_ctrl_32bit),
     .state(state),
     .reg_max(reg_max),
-    .pixel_index(pixel_index),
 
     .bit_pattern_index(bit_pattern_index),
     .pixel_bit_index(pixel_bit_index),
+    .pixel_index(pixel_index),
     .pixel_index_max(pixel_index_max),
     .stream_output(stream_output),
     .stream_reset(stream_reset),
-    .stream_pattern_of(stream_pattern_of),
-    .stream_bit_of(stream_bit_of),
-    .stream_pixel_of(stream_pixel_of)
+    .stream_pattern_of(stream_pattern_of), // could be kept internally
+    .stream_bit_of(stream_bit_of),         // could be kept internally
+    .stream_pixel_of(stream_pixel_of)   
   );
 
   always @(posedge clk7mhz) reset_reg_ctrl_run <= 'b0; // fall the flags eventually
 
-
-
-  always @(posedge clk7mhz) begin 
-    if (stream_bit_of) begin
-      // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if 
-      // maximum buffer size was reached, but in cases the buffer size is power 
-      // of 2 it will need to be by 1 bit to match the size
-        if (stream_pixel_of)  begin
-          // for the very last pixel overflow 0 and start reset
-          pixel_index <= 'd0;
-          state       <= `ENUM_STATE_RESET;
-        end else begin
-          // For all pixels except the last one go to the next pixel.
-          // In 32bit mode increment differently than in 8bit
-          pixel_index <= (reg_ctrl_32bit) ? pixel_index + 'd4 : pixel_index + 'd1;
-        end
-    end
-  end
+  // if last pixel is reached turn into reset state
+  always @(posedge clk7mhz) if (stream_bit_of && stream_pixel_of) state <= `ENUM_STATE_RESET;
 
 
   always @(posedge clk7mhz) begin
