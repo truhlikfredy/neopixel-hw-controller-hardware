@@ -1,6 +1,6 @@
 `include "anton_common.vh"
 
-module anton_neopixel_stream_ctrl (
+module anton_neopixel_stream_logic (
   input  clk7mhz,
   input  reg_ctrl_init,
   input  reg_ctrl_run,

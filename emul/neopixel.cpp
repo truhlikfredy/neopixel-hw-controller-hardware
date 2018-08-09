@@ -6,7 +6,7 @@
 
 #include "verilated_vcd_c.h"
 
-#include "Vanton_neopixel_apb.h"
+#include "Vanton_neopixel_apb_top.h"
 
 #define CTRL_INIT  1
 #define CTRL_LIMIT 2
@@ -17,7 +17,7 @@
 #define STATE_RESET 1
 #define STATE_OFF   2
 
-Vanton_neopixel_apb *uut;
+Vanton_neopixel_apb_top *uut;
 vluint64_t sim_time = 0;
 VerilatedVcdC *tfp;
 
@@ -100,7 +100,7 @@ void cycleClocks() {
 
 int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv);
-  uut = new Vanton_neopixel_apb;
+  uut = new Vanton_neopixel_apb_top;
 
   Verilated::traceEverOn(true);
   tfp = new VerilatedVcdC;

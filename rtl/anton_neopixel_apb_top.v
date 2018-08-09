@@ -1,6 +1,6 @@
 `include "anton_common.vh"
 
-module anton_neopixel_apb (
+module anton_neopixel_apb_top (
   input clk7mhz,
   output neoData,
   output neoState,
@@ -31,7 +31,7 @@ module anton_neopixel_apb (
   assign rd_enable = (!apbPwrite && apbPselx);
   assign address   = apbPaddr[15:2]; // 4 bytes (word) aligned to 1 byte aligned
 
-  anton_neopixel_raw #(
+  anton_neopixel_module #(
     .BUFFER_END(BUFFER_END)
   ) neopixel(
     .clk7mhz(clk7mhz),

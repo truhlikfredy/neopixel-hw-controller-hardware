@@ -8,7 +8,7 @@
 
 // TODO: nodemon killall first
 
-module anton_neopixel_raw (
+module anton_neopixel_module (
   input  clk7mhz,
   output neoData,
   output neoState,
@@ -125,10 +125,10 @@ module anton_neopixel_raw (
   wire stream_sync_of;
 
 
-  anton_neopixel_stream_ctrl #(
+  anton_neopixel_stream_logic #(
     .BUFFER_END(BUFFER_END),
     .RESET_DELAY(RESET_DELAY)
-  ) ctrl(
+  ) stream_logic(
     .clk7mhz(clk7mhz),
     .reg_ctrl_init(reg_ctrl_init),
     .reg_ctrl_run(reg_ctrl_run),
