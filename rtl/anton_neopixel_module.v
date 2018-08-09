@@ -46,7 +46,7 @@ module anton_neopixel_module (
   reg        reg_ctrl_run   = 'b0;
   reg        reg_ctrl_loop  = 'b0;
   reg        reg_ctrl_32bit = 'b0; // Change this only when the pixel data are not streamed
-  
+
   
   // TODO: detect verilator and use it only there
   // for simulation to track few cycles of the whole process to make sure after 

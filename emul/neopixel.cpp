@@ -113,6 +113,7 @@ int main(int argc, char** argv) {
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
   uut->clk7mhz   = 0;
+  uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
   writeApbByte(0,  0xff);
   writeApbByte(4,  0x02);
@@ -126,6 +127,8 @@ int main(int argc, char** argv) {
 
   writeRegisterMax(0xface);
   writeRegisterMax(7);
+
+  uut->anton_neopixel_apb_top__DOT__test_unit = 1;
   writeRegisterCtrl(CTRL_RUN | CTRL_32 | CTRL_LIMIT);
 
   // test 1 run 32bit - soft limit mode with 7bytes max -> 8 bytes size (which is 2 pixels in 32bit mode)
@@ -135,10 +138,12 @@ int main(int argc, char** argv) {
   cycleClocks();
 
   // After one run is finished switch to 8bit with hard limit mode
+  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
   writeRegisterCtrl(CTRL_RUN);
   while (testRegisterCtrl(CTRL_RUN)) cycleClocks(); // Wait for the next cycle to finish
 
   // Keep 8bit mode, but enable looping and software limit
+  uut->anton_neopixel_apb_top__DOT__test_unit = 3;
   writeRegisterCtrl(CTRL_RUN | CTRL_LOOP | CTRL_LIMIT);
 
   // Iterate until simulation is finished

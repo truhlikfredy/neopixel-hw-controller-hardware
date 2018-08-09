@@ -15,6 +15,7 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixel_index_ma
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.reset_delay_count"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.reset_delay"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.cycle"
+lappend signals "TOP.anton_neopixel_apb_top.test_unit"
 
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.stream_output"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.stream_reset"
