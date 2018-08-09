@@ -50,7 +50,7 @@ module anton_neopixel_stream_logic (
 
   always @(posedge clk7mhz) begin
     if (reg_ctrl_init) begin
-      // pixel_index     <= {BUFFER_BITS{1'b0}};  // TODO: undo this
+      pixel_index     <= {BUFFER_BITS{1'b0}};
       pixel_bit_index <= 'd0;  
     end
   end
