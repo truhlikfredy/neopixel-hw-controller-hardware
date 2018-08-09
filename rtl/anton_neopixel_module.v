@@ -33,19 +33,19 @@ module anton_neopixel_module (
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   
 
 
-  reg [7:0]              bus_data_out_buffer;
-  reg [7:0]              pixels[BUFFER_END:0];
+  reg [7:0]  bus_data_out_buffer;
+  reg [7:0]  pixels[BUFFER_END:0];
             
   
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
-  reg [12:0]             reg_max; 
+  reg [12:0] reg_max; 
   
-  reg                    reg_ctrl_init      = 'b0;
-  reg                    reg_ctrl_limit     = 'b0; // Change this only when the pixel data are not streamed
-  reg                    reg_ctrl_run       = 'b0;
-  reg                    reg_ctrl_loop      = 'b0;
-  reg                    reg_ctrl_32bit     = 'b0; // Change this only when the pixel data are not streamed
+  reg        reg_ctrl_init  = 'b0;
+  reg        reg_ctrl_limit = 'b0; // Change this only when the pixel data are not streamed
+  reg        reg_ctrl_run   = 'b0;
+  reg        reg_ctrl_loop  = 'b0;
+  reg        reg_ctrl_32bit = 'b0; // Change this only when the pixel data are not streamed
   
   
   // TODO: detect verilator and use it only there
