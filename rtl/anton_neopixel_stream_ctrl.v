@@ -4,27 +4,35 @@ module anton_neopixel_stream_ctrl (
   input  clk7mhz,
   input  reg_ctrl_init,
   input  reg_ctrl_run,
+  input  reg_ctrl_loop,
   input  reg_ctrl_limit,
   input  reg_ctrl_32bit,
-  input  state,
   input  [12:0] reg_max, // 13 bits in total apb is using 16 bus but -2 bit are dropped for word alignment and 1 bit used to detect control registry accesses
 
   output [2:0] bit_pattern_index,
   output [4:0] pixel_bit_index,
   output [BUFFER_BITS-1:0] pixel_index,
   output [BUFFER_BITS-1:0] pixel_index_max,
+  output state,
   output stream_output,
   output stream_reset,
   output stream_bit_of,
-  output stream_pixel_of
+  output stream_pixel_of,
+  output stream_sync_of
 );
 
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
+  parameter  RESET_DELAY = `RESET_DELAY_DEFAULT;  // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
 
-  reg [2:0] bit_pattern_index = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
-  reg [4:0] pixel_bit_index   = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
-  reg [BUFFER_BITS-1:0] pixel_index = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
+  reg [2:0]             bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
+  reg [4:0]             pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
+  reg [BUFFER_BITS-1:0] pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
+  reg [9:0]             reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
+
+  reg                   state              = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg [3:0]             cycle              = 'd0;  
+  
 
   // When 32bit mode enabled use
   // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
@@ -74,6 +82,31 @@ module anton_neopixel_stream_ctrl (
           // In 32bit mode increment differently than in 8bit
           pixel_index <= (reg_ctrl_32bit) ? pixel_index + 'd4 : pixel_index + 'd1;
         end
+    end
+  end
+
+  // if last pixel is reached turn into reset state
+  always @(posedge clk7mhz) if (stream_pixel_of) state <= `ENUM_STATE_RESET;
+
+
+  assign stream_sync_of = (reset_delay_count == RESET_DELAY);
+
+
+  always @(posedge clk7mhz) begin
+    if (stream_reset) begin
+      // when in the reset state, count 50ns (RESET_DELAY / 10)
+      reset_delay_count <= reset_delay_count + 'b1;
+    end
+  end
+
+
+  always @(posedge clk7mhz) begin
+    if (stream_sync_of) begin  
+      // predefined wait in reset state was reached, let's 
+      if (cycle == 'd5) $finish; // stop simulation here
+      state             <= `ENUM_STATE_TRANSMIT;
+      cycle             <= cycle + 'd1;
+      reset_delay_count <= 'd0;
     end
   end
 

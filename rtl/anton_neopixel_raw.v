@@ -36,9 +36,7 @@ module anton_neopixel_raw (
   reg [7:0]              bus_data_out_buffer;
   reg [7:0]              pixels[BUFFER_END:0];
             
-  reg [9:0]              reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
-  reg                    state              = 'b0;  // 0 = transmit bits, 1 = reset mode
-
+  
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
   reg [12:0]             reg_max; 
@@ -49,12 +47,10 @@ module anton_neopixel_raw (
   reg                    reg_ctrl_loop      = 'b0;
   reg                    reg_ctrl_32bit     = 'b0; // Change this only when the pixel data are not streamed
   
-  reg                    reset_reg_ctrl_run = 'b0;
   
   // TODO: detect verilator and use it only there
   // for simulation to track few cycles of the whole process to make sure after 
   // reset nothing funny is happening
-  reg [3:0]              cycle              = 'd0;  
   
   always @(posedge busClk) begin
     if (reg_ctrl_init) begin
@@ -100,11 +96,7 @@ module anton_neopixel_raw (
   end
 
 
-  always @(posedge busClk) begin
-    if (reset_reg_ctrl_run) begin
-      reg_ctrl_run <= 0;
-    end
-  end
+  always @(posedge busClk) if (stream_sync_of) reg_ctrl_run <= reg_ctrl_loop;
 
 
   anton_neopixel_stream #(
@@ -125,57 +117,37 @@ module anton_neopixel_raw (
   wire [4:0] pixel_bit_index;
   wire [BUFFER_BITS-1:0] pixel_index;
   wire [BUFFER_BITS-1:0] pixel_index_max;
+  wire state;
   wire stream_output;
   wire stream_reset;
   wire stream_bit_of;
   wire stream_pixel_of;
+  wire stream_sync_of;
 
 
-  anton_neopixel_stream_ctrl ctrl(
+  anton_neopixel_stream_ctrl #(
+    .BUFFER_END(BUFFER_END),
+    .RESET_DELAY(RESET_DELAY)
+  ) ctrl(
     .clk7mhz(clk7mhz),
     .reg_ctrl_init(reg_ctrl_init),
     .reg_ctrl_run(reg_ctrl_run),
+    .reg_ctrl_loop(reg_ctrl_loop),
     .reg_ctrl_limit(reg_ctrl_limit),
     .reg_ctrl_32bit(reg_ctrl_32bit),
-    .state(state),
     .reg_max(reg_max),
 
     .bit_pattern_index(bit_pattern_index),
     .pixel_bit_index(pixel_bit_index),
     .pixel_index(pixel_index),
     .pixel_index_max(pixel_index_max),
+    .state(state),
     .stream_output(stream_output),
     .stream_reset(stream_reset),
     .stream_bit_of(stream_bit_of),
-    .stream_pixel_of(stream_pixel_of)   
+    .stream_pixel_of(stream_pixel_of),
+    .stream_sync_of(stream_sync_of)
   );
-
-  always @(posedge clk7mhz) reset_reg_ctrl_run <= 'b0; // fall the flags eventually
-
-  // if last pixel is reached turn into reset state
-  always @(posedge clk7mhz) if (stream_pixel_of) state <= `ENUM_STATE_RESET;
-
-
-  always @(posedge clk7mhz) begin
-    if (stream_reset) begin
-      // when in the reset state, count 50ns (RESET_DELAY / 10)
-      reset_delay_count <= reset_delay_count + 'b1;
-
-      if (reset_delay_count == RESET_DELAY) begin
-        if (!reg_ctrl_loop) begin
-          reset_reg_ctrl_run <= 'b1;
-        end
-      end
-
-      if (reset_delay_count > RESET_DELAY) begin  
-        // predefined wait in reset state was reached, let's 
-        state             <= `ENUM_STATE_TRANSMIT;
-        if (cycle == 'd5) $finish; // stop simulation here
-        cycle             <= cycle + 'd1;
-        reset_delay_count <= 'd0;
-      end
-    end
-  end
 
 
   assign busDataOut = bus_data_out_buffer;
