@@ -35,6 +35,12 @@ npm run-script wave
 ```
 ![wave](/images/wave.png)
 
+![wave](/images/wave-01.png)
+
+![wave](/images/wave-02.png)
+
+![wave](/images/wave-03.png)
+
 # Protocol 
 
 Is implementing the [WS2812](https://cdn-shop.adafruit.com/datasheets/WS2812.pdf) NZR protocol.
