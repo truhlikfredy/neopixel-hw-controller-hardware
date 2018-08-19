@@ -105,3 +105,11 @@ Every single data chunk consists of 24 bits, their order is in figure below. Not
 * gtk-wave to see the waveforms
 * Phantomjs to build images for the documentation
 * visual studio code (not required, but commandbar settings are already premade for it)
+
+# Features
+
+* 8bit (reduced color) mode
+* 24bit (rounded to 32bit for better alignment) high color mode
+* single shot vs looped auto-updated mode
+* in-editor line coverage feedback (vscode and lcov)
+![lcov preview](/images/lcov1.png)
