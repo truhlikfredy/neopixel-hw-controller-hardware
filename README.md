@@ -112,6 +112,7 @@ Every single data chunk consists of 24 bits, their order is in figure below. Not
 # Dependencies
 
 * verilator to compile simulation
+* lcov to make html reports and vscode-lcov for in-editor support
 * Node.js / npm (run npm install to get the nodemon installed automatically, which is required for the run-scrip monitor)
 * gtk-wave to see the waveforms
 * Phantomjs to build images for the documentation
