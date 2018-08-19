@@ -1,4 +1,42 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-  "files.autoSave": "onFocusChange"
+  "files.autoSave": "onFocusChange",
+  "files.associations": {
+    "cctype": "cpp",
+    "clocale": "cpp",
+    "cmath": "cpp",
+    "csignal": "cpp",
+    "cstdarg": "cpp",
+    "cstddef": "cpp",
+    "cstdio": "cpp",
+    "cstdlib": "cpp",
+    "cstring": "cpp",
+    "ctime": "cpp",
+    "cwchar": "cpp",
+    "cwctype": "cpp",
+    "atomic": "cpp",
+    "*.tcc": "cpp",
+    "chrono": "cpp",
+    "condition_variable": "cpp",
+    "cstdint": "cpp",
+    "exception": "cpp",
+    "slist": "cpp",
+    "functional": "cpp",
+    "initializer_list": "cpp",
+    "iosfwd": "cpp",
+    "limits": "cpp",
+    "mutex": "cpp",
+    "new": "cpp",
+    "ratio": "cpp",
+    "stdexcept": "cpp",
+    "system_error": "cpp",
+    "thread": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "typeinfo": "cpp",
+    "utility": "cpp"
+  },
+  "lcov.path": [
+    "./emul/build/lcov.info"
+  ]
 }

@@ -12,9 +12,10 @@
     "doc": "cd ./images_src && ./generate_images.sh",
     "lint": "cd rtl && verilator --lint-only $npm_package_config_top_module.v",
     "clean": "cd emul && rm -rf *.o build/* *~ *.txt *.vcd *.mif *.orig",
-    "build": "cd emul && verilator -Wno-fatal -I../rtl --cc $npm_package_config_top_module.v --coverage-line --trace --exe ../$npm_package_config_cpp  -Mdir build -CFLAGS \"-g -O3\" && make -C build -f V$npm_package_config_top_module.mk",
+    "build": "cd emul && verilator -debug -debugi 4 -Wno-fatal -I../rtl --cc $npm_package_config_top_module.v --coverage-line --trace --exe ../$npm_package_config_cpp  -Mdir build -CFLAGS \"-g -O3\" && make -C build -f V$npm_package_config_top_module.mk",
     "run": "cd emul/build && ./V$npm_package_config_top_module",
-    "all": "npm run-script clean && npm run-script build && npm run-script run",
+    "report": "mkdir report; cd report; genhtml ../emul/build/lcov.info",
+    "all": "npm run-script clean && npm run-script build && npm run-script run && npm run-script report",
     "wave": "gtkwave ./emul/build/V$npm_package_config_top_module.vcd -S signals.tcl",
     "monitor-lint": "nodemon -V --watch \"rtl/$npm_package_config_top_module.v\" --watch \"rtl/anton_neopixel_registers.v\" --watch \"rtl/anton_neopixel_stream.v\" --watch \"rtl/anton_neopixel_module.v\" --watch \"rtl/anton_neopixel_stream_logic.v\" --ignore 'emul/build' --exec 'npm run-script lint'",
     "monitor-all": "nodemon -V --watch \"rtl/$npm_package_config_top_module.v\" --watch \"rtl/anton_neopixel_registers.v\" --watch \"rtl/anton_neopixel_stream.v\" --watch \"rtl/anton_neopixel_module.v\" --watch \"rtl/anton_neopixel_stream_logic.v\" --watch \"emul/$npm_package_config_cpp\" --ignore 'emul/build' --exec 'npm run-script all'"
