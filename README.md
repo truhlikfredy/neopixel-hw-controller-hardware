@@ -17,6 +17,11 @@ To run both clean, build and execute the simulation run the following:
 npm run-script run
 ```
 
+To generate coverage reports from a lcov file, run the following:
+```
+npm run-script report
+```
+
 Just to see where is an issue you can run it in linting mode:
 ```
 npm run-script -s lint
@@ -117,5 +122,6 @@ Every single data chunk consists of 24 bits, their order is in figure below. Not
 * 8bit (reduced color) mode
 * 24bit (rounded to 32bit for better alignment) high color mode
 * single shot vs looped auto-updated mode
+* software and hardware pixel size limiter. software limiter when the size is known, while hardware limiter can be used with unknown and changing chains.
 * in-editor line coverage feedback (vscode and lcov)
 ![lcov preview](/images/lcov1.png)
