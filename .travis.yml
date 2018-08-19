@@ -10,3 +10,4 @@ script:
   - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm run-script lint"
   - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm run-script build"
   - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm run-script run"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm run-script report"
