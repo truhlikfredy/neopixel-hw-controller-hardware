@@ -1,14 +1,14 @@
 language: generic
 script: 
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm install"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-slim:788f631 bash -c "cd /project && npm install"
 
   - mkdir -p ${TRAVIS_BUILD_DIR}/images
   - chmod a+rw ${TRAVIS_BUILD_DIR}/images
   - rm ${TRAVIS_BUILD_DIR}/images/*
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project wernight/phantomjs:2.1.1 bash -c "/project/images_src/generate_images.sh"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project wernight/phantomjs:2.1.1 bash -c "/project/images_src/generate_images.sh"
 
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script lint"
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script build"
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script run"
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script coveralls"
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script report"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script lint"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script build"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script run"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project --env COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script coveralls"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script report"
