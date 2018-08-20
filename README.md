@@ -4,6 +4,8 @@
 
 [![Build Status](https://travis-ci.org/truhlikfredy/neopixel-hw-controler-hardware.svg?branch=develop)](https://travis-ci.org/truhlikfredy/neopixel-hw-controler-hardware)
 
+[![Coverage Status](https://coveralls.io/repos/github/truhlikfredy/neopixel-hw-controler-hardware/badge.svg?branch=develop)](https://coveralls.io/github/truhlikfredy/neopixel-hw-controler-hardware?branch=develop)
+
 This part of the project implements the peripheral itself in verilog. The **emul** folder is used to emulate it with verilator so it doesn't have to be synthetized every single time to verify if it's working. GTK-Wave can be used to view output waveforms of the module.
 
 To compile the emulation you want to run these commands:
