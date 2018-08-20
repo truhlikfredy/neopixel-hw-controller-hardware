@@ -2,3 +2,4 @@
 /emul/build/
 /report
 npm-debug.log
+.coveralls.yml
