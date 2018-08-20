@@ -6,6 +6,7 @@
 
 #include "neopixel_simulation.h"
 #include "neopixel_driver.h"
+#include "neopixel_hal.h"
 
 #define CTRL_INIT  1
 #define CTRL_LIMIT 2
@@ -58,15 +59,15 @@ int main(int argc, char** argv) {
 
   NeoPixelDriver *driver = new NeoPixelDriver(0, 60);
 
-  // neopixelWriteApbByte(0,  0xff);
-  // neopixelWriteApbByte(4, 0x02);
-  // neopixelWriteApbByte(8, 0x18);
-  // neopixelWriteApbByte(12, 0xDE); // this shouldn't get displayed in 32bit mode
-  // neopixelWriteApbByte(16, 0xCE);
-  // neopixelWriteApbByte(20, 0xAD);
-  // neopixelWriteApbByte(24, 0x98);
-  // neopixelWriteApbByte(28, 0x01); // this shouldn't get displayed in 32bit mode
-  // neopixelWriteApbByte(32, 0x00);
+  neopixelWriteApbByte(0,  0xff);
+  neopixelWriteApbByte(4,  0x02);
+  neopixelWriteApbByte(8,  0x18);
+  neopixelWriteApbByte(12, 0xDE); // this shouldn't get displayed in 32bit mode
+  neopixelWriteApbByte(16, 0xCE);
+  neopixelWriteApbByte(20, 0xAD);
+  neopixelWriteApbByte(24, 0x98);
+  neopixelWriteApbByte(28, 0x01); // this shouldn't get displayed in 32bit mode
+  neopixelWriteApbByte(32, 0x00);
 
   driver->writeRegisterMax(0xface);
   driver->writeRegisterMax(7);
