@@ -7,7 +7,7 @@ script:
   - rm ${TRAVIS_BUILD_DIR}/images/*
   - docker run -v ${TRAVIS_BUILD_DIR}:/project wernight/phantomjs:2.1.1 bash -c "/project/images_src/generate_images.sh"
 
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:6503d21 bash -c "cd /project && npm run-script lint"
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:6503d21 bash -c "cd /project && npm run-script build"
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:6503d21 bash -c "cd /project && npm run-script run"
-  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:6503d21 bash -c "cd /project && npm run-script report"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script lint"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script build"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script run"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script report"
