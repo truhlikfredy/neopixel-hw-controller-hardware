@@ -128,3 +128,4 @@ Every single data chunk consists of 24 bits, their order is in figure below. Not
 * software and hardware pixel size limiter. software limiter when the size is known, while hardware limiter can be used with unknown and changing chains.
 * in-editor line coverage feedback (vscode and lcov)
 ![lcov preview](/images/lcov1.png)
+* [coveralls.io coverage reporting](https://coveralls.io/github/truhlikfredy/neopixel-hw-controler-hardware)
