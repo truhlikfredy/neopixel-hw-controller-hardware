@@ -16,7 +16,6 @@
     "run": "cd emul/build && ./V$npm_package_config_top_module",
     "report": "mkdir report; cd report; genhtml ../emul/build/lcov.info",
     "coveralls": "cat emul/build/lcov.info | coveralls",
-    "coveralls:travis": "export CI_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER && export CI_PULL_REQUEST=$TRAVIS_PULL_REQUEST && export CI_BRANCH=$TRAVIS_BRANCH && env | grep CI_ && npm run-script coveralls",
     "all": "npm run-script clean && npm run-script build && npm run-script run && npm run-script report",
     "wave": "gtkwave ./emul/build/V$npm_package_config_top_module.vcd -S signals.tcl",
     "monitor-lint": "nodemon -V --watch \"rtl/$npm_package_config_top_module.v\" --watch \"rtl/anton_neopixel_registers.v\" --watch \"rtl/anton_neopixel_stream.v\" --watch \"rtl/anton_neopixel_module.v\" --watch \"rtl/anton_neopixel_stream_logic.v\" --ignore 'emul/build' --exec 'npm run-script lint'",
