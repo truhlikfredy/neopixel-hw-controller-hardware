@@ -18,8 +18,8 @@
     "coveralls": "cat emul/build/lcov.info | coveralls",
     "all": "npm run-script clean && npm run-script build && npm run-script run && npm run-script report",
     "wave": "gtkwave ./emul/build/V$npm_package_config_top_module.vcd -S signals.tcl",
-    "monitor-lint": "nodemon -V --watch \"rtl/$npm_package_config_top_module.v\" --watch \"rtl/anton_neopixel_registers.v\" --watch \"rtl/anton_neopixel_stream.v\" --watch \"rtl/anton_neopixel_module.v\" --watch \"rtl/anton_neopixel_stream_logic.v\" --ignore 'emul/build' --exec 'npm run-script lint'",
-    "monitor-all": "nodemon -V --watch \"rtl/$npm_package_config_top_module.v\" --watch \"rtl/anton_neopixel_registers.v\" --watch \"rtl/anton_neopixel_stream.v\" --watch \"rtl/anton_neopixel_module.v\" --watch \"rtl/anton_neopixel_stream_logic.v\" --watch \"emul/$npm_package_config_cpp\" --ignore 'emul/build' --exec 'npm run-script all'"
+    "monitor-lint": "nodemon -V --watch rtl -e v --exec 'npm run-script lint'",
+    "monitor-all": "nodemon -V --watch rtl --watch emul --ignore emul/build -e cpp,c,h,v --exec 'npm run-script all'"
   },
   "author": "",
   "license": "ISC",
