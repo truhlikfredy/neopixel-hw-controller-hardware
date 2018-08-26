@@ -14,12 +14,12 @@
     "clean": "cd emul && rm -rf *.o build/* *~ *.txt *.vcd *.mif *.orig",
     "build": "cd emul && verilator -Wno-fatal -I../rtl --cc $npm_package_config_top_module.v --coverage-line --trace --exe ../$npm_package_config_cpp ../neopixel_driver.cpp ../neopixel_hal_simulation.cpp -Mdir build -CFLAGS \"-g -O3\" && make -C build -f V$npm_package_config_top_module.mk",
     "run": "cd emul/build && ./V$npm_package_config_top_module",
-    "report": "mkdir report; cd report; genhtml ../emul/build/lcov.info",
-    "coveralls": "cat emul/build/lcov.info | coveralls",
-    "all": "npm run-script clean && npm run-script build && npm run-script run && npm run-script report",
+    "coverage:html-report": "mkdir report; cd report; genhtml ../emul/build/lcov.info",
+    "coverage:coveralls": "cat emul/build/lcov.info | coveralls",
     "wave": "gtkwave ./emul/build/V$npm_package_config_top_module.vcd -S signals.tcl",
-    "monitor-lint": "nodemon -V --watch rtl -e v --exec 'npm run-script lint'",
-    "monitor-all": "nodemon -V --watch rtl --watch emul --ignore emul/build -e cpp,c,h,v --exec 'npm run-script all'"
+    "all": "npm run-script clean && npm run-script build && npm run-script run && npm run-script coverage:html-report",
+    "monitor:lint": "nodemon -V --watch rtl -e v --exec 'npm run-script lint'",
+    "monitor:all": "nodemon -V --watch rtl --watch emul --ignore emul/build -e cpp,c,h,v --exec 'npm run-script all'"
   },
   "author": "",
   "license": "ISC",

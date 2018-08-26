@@ -10,5 +10,5 @@ script:
   - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script lint"
   - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script build"
   - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script run"
-  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project --env-file <(env) antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script coveralls"
-  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script report"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project --env-file <(env) antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script coverage:coveralls"
+  - docker run --rm -v ${TRAVIS_BUILD_DIR}:/project antonkrug/verilator-lcov-slim:32d30f3 bash -c "cd /project && npm run-script coverage:report"
