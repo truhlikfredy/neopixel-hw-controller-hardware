@@ -92,14 +92,19 @@ int main(int argc, char** argv) {
   uut->anton_neopixel_apb_top__DOT__test_unit = 3;
   driver->writeRegisterCtrl(CTRL_RUN | CTRL_LOOP | CTRL_LIMIT);
 
-  // Iterate until simulation is finished
-  while (!Verilated::gotFinish()) cycleClocks();
+  // Iterate until simulation is finished or enough time passed.
+  // 3 simulation steps are quired to for 100ns in simulation to pass.
+  // Each simulation step is 25units, so 75units means 100ns, therefore 750=1us.
+  // stop the simulation if it didn't ended after 3ms (3000us)
+  while (!Verilated::gotFinish() && sim_time<(3000 * (75 *10))) {
+    cycleClocks();
+  }
 
   // Done simulating
   uut->final();
 
   #if VM_COVERAGE
-    VerilatedCov::write("line-coverage.dat");
+    VerilatedCov::write("lcov.info");
   #endif
 
   tfp->close();
