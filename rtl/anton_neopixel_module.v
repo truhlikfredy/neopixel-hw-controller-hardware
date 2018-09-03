@@ -10,6 +10,7 @@
 
 module anton_neopixel_module (
   input  clk7mhz,
+  input  syncStart,
   output neoData,
   output neoState,
 
@@ -54,6 +55,7 @@ module anton_neopixel_module (
 
     .stream_sync_of(stream_sync_of),
 
+    .syncStart(syncStart),
     .state(neoState),
     .pixels(pixels),
     .reg_max(reg_max),

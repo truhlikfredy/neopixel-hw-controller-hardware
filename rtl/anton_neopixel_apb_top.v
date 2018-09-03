@@ -1,7 +1,8 @@
 `include "anton_common.vh"
 
 module anton_neopixel_apb_top (
-  input clk7mhz,
+  input  clk7mhz,
+  input  syncStart,
   output neoData,
   output neoState,
 
@@ -37,6 +38,7 @@ module anton_neopixel_apb_top (
     .BUFFER_END(BUFFER_END)
   ) neopixel(
     .clk7mhz(clk7mhz),
+    .syncStart(syncStart),
     .neoData(neoData),
     .neoState(neoState),
     .busAddr(address),

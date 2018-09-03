@@ -10,6 +10,7 @@ module anton_neopixel_registers (
 
   input         stream_sync_of,
 
+  input         syncStart,
   input         state,
   output [7:0]  pixels[BUFFER_END:0],
   output [12:0] reg_max,
@@ -41,7 +42,6 @@ module anton_neopixel_registers (
   // for simulation to track few cycles of the whole process to make sure after 
   // reset nothing funny is happening
   
-
   always @(posedge busClk) begin
     if (reg_ctrl_init) begin
       reg_ctrl_init   <= 'b0;
@@ -87,6 +87,8 @@ module anton_neopixel_registers (
 
 
   always @(posedge busClk) if (stream_sync_of) reg_ctrl_run <= reg_ctrl_loop;
+
+  always @(posedge busClk) if (syncStart) reg_ctrl_run <= 'b1;
 
 
 endmodule
