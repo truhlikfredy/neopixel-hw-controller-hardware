@@ -5,5 +5,6 @@
 
 extern void neopixelWriteApbByte(uint32_t addr, uint8_t data);
 extern uint8_t neopixelReadApbByte(uint32_t addr);
+extern void neopixelSyncStart();
 
 #endif

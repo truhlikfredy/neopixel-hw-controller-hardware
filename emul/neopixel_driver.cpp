@@ -14,6 +14,7 @@ uint8_t NeoPixelDriver::readRegister(uint16_t addr) {
   return (neopixelReadApbByte(addr | 1 << 15));
 }
 
+// TODO: use enum for the offsets
 void NeoPixelDriver::writeRegisterMax(uint16_t value) {
   writeRegister(0, value & 0xFF);
   writeRegister(4, (value >> 8) & 0xFF);
@@ -32,4 +33,8 @@ void NeoPixelDriver::setPixelLength(uint16_t pixels) {
 
 uint8_t NeoPixelDriver::testRegisterCtrl(uint8_t mask) {
   return (readRegister(8) & mask);
+}
+
+void NeoPixelDriver::syncStart() {
+  neopixelSyncStart();
 }
