@@ -1,5 +1,8 @@
 `include "anton_common.vh"
 
+// TODO: neoState should only show when debug is enabled
+// TODO: enable debug on compilation time
+
 module anton_neopixel_apb_top (
   input  clk7mhz,
   input  syncStart,
