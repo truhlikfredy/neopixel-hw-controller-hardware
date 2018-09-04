@@ -38,17 +38,51 @@ void cycleClocks() {
   tfp->dump(sim_time += 25);
 }
 
+void simulationDone()
+{
+  // Done simulating
+  uut->final();
+
+#if VM_COVERAGE
+  VerilatedCov::writeLcov("lcov.info");
+#endif
+
+  tfp->close();
+  delete tfp;
+  delete uut;
+
+  exit(0);
+}
+
+#define MAX_COLORS 9
+
+const uint8_t colors[MAX_COLORS] = {
+    0xff,
+    0x02,
+    0x18,
+    0xDE, // this shouldn't get displayed in 32bit mode
+    0xCE,
+    0xAD,
+    0x98,
+    0x01, // this shouldn't get displayed in 32bit mode
+    0x00};
 
 void populatePixelBuffer(NeoPixelDriver *driver) {
-  neopixelWriteApbByte(0, 0xff);
-  neopixelWriteApbByte(4, 0x02);
-  neopixelWriteApbByte(8, 0x18);
-  neopixelWriteApbByte(12, 0xDE); // this shouldn't get displayed in 32bit mode
-  neopixelWriteApbByte(16, 0xCE);
-  neopixelWriteApbByte(20, 0xAD);
-  neopixelWriteApbByte(24, 0x98);
-  neopixelWriteApbByte(28, 0x01); // this shouldn't get displayed in 32bit mode
-  neopixelWriteApbByte(32, 0x00);
+  // write color values into the buffer
+  for (unsigned int i=0; i < MAX_COLORS; i++) {
+    driver->writePixelByte(i, colors[i]);
+  }
+
+  // read it back and verify if they match
+  for (unsigned int i = 0; i < MAX_COLORS; i++) {
+    if (driver->readPixelByte(i) != colors[i]) {
+      
+      printf("\nPixel data @%d doesn't match actual %d != expected %d \n\n", i, 
+        driver->readPixelByte(i), colors[i]);
+
+      simulationDone();
+    }
+  }
 }
 
 
@@ -108,16 +142,7 @@ int main(int argc, char** argv) {
     cycleClocks();
   }
 
-  // Done simulating
-  uut->final();
-
-  #if VM_COVERAGE
-    VerilatedCov::writeLcov("lcov.info");
-  #endif
-
-  tfp->close();
-  delete tfp;
-  delete uut;
+  simulationDone();
 
   return 0;
 }
