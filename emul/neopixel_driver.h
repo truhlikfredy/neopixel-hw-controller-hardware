@@ -21,6 +21,8 @@ class NeoPixelDriver {
     // void setPixel(uint32_t color);
     // void setPixel(uint8_t red, uint8_t green, uint8_t blue);
     // void setPixelRaw(uint32_t color);
+    
+    // TODO: Peripheral reset
 
     // TODO: Pixel words
     void writePixelByte(uint16_t pixel, uint8_t value);

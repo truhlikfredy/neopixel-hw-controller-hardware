@@ -2,6 +2,7 @@
 
 // TODO: neoState should only show when debug is enabled
 // TODO: enable debug on compilation time
+// TODO: double buffering
 
 module anton_neopixel_apb_top (
   input  clk7mhz,
@@ -35,7 +36,7 @@ module anton_neopixel_apb_top (
   assign rd_enable = (!apbPwrite && apbPselx);
   assign address   = apbPaddr[15:2]; // 4 bytes (word) aligned to 1 byte aligned
 
-  reg [2:0]  test_unit; // TODO: disable when not in simulation
+  reg [2:0]  test_unit; // TODO: disable when not in simulation/debug
   
   anton_neopixel_module #(
     .BUFFER_END(BUFFER_END)
