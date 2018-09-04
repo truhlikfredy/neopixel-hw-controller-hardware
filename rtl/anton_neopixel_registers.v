@@ -50,49 +50,45 @@ module anton_neopixel_registers (
       reg_ctrl_loop   <= 'b0;
       reg_ctrl_32bit  <= 'b0;
     end else begin
-      
-      if (stream_sync_of) begin
-        reg_ctrl_run <= reg_ctrl_loop;
-      end
 
-      if (syncStart) begin
-        reg_ctrl_run <= 'b1;
-      end else begin
+      if (busWrite) begin
+        if (busAddr[13] == 'b0) begin
 
-        if (busWrite) begin
-          if (busAddr[13] == 'b0) begin
+          // Write buffer
+          pixels[busAddr[BUFFER_BITS-1:0]] <= busDataIn;
+        end else begin
 
-            // Write buffer
-            pixels[busAddr[BUFFER_BITS-1:0]] <= busDataIn;
-          end else begin
-
-            // Write register
-            case (busAddr[1:0])
-              0: reg_max[7:0]  <= busDataIn;
-              1: reg_max[12:8] <= busDataIn[4:0];
-              2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
-            endcase
-          end
+          // Write register
+          case (busAddr[1:0])
+            0: reg_max[7:0]  <= busDataIn;
+            1: reg_max[12:8] <= busDataIn[4:0];
+            2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
+          endcase
         end
+      end
+      if (busRead) begin
+        if (busAddr[13] == 'b0) begin
+          
+          // Read buffer
+          busDataOut <= pixels[busAddr[BUFFER_BITS-1:0]];
+        end else begin
 
-        if (busRead) begin
-          if (busAddr[13] == 'b0) begin
-            
-            // Read buffer
-            busDataOut <= pixels[busAddr[BUFFER_BITS-1:0]];
-          end else begin
-
-            // Read register
-            case (busAddr[1:0])
-              0: busDataOut <= reg_max[7:0];
-              1: busDataOut <= { 3'b000, reg_max[12:8]};
-              2: busDataOut <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
-              3: busDataOut <= {7'b0000000, state};
-            endcase
-          end
+          // Read register
+          case (busAddr[1:0])
+            0: busDataOut <= reg_max[7:0];
+            1: busDataOut <= { 3'b000, reg_max[12:8]};
+            2: busDataOut <= {3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init};
+            3: busDataOut <= {7'b0000000, state};
+          endcase
         end
       end
     end
   end
+
+
+  always @(posedge busClk) if (stream_sync_of) reg_ctrl_run <= reg_ctrl_loop;
+
+  always @(posedge busClk) if (syncStart) reg_ctrl_run <= 'b1;
+
 
 endmodule
