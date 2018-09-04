@@ -26,15 +26,13 @@ class NeoPixelDriver {
 
     // TODO: Pixel words
     void writePixelByte(uint16_t pixel, uint8_t value);
-
     uint8_t readPixelByte(uint16_t pixel);
 
     void writeRegisterMax(uint16_t value);
+    uint16_t readRegisterMax();
 
     void writeRegisterCtrl(uint8_t value);
-
     uint8_t readRegisterCtrl();
-
     uint8_t testRegisterCtrl(uint8_t mask);
 
     void syncStart();

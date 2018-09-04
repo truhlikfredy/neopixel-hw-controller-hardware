@@ -28,6 +28,10 @@ void NeoPixelDriver::writeRegisterMax(uint16_t value) {
   writeRegister(1, (value >> 8) & 0xFF);
 }
 
+uint16_t NeoPixelDriver::readRegisterMax() {
+  return ( (uint16_t)(readRegister(0)) | (uint16_t)(readRegister(1)) << 8 );
+}
+
 void NeoPixelDriver::writeRegisterCtrl(uint8_t value) {
   writeRegister(2, value);
 }

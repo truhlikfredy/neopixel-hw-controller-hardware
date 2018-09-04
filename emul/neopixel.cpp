@@ -111,6 +111,9 @@ int main(int argc, char** argv) {
 
   driver->writeRegisterMax(0xface);
   driver->writeRegisterMax(7);
+  if (driver->readRegisterMax() != 7) {
+    simulationDone();
+  }
 
   uut->anton_neopixel_apb_top__DOT__test_unit = 1;
   driver->writeRegisterCtrl(CTRL_RUN | CTRL_32 | CTRL_LIMIT);
