@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
   uut->clk7mhz   = 0;
+  uut->syncStart = 0;
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
   NeoPixelDriver *driver = new NeoPixelDriver(0, 60);
@@ -96,7 +97,8 @@ int main(int argc, char** argv) {
 
   // Keep 8bit mode, but enable looping and software limit
   uut->anton_neopixel_apb_top__DOT__test_unit = 3;
-  driver->writeRegisterCtrl(CTRL_RUN | CTRL_LOOP | CTRL_LIMIT);
+  driver->writeRegisterCtrl(CTRL_LOOP | CTRL_LIMIT);
+  driver->syncStart();
 
   // Iterate until simulation is finished or enough time passed.
   // 3 simulation steps are quired to for 100ns in simulation to pass.
