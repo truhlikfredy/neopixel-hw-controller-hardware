@@ -6,6 +6,9 @@ NeoPixelDriver::NeoPixelDriver(uint32_t base, uint32_t pixels) {
   this->pixels = pixels;
 }
 
+void NeoPixelDriver::setPixelLength(uint16_t pixels) {
+}
+
 void NeoPixelDriver::writeRegister(uint16_t addr, uint8_t data) {
   neopixelWriteApbByte(addr << 2 | NEOPIXEL_CTRL_BIT, data);
 }
@@ -40,11 +43,12 @@ uint8_t NeoPixelDriver::readRegisterCtrl() {
   return (readRegister(2));
 }
 
-void NeoPixelDriver::setPixelLength(uint16_t pixels) {
-}
-
 uint8_t NeoPixelDriver::testRegisterCtrl(uint8_t mask) {
   return (readRegister(2) & mask);
+}
+
+uint8_t NeoPixelDriver::readRegisterState() {
+  return (readRegister(3));
 }
 
 void NeoPixelDriver::syncStart() {

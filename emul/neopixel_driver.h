@@ -35,6 +35,8 @@ class NeoPixelDriver {
     uint8_t readRegisterCtrl();
     uint8_t testRegisterCtrl(uint8_t mask);
 
+    uint8_t readRegisterState();
+
     void syncStart();
 };
 
