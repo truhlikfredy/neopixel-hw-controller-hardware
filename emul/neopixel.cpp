@@ -20,30 +20,18 @@
 Vanton_neopixel_apb_top *uut;
 VerilatedVcdC *tfp;
 vluint64_t sim_time;
+NeoPixelDriver *driver;
 
 // 3 simulation steps are quired to for 100ns in simulation to pass.
 // Each simulation step is 25units, so 75units means 100ns, therefore 750=1us.
 // stop the simulation if it didn't ended after 3ms (3000us)
 #define SIMULATION_NOT_STUCK (sim_time < (3000 * (75 * 10)))
 
-double sc_time_stamp () {
+double sc_time_stamp() {
   return sim_time*50;
 }
 
-
-void cycleClocks() {
-  uut->apbPclk = 0;
-  uut->eval();
-  tfp->dump(sim_time += 25);
-
-  uut->apbPclk = 1;
-  uut->clk7mhz = uut->clk7mhz ? 0 : 1;
-  uut->eval();
-  tfp->dump(sim_time += 25);
-}
-
-void simulationDone()
-{
+void simulationDone() {
   // Done simulating
   uut->final();
 
@@ -56,8 +44,29 @@ void simulationDone()
   tfp->close();
   delete tfp;
   delete uut;
+}
 
-  exit(0);
+void assert_equals(std::string text, uint16_t expected, uint16_t actual) {
+  if (expected != actual) {
+    std::cout << "FAILED: " << text << std::endl;
+    std::cout << "Expected=" << expected << " Actual=" << actual << std::endl;
+    simulationDone();
+    exit(1);
+  }
+  else {
+    std::cout << "PASS: " << text << std::endl;
+  }
+}
+
+void cycleClocks() {
+  uut->apbPclk = 0;
+  uut->eval();
+  tfp->dump(sim_time += 25);
+
+  uut->apbPclk = 1;
+  uut->clk7mhz = uut->clk7mhz ? 0 : 1;
+  uut->eval();
+  tfp->dump(sim_time += 25);
 }
 
 #define MAX_COLORS 9
@@ -91,6 +100,74 @@ void populatePixelBuffer(NeoPixelDriver *driver) {
   }
 }
 
+void testHeader(std::string text) {
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << text << std::endl;
+}
+
+void test1() {
+  testHeader("Test 1 - write and read back registers");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 1;
+
+  populatePixelBuffer(driver);
+
+  driver->writeRegisterMax(0x1ace);
+  assert_equals("Large value in MAX control register", 0x1ace, driver->readRegisterMax());
+
+  driver->writeRegisterMax(7);
+  assert_equals("Small value in MAX control register", 7, driver->readRegisterMax());
+}
+
+void test2() {
+  testHeader("Test 2 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size (which is 2 pixels in 32bit mode)");
+
+  driver->writeRegisterCtrl(CTRL_RUN | CTRL_32 | CTRL_LIMIT);
+  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
+  while (driver->readRegisterState() == 0 && SIMULATION_NOT_STUCK) { // Wait to end stream and start reset
+    cycleClocks();
+  }
+
+  if (driver->readRegisterState() != 1) {
+    printf("ERROR: After stream phase the reset part should started. \n");
+    printf("ERROR: Possibly the loop timeouted and never left from the stream phase.\n");
+    simulationDone();
+  }
+
+  // Wait for the reset to finish (stream phase + reset phase = whole cycle)
+  while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) { // Wait for the cycle to finish
+    if (uut->neoData != 0)
+    { // inside the reset part the output should be held low
+      printf("ERROR: At the reset phase the neoData was not kept low\n");
+      simulationDone();
+    }
+    cycleClocks();
+  }
+
+  cycleClocks();
+  cycleClocks();
+}
+
+void test3() {
+  testHeader("Test 3 - After one run is finished switch to 8bit with hard limit mode");
+
+  uut->anton_neopixel_apb_top__DOT__test_unit = 3;
+  driver->writeRegisterCtrl(CTRL_RUN);
+  while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) {
+    cycleClocks(); // Wait for the next cycle to finish
+  }
+}
+
+void test4() {
+  testHeader("Test 4 - Keep 8bit mode, but enable looping and software limit, and start it with a synch input");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 4;
+  driver->writeRegisterCtrl(CTRL_LOOP | CTRL_LIMIT);
+  driver->syncStart();
+
+  // Iterate until simulation is finished or enough time passed.
+  while (!Verilated::gotFinish() && SIMULATION_NOT_STUCK) {
+    cycleClocks();
+  }
+}
 
 int main(int argc, char** argv) {
   sim_time = 0;
@@ -112,57 +189,12 @@ int main(int argc, char** argv) {
   uut->syncStart = 0;
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
-  NeoPixelDriver *driver = new NeoPixelDriver(0, 60);
-  populatePixelBuffer(driver);
+  driver = new NeoPixelDriver(0, 60);
 
-  driver->writeRegisterMax(0xface);
-  driver->writeRegisterMax(7);
-  if (driver->readRegisterMax() != 7) simulationDone();
-
-  uut->anton_neopixel_apb_top__DOT__test_unit = 1;
-  driver->writeRegisterCtrl(CTRL_RUN | CTRL_32 | CTRL_LIMIT);
-
-  /***** Test 1 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size (which is 2 pixels in 32bit mode)*/
-  while (driver->readRegisterState() == 0 && SIMULATION_NOT_STUCK) { // Wait to end stream and start reset
-    cycleClocks();
-  }
-
-  if (driver->readRegisterState() != 1) {
-    printf("ERROR: After stream phase the reset part should started. \n");
-    printf("ERROR: Possibly the loop timeouted and never left from the stream phase.\n");
-    simulationDone();
-  }
-  
-  // Wait for the reset to finish (stream phase + reset phase = whole cycle)
-  while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) { // Wait for the cycle to finish
-    if (uut->neoData != 0) { // inside the reset part the output should be held low
-      printf("ERROR: At the reset phase the neoData was not kept low\n");
-      simulationDone(); 
-    }
-    cycleClocks(); 
-  }
-
-  cycleClocks();
-  cycleClocks();
-
-
-  /***** Test 2 - After one run is finished switch to 8bit with hard limit mode */
-  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
-  driver->writeRegisterCtrl(CTRL_RUN);
-  while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) {
-    cycleClocks(); // Wait for the next cycle to finish
-  }
-
-
-  /***** Test 3 - Keep 8bit mode, but enable looping and software limit, and start it with a synch input */
-  uut->anton_neopixel_apb_top__DOT__test_unit = 3;
-  driver->writeRegisterCtrl(CTRL_LOOP | CTRL_LIMIT);
-  driver->syncStart();
-
-  // Iterate until simulation is finished or enough time passed.
-  while (!Verilated::gotFinish() && SIMULATION_NOT_STUCK) {
-    cycleClocks();
-  }
+  test1();
+  test2();
+  test3();
+  test4();
 
   // Proper end of the simulation, if the simulation was shutdown sooner, due
   // to test failure, then one indicators is that the coverage and/or
