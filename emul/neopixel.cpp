@@ -114,6 +114,9 @@ void test1() {
   driver->writeRegisterMax(0x1ace);
   assert_equals("Large value in MAX control register", 0x1ace, driver->readRegisterMax());
 
+  driver->writeRegisterMax(0xffff);
+  assert_equals("Overflowing value in MAX control register", 0x1fff, driver->readRegisterMax());
+
   driver->writeRegisterMax(7);
   assert_equals("Small value in MAX control register", 7, driver->readRegisterMax());
 }
