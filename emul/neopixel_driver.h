@@ -6,6 +6,19 @@
 #define NEOPIXEL_CTRL_BIT ((uint16_t)(1 << 15))
 #define NEOPIXEL_CTRL_BIT_MASK (~(uint16_t)(1 << 15))
 
+// Because this driver is used in emulation as well the enum class feature
+// of C++11 can't be used because of verilator limitations. Wrapping enum
+// into struct so it will not polute the namespace.
+struct NeoPixelCtrl {
+  typedef enum { 
+    INIT   = 1, 
+    LIMIT  = 2, 
+    RUN    = 4, 
+    LOOP   = 8, 
+    MODE32 = 16 
+  } Type;
+};
+
 #define SELFTEST_MAX_COLORS 9
 
 const uint8_t colors[SELFTEST_MAX_COLORS] = {
@@ -34,6 +47,7 @@ class NeoPixelDriver {
   // TODO: Peripheral reset
 
   // TODO: Pixel words
+  // TODO: update/start
   void writePixelByte(uint16_t pixel, uint8_t value);
   uint8_t readPixelByte(uint16_t pixel);
 
@@ -51,6 +65,7 @@ class NeoPixelDriver {
   // self test parts
   void selfTest1populatePixelBuffer();
   void selfTest2maxRegister();
+  void selfTest3softLimit32bit();
 };
 
 #endif
