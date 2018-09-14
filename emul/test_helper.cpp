@@ -1,7 +1,6 @@
 
 #include <cstdlib>
 #include <iostream>
-
 #include <stdint.h>
 
 #include "test_helper.h"
