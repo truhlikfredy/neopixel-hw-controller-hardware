@@ -19,14 +19,14 @@
 		},
 		{
 			"text": "MonitorLint",
-			"command": "npm run-script -s monitor-lint",
+			"command": "npm run-script -s monitor:lint",
 			"skipTerminateQuickPick": false,
 			"priority": 9000,
 			"alignment": "left"
 		},
 		{
 			"text": "MonitorAll",
-			"command": "npm run-script -s monitor-all",
+			"command": "npm run-script -s monitor:all",
 			"skipTerminateQuickPick": false,
 			"priority": 8000,
 			"alignment": "left"
