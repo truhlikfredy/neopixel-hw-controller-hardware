@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include "assert.h"
 #include "neopixel_simulation.h"
 #include "neopixel_driver.h"
 #include "neopixel_hal.h"
@@ -46,17 +47,11 @@ void simulationDone() {
   delete uut;
 }
 
-template <typename T> void assert_equals(std::string text, T expected, T actual) {
-  if (expected != actual) {
-    std::cout << "FAILED: " << text << std::endl;
-    std::cout << "Expected=" << expected << " Actual=" << actual << std::endl;
-    simulationDone();
-    exit(1);
-  }
-  else {
-    std::cout << "PASS: " << text << std::endl;
-  }
+void testFailed() {
+  // implementation for assert.h
+  simulationDone();  
 }
+
 
 void cycleClocks() {
   uut->apbPclk = 0;
@@ -69,63 +64,30 @@ void cycleClocks() {
   tfp->dump(sim_time += 25);
 }
 
-#define MAX_COLORS 9
-
-const uint8_t colors[MAX_COLORS] = {
-    0xff,
-    0x02,
-    0x18,
-    0xDE, // this shouldn't get displayed in 32bit mode
-    0xCE,
-    0xAD,
-    0x98,
-    0x01, // this shouldn't get displayed in 32bit mode
-    0x00};
-
-void populatePixelBuffer(NeoPixelDriver *driver) {
-  // write color values into the buffer
-  for (unsigned int i=0; i < MAX_COLORS; i++) {
-    driver->writePixelByte(i, colors[i]);
-  }
-
-  // read it back and verify if they match
-  for (unsigned int i = 0; i < MAX_COLORS; i++) {
-    if (driver->readPixelByte(i) != colors[i]) {
-      
-      printf("\nPixel data @%d doesn't match actual %d != expected %d \n\n", i, 
-        driver->readPixelByte(i), colors[i]);
-
-      simulationDone();
-    }
-  }
-}
-
 void testHeader(std::string text) {
   std::cout << "---------------------------------------------" << std::endl;
   std::cout << text << std::endl;
 }
 
 void test1() {
-  testHeader("Test 1 - write and read back registers");
+  testHeader("Test 1 - populate buffer with values");
   uut->anton_neopixel_apb_top__DOT__test_unit = 1;
 
-  populatePixelBuffer(driver);
-
-  driver->writeRegisterMax(0x1ace);
-  assert_equals<uint16_t>("Large value in MAX control register", 0x1ace, driver->readRegisterMax());
-
-  driver->writeRegisterMax(0xffff);
-  assert_equals<uint16_t>("Overflowing value in MAX control register", 0x1fff, driver->readRegisterMax());
-
-  driver->writeRegisterMax(7);
-  assert_equals<uint16_t>("Small value in MAX control register", 7, driver->readRegisterMax());
+  driver->selfTest1populatePixelBuffer();
 }
 
 void test2() {
-  testHeader("Test 2 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size (which is 2 pixels in 32bit mode)");
+  testHeader("Test 2 - write and read back MAX register");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
+
+  driver->selfTest2maxRegister();
+}
+
+void test3() {
+  testHeader("Test 3 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size (which is 2 pixels in 32bit mode)");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 3;
 
   driver->writeRegisterCtrl(CTRL_RUN | CTRL_32 | CTRL_LIMIT);
-  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
   while (driver->readRegisterState() == 0 && SIMULATION_NOT_STUCK) { // Wait to end stream and start reset
     cycleClocks();
   }
@@ -150,19 +112,20 @@ void test2() {
   cycleClocks();
 }
 
-void test3() {
-  testHeader("Test 3 - After one run is finished switch to 8bit with hard limit mode");
+void test4() {
+  testHeader("Test 4 - After one run is finished switch to 8bit with hard limit mode");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 4;
 
-  uut->anton_neopixel_apb_top__DOT__test_unit = 3;
   driver->writeRegisterCtrl(CTRL_RUN);
   while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) {
     cycleClocks(); // Wait for the next cycle to finish
   }
 }
 
-void test4() {
-  testHeader("Test 4 - Keep 8bit mode, but enable looping and software limit, and start it with a synch input");
-  uut->anton_neopixel_apb_top__DOT__test_unit = 4;
+void test5() {
+  testHeader("Test 5 - Keep 8bit mode, but enable looping and software limit, and start it with a synch input");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 5;
+
   driver->writeRegisterCtrl(CTRL_LOOP | CTRL_LIMIT);
   driver->syncStart();
 
@@ -198,6 +161,7 @@ int main(int argc, char** argv) {
   test2();
   test3();
   test4();
+  test5();
 
   // Proper end of the simulation, if the simulation was shutdown sooner, due
   // to test failure, then one indicators is that the coverage and/or
