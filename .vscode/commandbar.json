@@ -5,28 +5,35 @@
 	"commands": [
 		{
 			"text": "Lint",
-			"command": "npm run-script lint",
+			"command": "npm run-script -s lint",
 			"skipTerminateQuickPick": false,
-      "priority": 10000,
+      "priority": 9900,
       "alignment": "left"
 		},
 		{
+			"text": "Build all and run",
+			"command": "npm run-script -s all",
+			"skipTerminateQuickPick": false,
+			"priority": 9500,
+			"alignment": "left"
+		},
+		{
 			"text": "MonitorLint",
-			"command": "npm run-script monitor-lint",
+			"command": "npm run-script -s monitor-lint",
 			"skipTerminateQuickPick": false,
 			"priority": 9000,
 			"alignment": "left"
 		},
 		{
 			"text": "MonitorAll",
-			"command": "npm run-script monitor-all",
+			"command": "npm run-script -s monitor-all",
 			"skipTerminateQuickPick": false,
 			"priority": 8000,
 			"alignment": "left"
 		},
 		{
 			"text": "GTK-Wave",
-			"command": "npm run-script wave",
+			"command": "npm run-script -s wave",
 			"skipTerminateQuickPick": false,
 			"priority": 7000,
 			"alignment": "left"
