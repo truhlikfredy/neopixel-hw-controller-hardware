@@ -93,16 +93,15 @@ void test3() {
   }
 
   if (driver->readRegisterState() != 1) {
-    printf("ERROR: After stream phase the reset part should started. \n");
-    printf("ERROR: Possibly the loop timeouted and never left from the stream phase.\n");
+    std::cout << "ERROR: After stream phase the reset part should started." << std::endl;
+    std::cout << "ERROR: Possibly the loop timeouted and never left from the stream phase." << std::endl;
     simulationDone();
   }
 
   // Wait for the reset to finish (stream phase + reset phase = whole cycle)
   while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) { // Wait for the cycle to finish
-    if (uut->neoData != 0)
-    { // inside the reset part the output should be held low
-      printf("ERROR: At the reset phase the neoData was not kept low\n");
+    if (uut->neoData != 0) { // inside the reset part the output should be held low
+      std::cout << "ERROR: At the reset phase the neoData was not kept low" << std::endl;
       simulationDone();
     }
     cycleClocks();
