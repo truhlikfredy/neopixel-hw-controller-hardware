@@ -76,35 +76,7 @@ void test3() {
       "(which is 2 pixels in 32bit mode)");
   uut->anton_neopixel_apb_top__DOT__test_unit = 3;
 
-  driver->writeRegisterCtrl(CTRL_RUN | CTRL_32 | CTRL_LIMIT);
-  while (driver->readRegisterState() == 0 &&
-         SIMULATION_NOT_STUCK) {  // Wait to end stream and start reset
-    cycleClocks();
-  }
-
-  if (driver->readRegisterState() != 1) {
-    std::cout << "ERROR: After stream phase the reset part should started."
-              << std::endl;
-    std::cout << "ERROR: Possibly the loop timeouted and never left from the "
-                 "stream phase."
-              << std::endl;
-    simulationDone();
-  }
-
-  // Wait for the reset to finish (stream phase + reset phase = whole cycle)
-  while (driver->testRegisterCtrl(CTRL_RUN) &&
-         SIMULATION_NOT_STUCK) {  // Wait for the cycle to finish
-    if (uut->neoData !=
-        0) {  // inside the reset part the output should be held low
-      std::cout << "ERROR: At the reset phase the neoData was not kept low"
-                << std::endl;
-      simulationDone();
-    }
-    cycleClocks();
-  }
-
-  cycleClocks();
-  cycleClocks();
+  driver->selfTest3softLimit32bit();
 }
 
 void test4() {
