@@ -4,7 +4,7 @@
 #include <string>
 
 extern void testFailed();
-extern void testWait();
+extern void testWait(uint32_t time);
 extern void testTimeoutStart(uint32_t timeout);
 extern bool testTimeoutIsExpired();
 

@@ -14,8 +14,10 @@ void testFailed() {
   simulationDone(); 
 }
 
-void testWait() {
-  cycleClocks();
+void testWait(uint32_t time) {
+  for (uint32_t i=0; i<time; i++) {
+    cycleClocks();
+  }
 }
 
 void testTimeoutStart(uint32_t timeout) {
