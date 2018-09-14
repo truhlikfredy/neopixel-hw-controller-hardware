@@ -36,6 +36,7 @@
     "typeinfo": "cpp",
     "utility": "cpp"
   },
+  "C_Cpp.clang_format_fallbackStyle": "Chromium",
   "lcov.path": [
     "./emul/build/lcov.info"
   ]

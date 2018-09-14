@@ -1,27 +1,27 @@
 #include <verilated.h>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <string>
-#include <cstdlib>
-#include <cstdio>
 
 #include "assert.h"
-#include "neopixel_simulation.h"
 #include "neopixel_driver.h"
 #include "neopixel_hal.h"
+#include "neopixel_simulation.h"
 
-#define CTRL_INIT  1
+#define CTRL_INIT 1
 #define CTRL_LIMIT 2
-#define CTRL_RUN   4
-#define CTRL_LOOP  8
-#define CTRL_32    16
+#define CTRL_RUN 4
+#define CTRL_LOOP 8
+#define CTRL_32 16
 
 #define STATE_RESET 1
-#define STATE_OFF   2
+#define STATE_OFF 2
 
-Vanton_neopixel_apb_top *uut;
-VerilatedVcdC *tfp;
+Vanton_neopixel_apb_top* uut;
+VerilatedVcdC* tfp;
 vluint64_t sim_time;
-NeoPixelDriver *driver;
+NeoPixelDriver* driver;
 
 // 3 simulation steps are quired to for 100ns in simulation to pass.
 // Each simulation step is 25units, so 75units means 100ns, therefore 750=1us.
@@ -29,14 +29,15 @@ NeoPixelDriver *driver;
 #define SIMULATION_NOT_STUCK (sim_time < (3000 * (75 * 10)))
 
 double sc_time_stamp() {
-  return sim_time*50;
+  return sim_time * 50;
 }
 
 void simulationDone() {
   // Done simulating
   uut->final();
 
-  std::cout << "Simulation finished with " << sim_time << " timestamp." << std::endl;
+  std::cout << "Simulation finished with " << sim_time << " timestamp."
+            << std::endl;
 
 #if VM_COVERAGE
   VerilatedCov::writeLcov("lcov.info");
@@ -49,9 +50,8 @@ void simulationDone() {
 
 void testFailed() {
   // implementation for assert.h
-  simulationDone();  
+  simulationDone();
 }
-
 
 void cycleClocks() {
   uut->apbPclk = 0;
@@ -84,24 +84,33 @@ void test2() {
 }
 
 void test3() {
-  testHeader("Test 3 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size (which is 2 pixels in 32bit mode)");
+  testHeader(
+      "Test 3 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size "
+      "(which is 2 pixels in 32bit mode)");
   uut->anton_neopixel_apb_top__DOT__test_unit = 3;
 
   driver->writeRegisterCtrl(CTRL_RUN | CTRL_32 | CTRL_LIMIT);
-  while (driver->readRegisterState() == 0 && SIMULATION_NOT_STUCK) { // Wait to end stream and start reset
+  while (driver->readRegisterState() == 0 &&
+         SIMULATION_NOT_STUCK) {  // Wait to end stream and start reset
     cycleClocks();
   }
 
   if (driver->readRegisterState() != 1) {
-    std::cout << "ERROR: After stream phase the reset part should started." << std::endl;
-    std::cout << "ERROR: Possibly the loop timeouted and never left from the stream phase." << std::endl;
+    std::cout << "ERROR: After stream phase the reset part should started."
+              << std::endl;
+    std::cout << "ERROR: Possibly the loop timeouted and never left from the "
+                 "stream phase."
+              << std::endl;
     simulationDone();
   }
 
   // Wait for the reset to finish (stream phase + reset phase = whole cycle)
-  while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) { // Wait for the cycle to finish
-    if (uut->neoData != 0) { // inside the reset part the output should be held low
-      std::cout << "ERROR: At the reset phase the neoData was not kept low" << std::endl;
+  while (driver->testRegisterCtrl(CTRL_RUN) &&
+         SIMULATION_NOT_STUCK) {  // Wait for the cycle to finish
+    if (uut->neoData !=
+        0) {  // inside the reset part the output should be held low
+      std::cout << "ERROR: At the reset phase the neoData was not kept low"
+                << std::endl;
       simulationDone();
     }
     cycleClocks();
@@ -112,17 +121,20 @@ void test3() {
 }
 
 void test4() {
-  testHeader("Test 4 - After one run is finished switch to 8bit with hard limit mode");
+  testHeader(
+      "Test 4 - After one run is finished switch to 8bit with hard limit mode");
   uut->anton_neopixel_apb_top__DOT__test_unit = 4;
 
   driver->writeRegisterCtrl(CTRL_RUN);
   while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) {
-    cycleClocks(); // Wait for the next cycle to finish
+    cycleClocks();  // Wait for the next cycle to finish
   }
 }
 
 void test5() {
-  testHeader("Test 5 - Keep 8bit mode, but enable looping and software limit, and start it with a synch input");
+  testHeader(
+      "Test 5 - Keep 8bit mode, but enable looping and software limit, and "
+      "start it with a synch input");
   uut->anton_neopixel_apb_top__DOT__test_unit = 5;
 
   driver->writeRegisterCtrl(CTRL_LOOP | CTRL_LIMIT);
@@ -150,7 +162,7 @@ int main(int argc, char** argv) {
   vcdname += ".vcd";
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
-  uut->clk7mhz   = 0;
+  uut->clk7mhz = 0;
   uut->syncStart = 0;
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 

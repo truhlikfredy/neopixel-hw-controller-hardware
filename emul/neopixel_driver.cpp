@@ -1,16 +1,15 @@
 #include <iostream>
 
-#include "test_helper.h"
 #include "neopixel_driver.h"
 #include "neopixel_hal.h"
+#include "test_helper.h"
 
 NeoPixelDriver::NeoPixelDriver(uint32_t base, uint32_t pixels) {
-  this->base   = base;
+  this->base = base;
   this->pixels = pixels;
 }
 
-void NeoPixelDriver::setPixelLength(uint16_t pixels) {
-}
+void NeoPixelDriver::setPixelLength(uint16_t pixels) {}
 
 void NeoPixelDriver::writeRegister(uint16_t addr, uint8_t data) {
   neopixelWriteApbByte(addr << 2 | NEOPIXEL_CTRL_BIT, data);
@@ -35,7 +34,7 @@ void NeoPixelDriver::writeRegisterMax(uint16_t value) {
 }
 
 uint16_t NeoPixelDriver::readRegisterMax() {
-  return ( (uint16_t)(readRegister(0)) | (uint16_t)(readRegister(1)) << 8 );
+  return ((uint16_t)(readRegister(0)) | (uint16_t)(readRegister(1)) << 8);
 }
 
 void NeoPixelDriver::writeRegisterCtrl(uint8_t value) {
@@ -67,8 +66,9 @@ void NeoPixelDriver::selfTest1populatePixelBuffer() {
   // read it back and verify if they match
   for (unsigned int i = 0; i < SELFTEST_MAX_COLORS; i++) {
     if (this->readPixelByte(i) != colors[i]) {
-      std::cout << "Pixel data @" << i << " doesn't match actual " << 
-        this->readPixelByte(i) << " != expected " << colors[i] << std::endl;
+      std::cout << "Pixel data @" << i << " doesn't match actual "
+                << this->readPixelByte(i) << " != expected " << colors[i]
+                << std::endl;
 
       testFailed();
     }
@@ -77,14 +77,14 @@ void NeoPixelDriver::selfTest1populatePixelBuffer() {
 
 void NeoPixelDriver::selfTest2maxRegister() {
   this->writeRegisterMax(0x1ace);
-  testAssertEquals<uint16_t>("Large value in MAX control register", 
-    0x1ace, this->readRegisterMax());
+  testAssertEquals<uint16_t>("Large value in MAX control register", 0x1ace,
+                             this->readRegisterMax());
 
   this->writeRegisterMax(0xffff);
   testAssertEquals<uint16_t>("Overflowing value in MAX control register",
-    0x1fff, this->readRegisterMax());
+                             0x1fff, this->readRegisterMax());
 
   this->writeRegisterMax(7);
-  testAssertEquals<uint16_t>("Small value in MAX control register",
-    7, this->readRegisterMax());
+  testAssertEquals<uint16_t>("Small value in MAX control register", 7,
+                             this->readRegisterMax());
 }
