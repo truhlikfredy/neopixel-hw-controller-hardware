@@ -8,22 +8,21 @@
 
 #define SELFTEST_MAX_COLORS 9
 
+const uint8_t colors[SELFTEST_MAX_COLORS] = {
+  0xff,
+  0x02,
+  0x18,
+  0xDE, // this shouldn't get displayed in 32bit mode
+  0xCE,
+  0xAD,
+  0x98,
+  0x01, // this shouldn't get displayed in 32bit mode
+  0x00};
     
 class NeoPixelDriver {
   private:
     uint32_t base;
     uint32_t pixels;
-
-    const uint8_t colors[SELFTEST_MAX_COLORS] = {
-      0xff,
-      0x02,
-      0x18,
-      0xDE, // this shouldn't get displayed in 32bit mode
-      0xCE,
-      0xAD,
-      0x98,
-      0x01, // this shouldn't get displayed in 32bit mode
-      0x00};
 
     void    writeRegister(uint16_t pixel, uint8_t value);
     uint8_t readRegister( uint16_t pixel);
