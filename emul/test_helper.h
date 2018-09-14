@@ -1,26 +1,13 @@
-#ifndef SIMPLE_ASSERTIONS
-#define SIMPLE_ASSERTIONS
+#ifndef TEST_HELPER
+#define TEST_HELPER
 
 #include <string>
-#include <iostream>
-#include <cstdlib>
 
 extern void testFailed();
+extern void testTimeoutStart(uint32_t timeout);
+extern bool testTimeoutIsExpired();
 
 template <typename T>
-void assert_equals(std::string text, T expected, T actual) {
-  if (expected != actual) {
-    std::cout << "FAILED: " << text << std::endl;
-    std::cout << "Expected=" << expected << " Actual=" << actual << std::endl;
-    testFailed(); // call your implementation for 'failed tests' case
-
-    // exit with arbirtary number, making it easier to distinguish between 
-    // other exit codes
-    exit(96); 
-  }
-  else {
-    std::cout << "PASS: " << text << std::endl;
-  }
-}
+void testAssertEquals(std::string text, T expected, T actual);
 
 #endif

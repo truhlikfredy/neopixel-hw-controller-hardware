@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "assert.h"
+#include "test_helper.h"
 #include "neopixel_driver.h"
 #include "neopixel_hal.h"
 
@@ -67,7 +67,8 @@ void NeoPixelDriver::selfTest1populatePixelBuffer() {
   // read it back and verify if they match
   for (unsigned int i = 0; i < SELFTEST_MAX_COLORS; i++) {
     if (this->readPixelByte(i) != colors[i]) {
-      std::cout << "Pixel data @" << i << " doesn't match actual " << this->readPixelByte(i) << " != expected " << colors[i] << std::endl;
+      std::cout << "Pixel data @" << i << " doesn't match actual " << 
+        this->readPixelByte(i) << " != expected " << colors[i] << std::endl;
 
       testFailed();
     }
@@ -76,11 +77,14 @@ void NeoPixelDriver::selfTest1populatePixelBuffer() {
 
 void NeoPixelDriver::selfTest2maxRegister() {
   this->writeRegisterMax(0x1ace);
-  assert_equals<uint16_t>("Large value in MAX control register", 0x1ace, this->readRegisterMax());
+  testAssertEquals<uint16_t>("Large value in MAX control register", 
+    0x1ace, this->readRegisterMax());
 
   this->writeRegisterMax(0xffff);
-  assert_equals<uint16_t>("Overflowing value in MAX control register", 0x1fff, this->readRegisterMax());
+  testAssertEquals<uint16_t>("Overflowing value in MAX control register",
+    0x1fff, this->readRegisterMax());
 
   this->writeRegisterMax(7);
-  assert_equals<uint16_t>("Small value in MAX control register", 7, this->readRegisterMax());
+  testAssertEquals<uint16_t>("Small value in MAX control register",
+    7, this->readRegisterMax());
 }
