@@ -46,7 +46,7 @@ void simulationDone() {
   delete uut;
 }
 
-void assert_equals(std::string text, uint16_t expected, uint16_t actual) {
+template <typename T> void assert_equals(std::string text, T expected, T actual) {
   if (expected != actual) {
     std::cout << "FAILED: " << text << std::endl;
     std::cout << "Expected=" << expected << " Actual=" << actual << std::endl;
@@ -112,13 +112,13 @@ void test1() {
   populatePixelBuffer(driver);
 
   driver->writeRegisterMax(0x1ace);
-  assert_equals("Large value in MAX control register", 0x1ace, driver->readRegisterMax());
+  assert_equals<uint16_t>("Large value in MAX control register", 0x1ace, driver->readRegisterMax());
 
   driver->writeRegisterMax(0xffff);
-  assert_equals("Overflowing value in MAX control register", 0x1fff, driver->readRegisterMax());
+  assert_equals<uint16_t>("Overflowing value in MAX control register", 0x1fff, driver->readRegisterMax());
 
   driver->writeRegisterMax(7);
-  assert_equals("Small value in MAX control register", 7, driver->readRegisterMax());
+  assert_equals<uint16_t>("Small value in MAX control register", 7, driver->readRegisterMax());
 }
 
 void test2() {
