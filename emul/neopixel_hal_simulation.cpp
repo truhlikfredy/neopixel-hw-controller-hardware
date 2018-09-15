@@ -49,7 +49,7 @@ unsigned char neopixelReadApbByte(unsigned int addr) {
   return (ret);
 }
 
-void neopixelSyncStart() {
+void neopixelSyncUpdate() {
   uut->syncStart = 1;
   uut->apbPclk = 1;
   // wait whole pos and down edge step

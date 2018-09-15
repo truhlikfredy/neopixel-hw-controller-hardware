@@ -61,7 +61,7 @@ class NeoPixelDriver {
 
   uint8_t readRegisterState();
 
-  void syncStart();
+  void syncUpdate();
 
   // self test parts
   // TODO hide this behind define

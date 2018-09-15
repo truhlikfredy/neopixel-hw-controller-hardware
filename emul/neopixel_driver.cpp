@@ -54,8 +54,8 @@ uint8_t NeoPixelDriver::readRegisterState() {
   return (readRegister(3));
 }
 
-void NeoPixelDriver::syncStart() {
-  neopixelSyncStart();
+void NeoPixelDriver::syncUpdate() {
+  neopixelSyncUpdate();
 }
 
 /******************** SELF TEST IMPLEMENTATION **********************/
@@ -149,7 +149,7 @@ void NeoPixelDriver::selfTest4hardLimit8bit() {
 
 void NeoPixelDriver::selfTest5softLimit8bitLoop() {
   this->writeRegisterCtrl(NeoPixelCtrl::LOOP | NeoPixelCtrl::LIMIT);
-  this->syncStart();
+  this->syncUpdate();
 
   // Iterate until simulation is finished or enough time passed.
   testTimeoutStart(3000);
