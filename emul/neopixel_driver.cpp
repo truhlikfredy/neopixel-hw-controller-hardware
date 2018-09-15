@@ -134,3 +134,29 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
 
   testWait(2);
 }
+
+void NeoPixelDriver::selfTest4hardLimit8bit() {
+  this->writeRegisterCtrl(NeoPixelCtrl::RUN);
+
+  testTimeoutStart(3000);
+  while (this->testRegisterCtrl(NeoPixelCtrl::RUN)) {
+    if (testTimeoutIsExpired())
+      testFailed();
+
+    testWait();  // Wait for the next cycle to finish
+  }
+}
+
+void NeoPixelDriver::selfTest5softLimit8bitLoop() {
+  this->writeRegisterCtrl(NeoPixelCtrl::LOOP | NeoPixelCtrl::LIMIT);
+  this->syncStart();
+
+  // Iterate until simulation is finished or enough time passed.
+  testTimeoutStart(3000);
+  while (!testIsFinished()) {
+    if (testTimeoutIsExpired())
+      testFailed();
+
+    testWait();
+  }
+}

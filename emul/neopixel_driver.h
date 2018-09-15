@@ -66,6 +66,8 @@ class NeoPixelDriver {
   void selfTest1populatePixelBuffer();
   void selfTest2maxRegister();
   void selfTest3softLimit32bit();
+  void selfTest4hardLimit8bit();
+  void selfTest5softLimit8bitLoop();
 };
 
 #endif

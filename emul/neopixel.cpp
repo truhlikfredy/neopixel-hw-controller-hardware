@@ -84,10 +84,7 @@ void test4() {
       "Test 4 - After one run is finished switch to 8bit with hard limit mode");
   uut->anton_neopixel_apb_top__DOT__test_unit = 4;
 
-  driver->writeRegisterCtrl(CTRL_RUN);
-  while (driver->testRegisterCtrl(CTRL_RUN) && SIMULATION_NOT_STUCK) {
-    cycleClocks();  // Wait for the next cycle to finish
-  }
+  driver->selfTest4hardLimit8bit();
 }
 
 void test5() {
@@ -96,13 +93,7 @@ void test5() {
       "start it with a synch input");
   uut->anton_neopixel_apb_top__DOT__test_unit = 5;
 
-  driver->writeRegisterCtrl(CTRL_LOOP | CTRL_LIMIT);
-  driver->syncStart();
-
-  // Iterate until simulation is finished or enough time passed.
-  while (!Verilated::gotFinish() && SIMULATION_NOT_STUCK) {
-    cycleClocks();
-  }
+  driver->selfTest5softLimit8bitLoop();
 }
 
 int main(int argc, char** argv) {
@@ -126,7 +117,8 @@ int main(int argc, char** argv) {
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
   driver = new NeoPixelDriver(0, 60);
-
+  
+  testStart();
   test1();
   test2();
   test3();

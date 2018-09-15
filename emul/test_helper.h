@@ -3,6 +3,8 @@
 
 #include <string>
 
+extern void testStart();
+extern bool testIsFinished();
 extern void testFailed();
 extern void testWait(uint32_t time);
 extern void testWait();

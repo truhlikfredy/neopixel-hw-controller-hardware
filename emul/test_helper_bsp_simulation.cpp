@@ -11,6 +11,15 @@ extern void cycleClocks();
 
 vluint64_t testTimeoutTime;
 
+void testStart() {
+  // in simulation we don't have to do much now, in hardware you want to
+  // start reading timer so you know when simulation should be finished
+}
+
+bool testIsFinished() {
+  return Verilated::gotFinish();
+}
+
 void testFailed() { 
   simulationDone(); 
 }
