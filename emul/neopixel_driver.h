@@ -19,6 +19,7 @@ struct NeoPixelCtrl {
   } Type;
 };
 
+// TODO hide this behind define
 #define SELFTEST_MAX_COLORS 9
 
 const uint8_t colors[SELFTEST_MAX_COLORS] = {
@@ -63,6 +64,7 @@ class NeoPixelDriver {
   void syncStart();
 
   // self test parts
+  // TODO hide this behind define
   void selfTest1populatePixelBuffer();
   void selfTest2maxRegister();
   void selfTest3softLimit32bit();

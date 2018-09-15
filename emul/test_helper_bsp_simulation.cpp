@@ -3,7 +3,6 @@
 // simulation board support package implementation for the test_helper
 
 #include "test_helper.h"
-#include "neopixel.h"
 #include "neopixel_simulation.h"
 
 extern void simulationDone();

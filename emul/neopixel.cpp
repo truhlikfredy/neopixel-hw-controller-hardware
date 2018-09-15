@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 
-#include "neopixel.h"
 #include "neopixel_driver.h"
 #include "neopixel_hal.h"
 #include "neopixel_simulation.h"
@@ -13,11 +12,6 @@ Vanton_neopixel_apb_top* uut;
 VerilatedVcdC* tfp;
 vluint64_t sim_time;
 NeoPixelDriver* driver;
-
-// 3 simulation steps are quired to for 100ns in simulation to pass.
-// Each simulation step is 25units, so 75units means 100ns, therefore 750=1us.
-// stop the simulation if it didn't ended after 3ms (3000us)
-#define SIMULATION_NOT_STUCK (sim_time < (3000 * (75 * 10)))
 
 double sc_time_stamp() {
   return sim_time * 50;
@@ -124,6 +118,7 @@ int main(int argc, char** argv) {
   test3();
   test4();
   test5();
+  testHeader("Tests finished without a failure");
 
   // Proper end of the simulation, if the simulation was shutdown sooner, due
   // to test failure, then one indicators is that the coverage and/or
