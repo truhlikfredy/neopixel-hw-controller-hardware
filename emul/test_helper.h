@@ -5,6 +5,7 @@
 
 extern void testFailed();
 extern void testWait(uint32_t time);
+extern void testWait();
 extern void testTimeoutStart(uint32_t microSeconds);
 extern bool testTimeoutIsExpired();
 

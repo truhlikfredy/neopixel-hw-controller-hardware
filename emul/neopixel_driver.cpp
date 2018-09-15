@@ -101,7 +101,7 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
     if (testTimeoutIsExpired()) 
       testFailed();
 
-    testWait(1);
+    testWait();
   }
 
   if (this->readRegisterState() != 1) {
@@ -129,7 +129,7 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
       testFailed();
     }
 
-    testWait(1);
+    testWait();
   }
 
   testWait(2);

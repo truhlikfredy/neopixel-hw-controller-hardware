@@ -21,6 +21,10 @@ void testWait(uint32_t time) {
   }
 }
 
+void testWait() {
+  cycleClocks();
+}
+
 // 3 simulation steps are quired to for 100ns in simulation to pass.
 // Each simulation step is 25units of the counter, so 75 units of the
 // counter means 100ns in time, therefore 750 counter units = 1us.
