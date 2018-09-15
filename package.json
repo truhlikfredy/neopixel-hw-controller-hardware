@@ -5,7 +5,7 @@
   "main": "index.js",
   "config": {
     "top_module": "anton_neopixel_apb_top",
-    "cpp": "neopixel.cpp",
+    "cpp": "neopixel_simulation.cpp",
     "cflags": "-g -O3"
   },
   "scripts": {
