@@ -5,9 +5,6 @@
 #include "test_helper.h"
 #include "neopixel_simulation.h"
 
-extern void simulationDone();
-extern void cycleClocks();
-
 vluint64_t testTimeoutTime;
 
 void testStart() {
