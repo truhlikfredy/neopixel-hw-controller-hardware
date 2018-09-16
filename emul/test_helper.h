@@ -16,4 +16,7 @@ extern bool readNeoData();
 template <typename T>
 void testAssertEquals(std::string text, T expected, T actual);
 
+template <typename T>
+void testAssertEquals(std::string text, T expected, T actual, bool displayPass);
+
 #endif
