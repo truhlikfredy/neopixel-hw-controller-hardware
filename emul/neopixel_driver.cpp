@@ -54,7 +54,7 @@ uint8_t NeoPixelDriver::readRegisterState() {
 }
 
 void NeoPixelDriver::updateLeds() {
-  this->writeRegisterCtrl(NeoPixelCtrl::RUN | this->readRegisterCtrl());
+  writeRegisterCtrl(NeoPixelCtrl::RUN | readRegisterCtrl());
 }
 
 void NeoPixelDriver::syncUpdateLeds() {
@@ -67,14 +67,14 @@ void NeoPixelDriver::syncUpdateLeds() {
 void NeoPixelDriver::selfTest1populatePixelBuffer() {
   // write color values into the buffer
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    this->writePixelByte(i, neopixel_selftest_colors[i]);
+    writePixelByte(i, neopixel_selftest_colors[i]);
   }
 
   // read it back and verify if they match
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    if (this->readPixelByte(i) != neopixel_selftest_colors[i]) {
+    if (readPixelByte(i) != neopixel_selftest_colors[i]) {
       std::cout << "Pixel data @" << i << " doesn't match actual "
-                << this->readPixelByte(i) << " != expected "
+                << readPixelByte(i) << " != expected "
                 << neopixel_selftest_colors[i] << std::endl;
 
       testFailed();
@@ -83,25 +83,25 @@ void NeoPixelDriver::selfTest1populatePixelBuffer() {
 }
 
 void NeoPixelDriver::selfTest2maxRegister() {
-  this->writeRegisterMax(0x1ace);
+  writeRegisterMax(0x1ace);
   testAssertEquals<uint16_t>("Large value in MAX control register", 0x1ace,
-                             this->readRegisterMax());
+                             readRegisterMax());
 
-  this->writeRegisterMax(0xffff);
+  writeRegisterMax(0xffff);
   testAssertEquals<uint16_t>("Overflowing value in MAX control register",
-                             0x1fff, this->readRegisterMax());
+                             0x1fff, readRegisterMax());
 
-  this->writeRegisterMax(7);
+  writeRegisterMax(7);
   testAssertEquals<uint16_t>("Small value in MAX control register", 7,
-                             this->readRegisterMax());
+                             readRegisterMax());
 }
 
 void NeoPixelDriver::selfTest3softLimit32bit() {
-  this->writeRegisterCtrl(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
-  this->updateLeds();
+  writeRegisterCtrl(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
+  updateLeds();
 
   testTimeoutStart(3000); // 3ms timeout
-  while (this->readRegisterState() == 0) {
+  while (readRegisterState() == 0) {
     // Wait to end stream and start reset
     testAssertEquals<bool>("Finished before timeout", false,
                            testTimeoutIsExpired(), false);
@@ -110,11 +110,11 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
   }
 
   testAssertEquals<uint8_t>("After stream phase the reset part started",
-                            1, this->readRegisterState());
+                            1, readRegisterState());
 
   // Wait for the reset to finish (stream phase + reset phase = whole cycle)
   testTimeoutStart(3000);  // 3ms timeout
-  while (this->testRegisterCtrl(NeoPixelCtrl::RUN)) {
+  while (testRegisterCtrl(NeoPixelCtrl::RUN)) {
     // Wait for the cycle to finish
     testAssertEquals<bool>("Finished before timeout", false,
                            testTimeoutIsExpired(), false);
@@ -129,11 +129,11 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
 }
 
 void NeoPixelDriver::selfTest4hardLimit8bit() {
-  this->writeRegisterCtrl(NeoPixelCtrl::NONE);
-  this->updateLeds();
+  writeRegisterCtrl(NeoPixelCtrl::NONE);
+  updateLeds();
 
   testTimeoutStart(3000);
-  while (this->testRegisterCtrl(NeoPixelCtrl::RUN)) {
+  while (testRegisterCtrl(NeoPixelCtrl::RUN)) {
     testAssertEquals<bool>("Finished before timeout", false,
                            testTimeoutIsExpired(), false);
 
@@ -142,8 +142,8 @@ void NeoPixelDriver::selfTest4hardLimit8bit() {
 }
 
 void NeoPixelDriver::selfTest5softLimit8bitLoop() {
-  this->writeRegisterCtrl(NeoPixelCtrl::LOOP | NeoPixelCtrl::LIMIT);
-  this->syncUpdateLeds();
+  writeRegisterCtrl(NeoPixelCtrl::LOOP | NeoPixelCtrl::LIMIT);
+  syncUpdateLeds();
 
   // Iterate until simulation is finished or enough time passed.
   testTimeoutStart(3000);
