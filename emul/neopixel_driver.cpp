@@ -54,7 +54,11 @@ uint8_t NeoPixelDriver::readRegisterState() {
   return (readRegister(3));
 }
 
-void NeoPixelDriver::syncUpdate() {
+void NeoPixelDriver::updateLeds() {
+  this->writeRegisterCtrl(NeoPixelCtrl::RUN | this->readRegisterCtrl());
+}
+
+void NeoPixelDriver::syncUpdateLeds() {
   neopixelSyncUpdate();
 }
 
@@ -93,7 +97,8 @@ void NeoPixelDriver::selfTest2maxRegister() {
 }
 
 void NeoPixelDriver::selfTest3softLimit32bit() {
-  this->writeRegisterCtrl(NeoPixelCtrl::RUN | NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
+  this->writeRegisterCtrl(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
+  this->updateLeds();
 
   testTimeoutStart(3000); // 3ms timeout
   while (this->readRegisterState() == 0) {
@@ -136,7 +141,8 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
 }
 
 void NeoPixelDriver::selfTest4hardLimit8bit() {
-  this->writeRegisterCtrl(NeoPixelCtrl::RUN);
+  this->writeRegisterCtrl(NeoPixelCtrl::NONE);
+  this->updateLeds();
 
   testTimeoutStart(3000);
   while (this->testRegisterCtrl(NeoPixelCtrl::RUN)) {
@@ -149,7 +155,7 @@ void NeoPixelDriver::selfTest4hardLimit8bit() {
 
 void NeoPixelDriver::selfTest5softLimit8bitLoop() {
   this->writeRegisterCtrl(NeoPixelCtrl::LOOP | NeoPixelCtrl::LIMIT);
-  this->syncUpdate();
+  this->syncUpdateLeds();
 
   // Iterate until simulation is finished or enough time passed.
   testTimeoutStart(3000);

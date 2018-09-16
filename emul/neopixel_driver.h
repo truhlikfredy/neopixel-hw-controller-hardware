@@ -11,6 +11,7 @@
 // into struct so it will not polute the namespace.
 struct NeoPixelCtrl {
   typedef enum { 
+    NONE   = 0,
     INIT   = 1, 
     LIMIT  = 2, 
     RUN    = 4, 
@@ -61,7 +62,8 @@ class NeoPixelDriver {
 
   uint8_t readRegisterState();
 
-  void syncUpdate();
+  void updateLeds();
+  void syncUpdateLeds();
 
   // self test parts
   // TODO hide this behind define
