@@ -23,6 +23,15 @@ struct NeoPixelCtrl {
   } Type;
 };
 
+struct NeoPixelReg {
+  typedef enum {
+    MAX_LOW  = 0,
+    MAX_HIGH = 1,
+    CTRL     = 2,
+    STATE    = 3
+  } Type;
+};
+
 #ifdef NEOPIXEL_SELFTEST
 #define SELFTEST_MAX_COLORS 9
 
@@ -39,8 +48,8 @@ class NeoPixelDriver {
   uint32_t base;
   uint32_t pixels;
 
-  void writeRegister(uint16_t pixel, uint8_t value);
-  uint8_t readRegister(uint16_t pixel);
+  void writeRegister(NeoPixelReg::Type, uint8_t value);
+  uint8_t readRegister(NeoPixelReg::Type addr);
 
  public:
   NeoPixelDriver(uint32_t base, uint32_t pixels);

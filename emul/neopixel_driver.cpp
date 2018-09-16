@@ -11,12 +11,12 @@ NeoPixelDriver::NeoPixelDriver(uint32_t base, uint32_t pixels) {
 
 void NeoPixelDriver::setPixelLength(uint16_t pixels) {}
 
-void NeoPixelDriver::writeRegister(uint16_t addr, uint8_t data) {
-  neopixelWriteApbByte(addr << 2 | NEOPIXEL_CTRL_BIT, data);
+void NeoPixelDriver::writeRegister(NeoPixelReg::Type addr, uint8_t data) {
+  neopixelWriteApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT, data);
 }
 
-uint8_t NeoPixelDriver::readRegister(uint16_t addr) {
-  return (neopixelReadApbByte(addr << 2 | NEOPIXEL_CTRL_BIT));
+uint8_t NeoPixelDriver::readRegister(NeoPixelReg::Type addr) {
+  return (neopixelReadApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT));
 }
 
 void NeoPixelDriver::writePixelByte(uint16_t pixel, uint8_t value) {
@@ -27,30 +27,30 @@ uint8_t NeoPixelDriver::readPixelByte(uint16_t addr) {
   return (neopixelReadApbByte(addr << 2 & NEOPIXEL_CTRL_BIT_MASK));
 }
 
-// TODO: use enum for the offsets
 void NeoPixelDriver::writeRegisterMax(uint16_t value) {
-  writeRegister(0, value & 0xFF);
-  writeRegister(1, (value >> 8) & 0xFF);
+  writeRegister(NeoPixelReg::MAX_LOW, value & 0xFF);
+  writeRegister(NeoPixelReg::MAX_HIGH, (value >> 8) & 0xFF);
 }
 
 uint16_t NeoPixelDriver::readRegisterMax() {
-  return ((uint16_t)(readRegister(0)) | (uint16_t)(readRegister(1)) << 8);
+  return ((uint16_t)(readRegister(NeoPixelReg::MAX_LOW)) |
+          (uint16_t)(readRegister(NeoPixelReg::MAX_HIGH)) << 8);
 }
 
 void NeoPixelDriver::writeRegisterCtrl(uint8_t value) {
-  writeRegister(2, value);
+  writeRegister(NeoPixelReg::CTRL, value);
 }
 
 uint8_t NeoPixelDriver::readRegisterCtrl() {
-  return (readRegister(2));
+  return (readRegister(NeoPixelReg::CTRL));
 }
 
 uint8_t NeoPixelDriver::testRegisterCtrl(uint8_t mask) {
-  return (readRegister(2) & mask);
+  return (readRegister(NeoPixelReg::CTRL) & mask);
 }
 
 uint8_t NeoPixelDriver::readRegisterState() {
-  return (readRegister(3));
+  return (readRegister(NeoPixelReg::STATE));
 }
 
 void NeoPixelDriver::updateLeds() {
@@ -111,7 +111,6 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
 
   testAssertEquals<uint8_t>("After stream phase the reset part started",
                             1, this->readRegisterState());
-  //ERROR: Possibly the loop timeouted and never left from the stream phase.
 
   // Wait for the reset to finish (stream phase + reset phase = whole cycle)
   testTimeoutStart(3000);  // 3ms timeout
