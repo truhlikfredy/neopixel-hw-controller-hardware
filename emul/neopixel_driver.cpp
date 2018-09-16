@@ -103,36 +103,25 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
   testTimeoutStart(3000); // 3ms timeout
   while (this->readRegisterState() == 0) {
     // Wait to end stream and start reset
-    if (testTimeoutIsExpired()) 
-      testFailed();
+    testAssertEquals<bool>("Finished before timeout", false,
+                           testTimeoutIsExpired(), false);
 
     testWait();
   }
 
-  if (this->readRegisterState() != 1) {
-    std::cout << "ERROR: After stream phase the reset part should started."
-              << std::endl;
-
-    std::cout << "ERROR: Possibly the loop timeouted and never left from the "
-                 "stream phase."
-              << std::endl;
-              
-    testFailed();
-  }
+  testAssertEquals<uint8_t>("After stream phase the reset part started",
+                            1, this->readRegisterState());
+  //ERROR: Possibly the loop timeouted and never left from the stream phase.
 
   // Wait for the reset to finish (stream phase + reset phase = whole cycle)
   testTimeoutStart(3000);  // 3ms timeout
   while (this->testRegisterCtrl(NeoPixelCtrl::RUN)) {
     // Wait for the cycle to finish
-    if (testTimeoutIsExpired()) 
-      testFailed();
+    testAssertEquals<bool>("Finished before timeout", false,
+                           testTimeoutIsExpired(), false);
 
-    if (readNeoData() != 0) {
-      // inside the reset part the output should be held low
-      std::cout << "ERROR: At the reset phase the neoData was not kept low"
-                << std::endl;
-      testFailed();
-    }
+    testAssertEquals<bool>("At the reset phase the neoData was kept low",
+                           false, readNeoData(), false);
 
     testWait();
   }
@@ -146,8 +135,8 @@ void NeoPixelDriver::selfTest4hardLimit8bit() {
 
   testTimeoutStart(3000);
   while (this->testRegisterCtrl(NeoPixelCtrl::RUN)) {
-    if (testTimeoutIsExpired())
-      testFailed();
+    testAssertEquals<bool>("Finished before timeout", false,
+                           testTimeoutIsExpired(), false);
 
     testWait();  // Wait for the next cycle to finish
   }
@@ -160,8 +149,8 @@ void NeoPixelDriver::selfTest5softLimit8bitLoop() {
   // Iterate until simulation is finished or enough time passed.
   testTimeoutStart(3000);
   while (!testIsFinished()) {
-    if (testTimeoutIsExpired())
-      testFailed();
+    testAssertEquals<bool>("Finished before timeout", false,
+                           testTimeoutIsExpired(), false);
 
     testWait();
   }
