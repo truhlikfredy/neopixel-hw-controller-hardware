@@ -46,15 +46,19 @@ const uint8_t neopixel_selftest_colors[SELFTEST_MAX_COLORS] = {
 class NeoPixelDriver {
  private:
   uint32_t base;
-  uint32_t pixels;
+  uint16_t pixels;
 
   void writeRegister(NeoPixelReg::Type, uint8_t value);
   uint8_t readRegister(NeoPixelReg::Type addr);
 
  public:
-  NeoPixelDriver(uint32_t base, uint32_t pixels);
+  NeoPixelDriver(uint32_t base, uint16_t pixels);
+  NeoPixelDriver(uint32_t base);
+
+  void initHardware();
 
   void setPixelLength(uint16_t pixels);
+  uint16_t getPixelLength();
   // void setPixel(uint32_t color);
   // void setPixel(uint8_t red, uint8_t green, uint8_t blue);
   // void setPixelRaw(uint32_t color);

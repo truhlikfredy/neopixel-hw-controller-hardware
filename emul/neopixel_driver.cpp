@@ -4,12 +4,39 @@
 #include "neopixel_hal.h"
 #include "test_helper.h"
 
-NeoPixelDriver::NeoPixelDriver(uint32_t base, uint32_t pixels) {
+NeoPixelDriver::NeoPixelDriver(uint32_t base, uint16_t pixels) {
   this->base = base;
-  this->pixels = pixels;
+  initHardware();
+  setPixelLength(pixels);
 }
 
-void NeoPixelDriver::setPixelLength(uint16_t pixels) {}
+NeoPixelDriver::NeoPixelDriver(uint32_t base) {
+  this->base = base;
+  initHardware();
+}
+
+void NeoPixelDriver::initHardware() {
+  writeRegisterCtrl(NeoPixelCtrl::INIT);
+  
+  // block the driver until the hardware deasserts the init flag
+  while (testRegisterCtrl(NeoPixelCtrl::INIT));
+}
+
+void NeoPixelDriver::setPixelLength(uint16_t pixels) {
+  if (testRegisterCtrl(NeoPixelCtrl::MODE32)) {
+    writeRegisterMax(pixels <<2);
+  } else {
+    writeRegisterMax(pixels);
+  }
+}
+
+uint16_t NeoPixelDriver::getPixelLength() {
+  if (testRegisterCtrl(NeoPixelCtrl::MODE32)) {
+    return(readRegisterMax() >> 2);
+  } else {
+    return(readRegisterMax());
+  }
+}
 
 void NeoPixelDriver::writeRegister(NeoPixelReg::Type addr, uint8_t data) {
   neopixelWriteApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT, data);
