@@ -29,7 +29,7 @@ template <typename T>
 void testAssertEquals(std::string text,
                       T expected,
                       T actual) {
-  testAssertEquals(text, expected, actual, false);
+  testAssertEquals(text, expected, actual, true);
 }
 // expected usages of the template are pre-compiled so they will not be
 // undefined
