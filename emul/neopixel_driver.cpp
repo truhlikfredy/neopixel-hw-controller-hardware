@@ -18,7 +18,8 @@ NeoPixelDriver::NeoPixelDriver(uint32_t base) {
 void NeoPixelDriver::initHardware() {
   writeRegisterCtrl(NeoPixelCtrl::INIT);
   
-  // block the driver until the hardware deasserts the init flag
+  // block the driver until the hardware deasserts the init flag.
+  // if something is wrong with the hw this will make the firmware to freeze
   while (testRegisterCtrl(NeoPixelCtrl::INIT));
 }
 

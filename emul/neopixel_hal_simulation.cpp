@@ -2,6 +2,10 @@
 #include "neopixel_simulation.h"
 
 void evalStep() {
+  if (sim_time > SIMULATION_HARD_LIMIT) {
+    simulationHardLimitReached();
+  }
+  
   uut->apbPclk = uut->apbPclk ? 0 : 1;
   if (uut->apbPclk) {
     // on positive apbPclk cycle the 7mhz clock

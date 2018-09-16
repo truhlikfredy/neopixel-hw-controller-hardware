@@ -33,8 +33,18 @@ void simulationDone() {
   delete uut;
 }
 
+void simulationHardLimitReached() {
+  std::cout << "ERROR: Simulation time reached hard limit, probably stuck at something. Terminating the simulation." << std::endl;
+    
+  simulationDone();
+  exit(1);
+}
 
 void cycleClocks() {
+  if (sim_time > SIMULATION_HARD_LIMIT) {
+    simulationHardLimitReached();
+  }
+
   uut->apbPclk = 0;
   uut->eval();
   tfp->dump(sim_time += 25);
@@ -52,6 +62,7 @@ void testHeader(std::string text) {
 
 void test1() {
   testHeader("Test 1 - populate buffer with values");
+  //TODO: make sure they are registers and save int the DOTs
   uut->anton_neopixel_apb_top__DOT__test_unit = 1;
 
   driver->selfTest1populatePixelBuffer();
@@ -110,7 +121,7 @@ int main(int argc, char** argv) {
   uut->syncStart = 0;
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
-  driver = new NeoPixelDriver(0, 60);
+  driver = new NeoPixelDriver(0x0);
   
   testStart();
   test1();
