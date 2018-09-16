@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+// comment out to remove the selftest features
+#define NEOPIXEL_SELFTEST
+
 #define NEOPIXEL_CTRL_BIT ((uint16_t)(1 << 15))
 #define NEOPIXEL_CTRL_BIT_MASK (~(uint16_t)(1 << 15))
 
@@ -20,15 +23,16 @@ struct NeoPixelCtrl {
   } Type;
 };
 
-// TODO hide this behind define
+#ifdef NEOPIXEL_SELFTEST
 #define SELFTEST_MAX_COLORS 9
 
-const uint8_t colors[SELFTEST_MAX_COLORS] = {
+const uint8_t neopixel_selftest_colors[SELFTEST_MAX_COLORS] = {
     0xff, 0x02, 0x18,
     0xDE,  // this shouldn't get displayed in 32bit mode
     0xCE, 0xAD, 0x98,
     0x01,  // this shouldn't get displayed in 32bit mode
     0x00};
+#endif
 
 class NeoPixelDriver {
  private:
@@ -49,7 +53,6 @@ class NeoPixelDriver {
   // TODO: Peripheral reset
 
   // TODO: Pixel words
-  // TODO: update/start
   void writePixelByte(uint16_t pixel, uint8_t value);
   uint8_t readPixelByte(uint16_t pixel);
 
@@ -65,13 +68,14 @@ class NeoPixelDriver {
   void updateLeds();
   void syncUpdateLeds();
 
-  // self test parts
-  // TODO hide this behind define
+  // self test methods
+#ifdef NEOPIXEL_SELFTEST
   void selfTest1populatePixelBuffer();
   void selfTest2maxRegister();
   void selfTest3softLimit32bit();
   void selfTest4hardLimit8bit();
   void selfTest5softLimit8bitLoop();
+#endif
 };
 
 #endif

@@ -4,7 +4,6 @@
 #include "neopixel_hal.h"
 #include "test_helper.h"
 
-
 NeoPixelDriver::NeoPixelDriver(uint32_t base, uint32_t pixels) {
   this->base = base;
   this->pixels = pixels;
@@ -63,19 +62,20 @@ void NeoPixelDriver::syncUpdateLeds() {
 }
 
 /******************** SELF TEST IMPLEMENTATION **********************/
+#ifdef NEOPIXEL_SELFTEST
 
 void NeoPixelDriver::selfTest1populatePixelBuffer() {
   // write color values into the buffer
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    this->writePixelByte(i, colors[i]);
+    this->writePixelByte(i, neopixel_selftest_colors[i]);
   }
 
   // read it back and verify if they match
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    if (this->readPixelByte(i) != colors[i]) {
+    if (this->readPixelByte(i) != neopixel_selftest_colors[i]) {
       std::cout << "Pixel data @" << i << " doesn't match actual "
-                << this->readPixelByte(i) << " != expected " << colors[i]
-                << std::endl;
+                << this->readPixelByte(i) << " != expected "
+                << neopixel_selftest_colors[i] << std::endl;
 
       testFailed();
     }
@@ -166,3 +166,5 @@ void NeoPixelDriver::selfTest5softLimit8bitLoop() {
     testWait();
   }
 }
+
+#endif
