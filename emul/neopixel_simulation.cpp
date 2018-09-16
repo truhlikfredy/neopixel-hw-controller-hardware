@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
   driver = new NeoPixelDriver(0x0);
-  
+
   testStart();
   test1();
   test2();

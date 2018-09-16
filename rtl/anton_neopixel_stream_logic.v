@@ -8,6 +8,9 @@ module anton_neopixel_stream_logic (
   input  reg_ctrl_limit,
   input  reg_ctrl_32bit,
   input  [12:0] reg_max, // 13 bits in total apb is using 16 bus but -2 bit are dropped for word alignment and 1 bit used to detect control registry accesses
+  
+  input  initSlow,
+  output initSlowDone,
 
   output [2:0] bit_pattern_index,
   output [4:0] pixel_bit_index,
@@ -32,6 +35,8 @@ module anton_neopixel_stream_logic (
 
   reg                   state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg [3:0]             cycle              = 'd0;  
+
+  reg                   initSlowDone       = 'b0;
   
 
   // When 32bit mode enabled use
@@ -49,9 +54,14 @@ module anton_neopixel_stream_logic (
 
 
   always @(posedge clk7mhz) begin
-    if (reg_ctrl_init) begin
+    if (initSlow) begin
       pixel_index     <= {BUFFER_BITS{1'b0}};
       pixel_bit_index <= 'd0;  
+      initSlowDone    <= 'b1; // after the init is done signal a flag
+    end
+
+    if (initSlowDone) begin
+      initSlowDone    <= 'b0; // after one slow clock, it should be enough to de-assert the flag
     end
   end
 

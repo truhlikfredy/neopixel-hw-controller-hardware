@@ -1,5 +1,6 @@
 `include "anton_common.vh"
 
+// TODO more consistent naming
 module anton_neopixel_registers (
   input         busClk,
   input  [13:0] busAddr,
@@ -18,7 +19,9 @@ module anton_neopixel_registers (
   output        reg_ctrl_limit,
   output        reg_ctrl_run,
   output        reg_ctrl_loop,
-  output        reg_ctrl_32bit
+  output        reg_ctrl_32bit,
+  output        initSlow,
+  input         initSlowDone
 );
 
   reg [7:0]  pixels[BUFFER_END:0];
@@ -43,14 +46,20 @@ module anton_neopixel_registers (
   // reset nothing funny is happening
   
   always @(posedge busClk) begin
+    if (initSlowDone) begin
+      reg_ctrl_init <= 'b0;
+      initSlow      <= 'b0;
+    end
+
     if (reg_ctrl_init) begin
-      reg_ctrl_init   <= 'b0;
+      // reg_ctrl_init   <= 'b0;
       reg_ctrl_limit  <= 'b0;
       reg_ctrl_run    <= 'b0;
       reg_ctrl_loop   <= 'b0;
       reg_ctrl_32bit  <= 'b0;
-    end else begin
 
+      initSlow        <= 'b1;
+    end
       if (busWrite) begin
         if (busAddr[13] == 'b0) begin
 
@@ -81,7 +90,6 @@ module anton_neopixel_registers (
             3: busDataOut <= {7'b0000000, state};
           endcase
         end
-      end
     end
   end
 
