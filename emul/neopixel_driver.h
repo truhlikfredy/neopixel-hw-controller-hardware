@@ -19,7 +19,8 @@ struct NeoPixelCtrl {
     LIMIT  = 2, 
     RUN    = 4, 
     LOOP   = 8, 
-    MODE32 = 16 
+    MODE32 = 16,
+    BUFFER = 32,
   } Type;
 };
 
@@ -49,6 +50,11 @@ class NeoPixelDriver {
   uint16_t pixels;
 
   void writeRegister(NeoPixelReg::Type, uint8_t value);
+
+  void writeRegisterMasked(NeoPixelReg::Type addr,
+                           uint8_t mask,
+                           uint8_t value);
+
   uint8_t readRegister(NeoPixelReg::Type addr);
 
  public:
@@ -73,10 +79,14 @@ class NeoPixelDriver {
   uint16_t readRegisterMax();
 
   void writeRegisterCtrl(uint8_t value);
+  void writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
+  void writeRegisterCtrlWOBuffer(uint8_t value);
   uint8_t readRegisterCtrl();
   uint8_t testRegisterCtrl(uint8_t mask);
 
   uint8_t readRegisterState();
+
+  void switchBuffer();
 
   void updateLeds();
   void syncUpdateLeds();

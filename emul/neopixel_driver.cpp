@@ -43,6 +43,12 @@ void NeoPixelDriver::writeRegister(NeoPixelReg::Type addr, uint8_t data) {
   neopixelWriteApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT, data);
 }
 
+void NeoPixelDriver::writeRegisterMasked(NeoPixelReg::Type addr,
+                                         uint8_t mask,
+                                         uint8_t value) {
+  writeRegister(addr,(readRegister(addr) & ~mask) | (value & mask));
+}
+
 uint8_t NeoPixelDriver::readRegister(NeoPixelReg::Type addr) {
   return (neopixelReadApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT));
 }
@@ -69,6 +75,14 @@ void NeoPixelDriver::writeRegisterCtrl(uint8_t value) {
   writeRegister(NeoPixelReg::CTRL, value);
 }
 
+void NeoPixelDriver::writeRegisterCtrlMasked(uint8_t mask, uint8_t value) {
+  writeRegisterMasked(NeoPixelReg::CTRL, mask, value);
+}
+
+void NeoPixelDriver::writeRegisterCtrlWOBuffer(uint8_t value) {
+  writeRegisterCtrl(value | testRegisterCtrl(NeoPixelCtrl::BUFFER));
+}
+
 uint8_t NeoPixelDriver::readRegisterCtrl() {
   return (readRegister(NeoPixelReg::CTRL));
 }
@@ -77,8 +91,13 @@ uint8_t NeoPixelDriver::testRegisterCtrl(uint8_t mask) {
   return (readRegister(NeoPixelReg::CTRL) & mask);
 }
 
+
 uint8_t NeoPixelDriver::readRegisterState() {
   return (readRegister(NeoPixelReg::STATE));
+}
+
+void NeoPixelDriver::switchBuffer() {
+  writeRegisterCtrlMasked(NeoPixelCtrl::BUFFER, ~testRegisterCtrl(NeoPixelCtrl::BUFFER));
 }
 
 void NeoPixelDriver::updateLeds() {
@@ -125,13 +144,13 @@ void NeoPixelDriver::selfTest2maxRegister() {
 }
 
 void NeoPixelDriver::selfTest3softLimit32bit() {
-  writeRegisterCtrl(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
+  writeRegisterCtrlWOBuffer(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
   updateLeds();
 
   testTimeoutStart(3000); // 3ms timeout
   while (readRegisterState() == 0) {
     // Wait to end stream and start reset
-    testAssertEquals<bool>("Finished before timeout", false,
+    testAssertEquals<bool>("Finish before timeout", false,
                            testTimeoutIsExpired(), false);
 
     testWait();
@@ -144,7 +163,7 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
   testTimeoutStart(3000);  // 3ms timeout
   while (testRegisterCtrl(NeoPixelCtrl::RUN)) {
     // Wait for the cycle to finish
-    testAssertEquals<bool>("Finished before timeout", false,
+    testAssertEquals<bool>("Finish before timeout", false,
                            testTimeoutIsExpired(), false);
 
     testAssertEquals<bool>("At the reset phase the neoData was kept low",

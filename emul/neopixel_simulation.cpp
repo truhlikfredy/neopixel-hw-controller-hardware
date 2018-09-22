@@ -125,6 +125,7 @@ int main(int argc, char** argv) {
 
   testStart();
   test1();
+  driver->switchBuffer();
   test2();
   test3();
   test4();
