@@ -19,8 +19,7 @@ struct NeoPixelCtrl {
     LIMIT  = 2, 
     RUN    = 4, 
     LOOP   = 8, 
-    MODE32 = 16,
-    BUFFER = 32,
+    MODE32 = 16
   } Type;
 };
 
@@ -29,7 +28,8 @@ struct NeoPixelReg {
     MAX_LOW  = 0,
     MAX_HIGH = 1,
     CTRL     = 2,
-    STATE    = 3
+    STATE    = 3,
+    BUFFER   = 4
   } Type;
 };
 
@@ -80,7 +80,6 @@ class NeoPixelDriver {
 
   void writeRegisterCtrl(uint8_t value);
   void writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
-  void writeRegisterCtrlWOBuffer(uint8_t value);
   uint8_t readRegisterCtrl();
   uint8_t testRegisterCtrl(uint8_t mask);
 
@@ -93,11 +92,12 @@ class NeoPixelDriver {
 
   // self test methods
 #ifdef NEOPIXEL_SELFTEST
-  void selfTest1populatePixelBuffer();
-  void selfTest2maxRegister();
-  void selfTest3softLimit32bit();
-  void selfTest4hardLimit8bit();
-  void selfTest5softLimit8bitLoop();
+  void selfTestPopulatePixelBuffer();
+  void selfTestMaxRegister();
+  void selfTestSwitchBuffer();
+  void selfTestSoftLimit32bit();
+  void selfTestHardLimit8bit();
+  void selfTestSoftLimit8bitLoop();
 #endif
 };
 

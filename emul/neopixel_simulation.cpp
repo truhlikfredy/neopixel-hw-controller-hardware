@@ -65,40 +65,47 @@ void test1() {
   //TODO: make sure they are registers and save int the DOTs
   uut->anton_neopixel_apb_top__DOT__test_unit = 1;
 
-  driver->selfTest1populatePixelBuffer();
+  driver->selfTestPopulatePixelBuffer();
 }
 
 void test2() {
-  testHeader("Test 2 - write and read back MAX register");
+  testHeader("Test 2 - double buffering");
   uut->anton_neopixel_apb_top__DOT__test_unit = 2;
 
-  driver->selfTest2maxRegister();
+  driver->selfTestSwitchBuffer();
 }
 
 void test3() {
-  testHeader(
-      "Test 3 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size "
-      "(which is 2 pixels in 32bit mode)");
+  testHeader("Test 3 - write and read back MAX register");
   uut->anton_neopixel_apb_top__DOT__test_unit = 3;
 
-  driver->selfTest3softLimit32bit();
+  driver->selfTestMaxRegister();
 }
 
 void test4() {
   testHeader(
-      "Test 4 - After one run is finished switch to 8bit with hard limit mode");
+      "Test 4 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size "
+      "(which is 2 pixels in 32bit mode)");
   uut->anton_neopixel_apb_top__DOT__test_unit = 4;
 
-  driver->selfTest4hardLimit8bit();
+  driver->selfTestSoftLimit32bit();
 }
 
 void test5() {
   testHeader(
-      "Test 5 - Keep 8bit mode, but enable looping and software limit, and "
-      "start it with a synch input");
+      "Test 5 - After one run is finished switch to 8bit with hard limit mode");
   uut->anton_neopixel_apb_top__DOT__test_unit = 5;
 
-  driver->selfTest5softLimit8bitLoop();
+  driver->selfTestHardLimit8bit();
+}
+
+void test6() {
+  testHeader(
+      "Test 6 - Keep 8bit mode, but enable looping and software limit, and "
+      "start it with a synch input");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 6;
+
+  driver->selfTestSoftLimit8bitLoop();
 }
 
 int main(int argc, char** argv) {
@@ -125,11 +132,12 @@ int main(int argc, char** argv) {
 
   testStart();
   test1();
-  driver->switchBuffer();
   test2();
+  driver->switchBuffer();
   test3();
   test4();
   test5();
+  test6();
   testHeader("Tests finished without a failure");
 
   // Proper end of the simulation, if the simulation was shutdown sooner, due

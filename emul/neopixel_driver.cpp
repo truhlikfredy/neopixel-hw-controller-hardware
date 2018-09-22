@@ -79,10 +79,6 @@ void NeoPixelDriver::writeRegisterCtrlMasked(uint8_t mask, uint8_t value) {
   writeRegisterMasked(NeoPixelReg::CTRL, mask, value);
 }
 
-void NeoPixelDriver::writeRegisterCtrlWOBuffer(uint8_t value) {
-  writeRegisterCtrl(value | testRegisterCtrl(NeoPixelCtrl::BUFFER));
-}
-
 uint8_t NeoPixelDriver::readRegisterCtrl() {
   return (readRegister(NeoPixelReg::CTRL));
 }
@@ -97,7 +93,7 @@ uint8_t NeoPixelDriver::readRegisterState() {
 }
 
 void NeoPixelDriver::switchBuffer() {
-  writeRegisterCtrlMasked(NeoPixelCtrl::BUFFER, ~testRegisterCtrl(NeoPixelCtrl::BUFFER));
+  writeRegister(NeoPixelReg::BUFFER, ~readRegister(NeoPixelReg::BUFFER));
 }
 
 void NeoPixelDriver::updateLeds() {
@@ -111,7 +107,7 @@ void NeoPixelDriver::syncUpdateLeds() {
 /******************** SELF TEST IMPLEMENTATION **********************/
 #ifdef NEOPIXEL_SELFTEST
 
-void NeoPixelDriver::selfTest1populatePixelBuffer() {
+void NeoPixelDriver::selfTestPopulatePixelBuffer() {
   // write color values into the buffer
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
     writePixelByte(i, neopixel_selftest_colors[i]);
@@ -129,7 +125,31 @@ void NeoPixelDriver::selfTest1populatePixelBuffer() {
   }
 }
 
-void NeoPixelDriver::selfTest2maxRegister() {
+void NeoPixelDriver::selfTestSwitchBuffer() {
+  testAssertEquals<uint8_t>("Buffer A should be set by default", 0,
+                            readRegister(NeoPixelReg::BUFFER));
+
+  switchBuffer();
+  testAssertEquals<uint8_t>("Buffer should switch to B", 1,
+                            readRegister(NeoPixelReg::BUFFER));
+
+  for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
+    testAssertEquals<uint8_t>("Reading empty pixel from buffer B", 0x00,  
+      readPixelByte(i));
+  }
+
+  switchBuffer();
+  testAssertEquals<uint8_t>("Buffer should switch back to A", 0,
+                            readRegister(NeoPixelReg::BUFFER));
+
+  for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
+    testAssertEquals<uint8_t>(
+        "Reading previously populated pixel from buffer A",
+        neopixel_selftest_colors[i], readPixelByte(i));
+  }
+}
+
+void NeoPixelDriver::selfTestMaxRegister() {
   writeRegisterMax(0x1ace);
   testAssertEquals<uint16_t>("Large value in MAX control register", 0x1ace,
                              readRegisterMax());
@@ -143,8 +163,8 @@ void NeoPixelDriver::selfTest2maxRegister() {
                              readRegisterMax());
 }
 
-void NeoPixelDriver::selfTest3softLimit32bit() {
-  writeRegisterCtrlWOBuffer(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
+void NeoPixelDriver::selfTestSoftLimit32bit() {
+  writeRegisterCtrl(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
   updateLeds();
 
   testTimeoutStart(3000); // 3ms timeout
@@ -175,7 +195,7 @@ void NeoPixelDriver::selfTest3softLimit32bit() {
   testWait(2);
 }
 
-void NeoPixelDriver::selfTest4hardLimit8bit() {
+void NeoPixelDriver::selfTestHardLimit8bit() {
   writeRegisterCtrl(NeoPixelCtrl::NONE);
   updateLeds();
 
@@ -188,7 +208,7 @@ void NeoPixelDriver::selfTest4hardLimit8bit() {
   }
 }
 
-void NeoPixelDriver::selfTest5softLimit8bitLoop() {
+void NeoPixelDriver::selfTestSoftLimit8bitLoop() {
   writeRegisterCtrl(NeoPixelCtrl::LOOP | NeoPixelCtrl::LIMIT);
   syncUpdateLeds();
 
