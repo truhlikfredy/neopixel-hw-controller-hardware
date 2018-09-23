@@ -139,6 +139,10 @@ int main(int argc, char** argv) {
   } 
   test3();
   test4();
+  // just add delay so it's more visible on gtk wave
+  for (uint32_t i = 0; i < 150; i++) {
+    cycleClocks();
+  }
   test5();
   test6();
   testHeader("Tests finished without a failure");

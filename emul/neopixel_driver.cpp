@@ -127,7 +127,13 @@ void NeoPixelDriver::switchBuffer() {
 }
 
 void NeoPixelDriver::switchBufferSafely() {
-  while (!readRegisterState());
+  // if the double buffering will be disabled but underlying application was
+  // using it as a way to synch/slow-down the application, then still this
+  // function will just do that, but without switching a buffer
+  if (testRegisterCtrl(NeoPixelCtrl::RUN)) {
+    // if the stream is running, then wait for the reset phase to switch buffer
+    while (!readRegister(NeoPixelReg::STATE));
+  }
   switchBuffer();
 }
 
