@@ -4,7 +4,9 @@
 #include "neopixel_hal.h"
 #include "test_helper.h"
 
-NeoPixelDriver::NeoPixelDriver(uint32_t base, uint16_t pixels, bool doubleBuffer) {
+NeoPixelDriver::NeoPixelDriver(uint32_t base, 
+                               uint16_t pixels, 
+                               bool     doubleBuffer) {
   this->base         = base;
   this->doubleBuffer = doubleBuffer;
   initHardware();
@@ -23,6 +25,7 @@ NeoPixelDriver::NeoPixelDriver(uint32_t base) {
   this->doubleBuffer = false;
   initHardware();
 }
+
 
 void NeoPixelDriver::initHardware() {
   writeRegisterCtrl(NeoPixelCtrl::INIT);
@@ -128,7 +131,11 @@ void NeoPixelDriver::switchBufferSafely() {
   switchBuffer();
 }
 
-bool NeoPixelDriver::isDoubleBufferEnabled() {
+void NeoPixelDriver::setDoubleBuffer(bool value) {
+  doubleBuffer = value;
+}
+
+bool NeoPixelDriver::isDoubleBuffer() {
   return this->doubleBuffer;
 }
 
@@ -162,26 +169,28 @@ void NeoPixelDriver::selfTestPopulatePixelBuffer() {
 }
 
 void NeoPixelDriver::selfTestSwitchBuffer() {
-  testAssertEquals<uint8_t>("Buffer A should be set by default", 0,
-                            readRegister(NeoPixelReg::BUFFER));
+  if (doubleBuffer) {
+    testAssertEquals<uint8_t>("Buffer A should be set by default", 0,
+                              readRegister(NeoPixelReg::BUFFER));
 
-  switchBuffer();
-  testAssertEquals<uint8_t>("Buffer should switch to B", 1,
-                            readRegister(NeoPixelReg::BUFFER));
+    switchBuffer();
+    testAssertEquals<uint8_t>("Buffer should switch to B", 1,
+                              readRegister(NeoPixelReg::BUFFER));
 
-  for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    testAssertEquals<uint8_t>("Reading empty pixel from buffer B", 0x00,  
-      readPixelByte(i));
-  }
+    for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
+      testAssertEquals<uint8_t>("Reading empty pixel from buffer B", 0x00,  
+        readPixelByte(i));
+    }
 
-  switchBuffer();
-  testAssertEquals<uint8_t>("Buffer should switch back to A", 0,
-                            readRegister(NeoPixelReg::BUFFER));
+    switchBuffer();
+    testAssertEquals<uint8_t>("Buffer should switch back to A", 0,
+                              readRegister(NeoPixelReg::BUFFER));
 
-  for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    testAssertEquals<uint8_t>(
-        "Reading previously populated pixel from buffer A",
-        neopixel_selftest_colors[i], readPixelByte(i));
+    for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
+      testAssertEquals<uint8_t>(
+          "Reading previously populated pixel from buffer A",
+          neopixel_selftest_colors[i], readPixelByte(i));
+    }
   }
 }
 

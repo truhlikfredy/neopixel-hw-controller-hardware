@@ -129,11 +129,14 @@ int main(int argc, char** argv) {
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
   driver = new NeoPixelDriver(0x0);
+  driver->setDoubleBuffer(true);
 
   testStart();
   test1();
   test2();
-  driver->switchBuffer();
+  if (driver->isDoubleBuffer()) {
+    driver->switchBuffer();
+  } 
   test3();
   test4();
   test5();

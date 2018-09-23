@@ -91,7 +91,8 @@ class NeoPixelDriver {
 
   void switchBuffer();
   void switchBufferSafely();
-  bool isDoubleBufferEnabled();
+  void setDoubleBuffer(bool value);
+  bool isDoubleBuffer();
 
   void updateLeds();
   void syncUpdateLeds();
