@@ -62,6 +62,8 @@ class NeoPixelDriver {
   NeoPixelDriver(uint32_t base);
 
   void initHardware();
+  void cleanBuffers();
+  void cleanBuffer(uint8_t buffer);
 
   void setPixelLength(uint16_t pixels);
   uint16_t getPixelLength();
@@ -86,6 +88,7 @@ class NeoPixelDriver {
   uint8_t readRegisterState();
 
   void switchBuffer();
+  void switchBufferSafely();
 
   void updateLeds();
   void syncUpdateLeds();

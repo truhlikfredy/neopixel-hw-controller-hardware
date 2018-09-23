@@ -23,6 +23,22 @@ void NeoPixelDriver::initHardware() {
   while (testRegisterCtrl(NeoPixelCtrl::INIT));
 }
 
+void NeoPixelDriver::cleanBuffers() {
+  cleanBuffer(0);
+  cleanBuffer(1);
+}
+
+void NeoPixelDriver::cleanBuffer(uint8_t buffer) {
+  uint8_t currentBuffer = readRegister(NeoPixelReg::BUFFER);
+  writeRegister(NeoPixelReg::BUFFER, buffer);
+
+  for (uint32_t i = 0; i < pixels; i++) {
+    writePixelByte(i, 0x00);
+  }
+
+  writeRegister(NeoPixelReg::BUFFER, currentBuffer);
+}
+
 void NeoPixelDriver::setPixelLength(uint16_t pixels) {
   if (testRegisterCtrl(NeoPixelCtrl::MODE32)) {
     writeRegisterMax(pixels <<2);
@@ -94,6 +110,11 @@ uint8_t NeoPixelDriver::readRegisterState() {
 
 void NeoPixelDriver::switchBuffer() {
   writeRegister(NeoPixelReg::BUFFER, ~readRegister(NeoPixelReg::BUFFER));
+}
+
+void NeoPixelDriver::switchBufferSafely() {
+  while (!readRegisterState());
+  switchBuffer();
 }
 
 void NeoPixelDriver::updateLeds() {
