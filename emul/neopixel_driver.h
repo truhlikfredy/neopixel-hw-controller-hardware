@@ -48,6 +48,7 @@ class NeoPixelDriver {
  private:
   uint32_t base;
   uint16_t pixels;
+  bool     doubleBuffer;
 
   void writeRegister(NeoPixelReg::Type, uint8_t value);
 
@@ -58,6 +59,7 @@ class NeoPixelDriver {
   uint8_t readRegister(NeoPixelReg::Type addr);
 
  public:
+  NeoPixelDriver(uint32_t base, uint16_t pixels, bool doubleBuffer);
   NeoPixelDriver(uint32_t base, uint16_t pixels);
   NeoPixelDriver(uint32_t base);
 
@@ -89,6 +91,7 @@ class NeoPixelDriver {
 
   void switchBuffer();
   void switchBufferSafely();
+  bool isDoubleBufferEnabled();
 
   void updateLeds();
   void syncUpdateLeds();

@@ -4,14 +4,23 @@
 #include "neopixel_hal.h"
 #include "test_helper.h"
 
+NeoPixelDriver::NeoPixelDriver(uint32_t base, uint16_t pixels, bool doubleBuffer) {
+  this->base         = base;
+  this->doubleBuffer = doubleBuffer;
+  initHardware();
+  setPixelLength(pixels);
+}
+
 NeoPixelDriver::NeoPixelDriver(uint32_t base, uint16_t pixels) {
-  this->base = base;
+  this->base         = base;
+  this->doubleBuffer = false;
   initHardware();
   setPixelLength(pixels);
 }
 
 NeoPixelDriver::NeoPixelDriver(uint32_t base) {
-  this->base = base;
+  this->base         = base;
+  this->doubleBuffer = false;
   initHardware();
 }
 
@@ -109,12 +118,18 @@ uint8_t NeoPixelDriver::readRegisterState() {
 }
 
 void NeoPixelDriver::switchBuffer() {
-  writeRegister(NeoPixelReg::BUFFER, ~readRegister(NeoPixelReg::BUFFER));
+  if (doubleBuffer) {
+    writeRegister(NeoPixelReg::BUFFER, ~readRegister(NeoPixelReg::BUFFER));
+  }
 }
 
 void NeoPixelDriver::switchBufferSafely() {
   while (!readRegisterState());
   switchBuffer();
+}
+
+bool NeoPixelDriver::isDoubleBufferEnabled() {
+  return this->doubleBuffer;
 }
 
 void NeoPixelDriver::updateLeds() {
