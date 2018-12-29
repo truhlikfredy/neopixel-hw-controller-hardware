@@ -10,9 +10,10 @@
 
 
 // How long the reset delay will be happening, minimum spec is so 
-// 50us => 50000ns/(1/6.4) = 320 000 ticks. But some arrays need bit more:
-// 81us => 81000ns/(1/6.4) = 518 400 ticks
-`define RESET_DELAY_DEFAULT 518400
+// 1250ns = 1.25us => 1.25/(1/6.4) = 8 ticks for 1 bit to be transfer
+// 50us => 50/(1/6.4) = 320 ticks. But some arrays need bit more:
+// 300us => 300/(1/6.4) = 1959 ticks
+`define RESET_DELAY_DEFAULT 1959
 
 // https://stackoverflow.com/questions/5269634/address-width-from-ram-depth
 `define CLOG2(x) \

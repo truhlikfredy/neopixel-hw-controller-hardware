@@ -36,7 +36,7 @@ void testWait() {
 // Each simulation step is 25units of the counter, so 75 units of the
 // counter means 100ns in time, therefore 1172 counter units = 1us.
 void testTimeoutStart(uint32_t microSeconds) {
-  testTimeoutTime = sim_time + ((vluint64_t)(microSeconds) * 1172000);
+  testTimeoutTime = sim_time + ((vluint64_t)(microSeconds) * 1172);
 }
 
 bool testTimeoutIsExpired() {

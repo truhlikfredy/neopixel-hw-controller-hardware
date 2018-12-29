@@ -32,11 +32,11 @@ module anton_neopixel_registers (
   // alignment and 1 bit used to detect control registry accesses
   reg [12:0] reg_max; 
   
-  reg        reg_ctrl_init   = 'b0;
-  reg        reg_ctrl_limit  = 'b0; // Change this only when the pixel data are not streamed
-  reg        reg_ctrl_run    = 'b0;
-  reg        reg_ctrl_loop   = 'b0;
-  reg        reg_ctrl_32bit  = 'b0; // Change this only when the pixel data are not streamed
+  reg        reg_ctrl_init     = 'b0;
+  reg        reg_ctrl_limit    = 'b0; // Change this only when the pixel data are not streamed
+  reg        reg_ctrl_run      = 'b0;
+  reg        reg_ctrl_loop     = 'b0;
+  reg        reg_ctrl_32bit    = 'b0; // Change this only when the pixel data are not streamed
   reg        reg_buffer_select = 'b0;
 
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
