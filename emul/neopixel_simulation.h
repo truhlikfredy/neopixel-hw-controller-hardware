@@ -5,8 +5,8 @@
 #include "Vanton_neopixel_apb_top.h"
 #include "verilated_vcd_c.h"
 
-// when to kill the simulator to preven running in infinite loops
-#define SIMULATION_HARD_LIMIT (15000*750)
+// when to kill the simulator to prevent running in infinite loops
+#define SIMULATION_HARD_LIMIT (25000*1172*100)
 
 
 extern Vanton_neopixel_apb_top* uut;

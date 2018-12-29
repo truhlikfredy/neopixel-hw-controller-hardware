@@ -30,11 +30,13 @@ void testWait() {
   cycleClocks();
 }
 
-// 3 simulation steps are quired to for 100ns in simulation to pass.
+// TODO align simulation time with real time if you can
+// 3 simulation steps are required to for 100ns in simulation to pass.
+// which would be 6.4ns in real life.
 // Each simulation step is 25units of the counter, so 75 units of the
-// counter means 100ns in time, therefore 750 counter units = 1us.
+// counter means 100ns in time, therefore 1172 counter units = 1us.
 void testTimeoutStart(uint32_t microSeconds) {
-  testTimeoutTime = sim_time + ((vluint64_t)(microSeconds) * 750);
+  testTimeoutTime = sim_time + ((vluint64_t)(microSeconds) * 1172000);
 }
 
 bool testTimeoutIsExpired() {
