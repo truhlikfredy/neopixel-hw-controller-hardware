@@ -5,7 +5,7 @@
 // TODO: double buffering
 
 module anton_neopixel_apb_top (
-  input  clk7mhz,
+  input  clk6_4mhz,
   input  syncStart,
   output neoData,
   output neoState,
@@ -41,7 +41,7 @@ module anton_neopixel_apb_top (
   anton_neopixel_module #(
     .BUFFER_END(BUFFER_END)
   ) neopixel(
-    .clk7mhz(clk7mhz),
+    .clk6_4mhz(clk6_4mhz),
     .syncStart(syncStart),
     .neoData(neoData),
     .neoState(neoState),

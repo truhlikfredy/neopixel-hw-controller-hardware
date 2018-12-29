@@ -1,5 +1,5 @@
 lappend signals "TOP.anton_neopixel_apb_top.apbPclk"
-lappend signals "TOP.clk7mhz"
+lappend signals "TOP.clk6_4mhz"
 lappend signals "TOP.syncStart"
 lappend signals "TOP.neoData"
 lappend signals "TOP.neoState"

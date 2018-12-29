@@ -9,9 +9,10 @@
 `define BUFFER_END_DEFAULT 31
 
 
-// how long the reset delay will be happening, minimum is 50us so 50/(1/7) = 350
-// ticks. But giving bit margin 55us => 385 ticks
-`define RESET_DELAY_DEFAULT 2100
+// How long the reset delay will be happening, minimum spec is so 
+// 50us => 50000ns/(1/6.4) = 320 000 ticks. But some arrays need bit more:
+// 81us => 81000ns/(1/6.4) = 518 400 ticks
+`define RESET_DELAY_DEFAULT 518400
 
 // https://stackoverflow.com/questions/5269634/address-width-from-ram-depth
 `define CLOG2(x) \

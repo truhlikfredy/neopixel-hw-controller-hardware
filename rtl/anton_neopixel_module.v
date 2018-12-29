@@ -9,7 +9,7 @@
 // TODO: nodemon killall first
 
 module anton_neopixel_module (
-  input  clk7mhz,
+  input  clk6_4mhz,
   input  syncStart,
   output neoData,
   output neoState,
@@ -26,8 +26,9 @@ module anton_neopixel_module (
   // 8192 pixels, which should have 4Hz refresh
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT;
 
-  // how long the reset delay will be happening, minimum is 50us so 50/(1/7) =
-  // 350 ticks. But giving bit margin 55us => 385 ticks
+// How long the reset delay will be happening, minimum spec is so 
+// 50us => 50000ns/(1/6.4) = 320 000 ticks. But some arrays need bit more:
+// 81us => 81000ns/(1/6.4) = 518 400 ticks
   parameter  RESET_DELAY = `RESET_DELAY_DEFAULT; 
 
   // minimum required amount of bits to store the BUFFER_END
@@ -102,7 +103,7 @@ module anton_neopixel_module (
     .BUFFER_END(BUFFER_END),
     .RESET_DELAY(RESET_DELAY)
   ) stream_logic(
-    .clk7mhz(clk7mhz),
+    .clk6_4mhz(clk6_4mhz),
     .reg_ctrl_init(reg_ctrl_init),
     .reg_ctrl_run(reg_ctrl_run),
     .reg_ctrl_loop(reg_ctrl_loop),

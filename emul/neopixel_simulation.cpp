@@ -50,7 +50,7 @@ void cycleClocks() {
   tfp->dump(sim_time += 25);
 
   uut->apbPclk = 1;
-  uut->clk7mhz = uut->clk7mhz ? 0 : 1;
+  uut->clk6_4mhz = uut->clk6_4mhz ? 0 : 1;
   uut->eval();
   tfp->dump(sim_time += 25);
 }
@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
   vcdname += ".vcd";
   std::cout << vcdname << std::endl;
   tfp->open(vcdname.c_str());
-  uut->clk7mhz = 0;
+  uut->clk6_4mhz = 0;
   uut->syncStart = 0;
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 

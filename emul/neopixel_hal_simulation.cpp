@@ -9,7 +9,7 @@ void evalStep() {
   uut->apbPclk = uut->apbPclk ? 0 : 1;
   if (uut->apbPclk) {
     // on positive apbPclk cycle the 7mhz clock
-    uut->clk7mhz = uut->clk7mhz ? 0 : 1;
+    uut->clk6_4mhz = uut->clk6_4mhz ? 0 : 1;
   }
 
   uut->eval();
