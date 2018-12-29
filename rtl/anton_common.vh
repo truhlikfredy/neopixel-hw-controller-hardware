@@ -11,7 +11,7 @@
 
 // how long the reset delay will be happening, minimum is 50us so 50/(1/7) = 350
 // ticks. But giving bit margin 55us => 385 ticks
-`define RESET_DELAY_DEFAULT 385
+`define RESET_DELAY_DEFAULT 2100
 
 // https://stackoverflow.com/questions/5269634/address-width-from-ram-depth
 `define CLOG2(x) \

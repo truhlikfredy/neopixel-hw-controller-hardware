@@ -31,7 +31,7 @@ module anton_neopixel_stream_logic (
   reg [2:0]             bit_pattern_index  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [4:0]             pixel_bit_index    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
   reg [BUFFER_BITS-1:0] pixel_index        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
-  reg [9:0]             reset_delay_count  = 'd0;  // 10 bits can go to 1024 so should be enough to count ~500 (50us)
+  reg [11:0]             reset_delay_count  = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 2100ticks (300ns)
 
   reg                   state              = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg [3:0]             cycle              = 'd0;  
@@ -104,7 +104,7 @@ module anton_neopixel_stream_logic (
 
   always @(posedge clk7mhz) begin
     if (stream_reset) begin
-      // when in the reset state, count 50ns (RESET_DELAY / 10)
+      // when in the reset state, count 300ns (RESET_DELAY ticks / 7MHz clock)
       reset_delay_count <= reset_delay_count + 'b1;
     end
   end
