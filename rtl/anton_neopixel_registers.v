@@ -30,12 +30,14 @@ module anton_neopixel_registers (
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
   reg [12:0] reg_max; 
+
+  reg        initSlow       = 'b0;
   
-  reg        reg_ctrl_init     = 'b0;
-  reg        reg_ctrl_limit    = 'b0; // Change this only when the pixel data are not streamed
-  reg        reg_ctrl_run      = 'b0;
-  reg        reg_ctrl_loop     = 'b0;
-  reg        reg_ctrl_32bit    = 'b0; // Change this only when the pixel data are not streamed
+  reg        reg_ctrl_init  = 'b0;
+  reg        reg_ctrl_limit = 'b0; // Change this only when the pixel data are not streamed
+  reg        reg_ctrl_run   = 'b0;
+  reg        reg_ctrl_loop  = 'b0;
+  reg        reg_ctrl_32bit = 'b0; // Change this only when the pixel data are not streamed
 
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
@@ -52,12 +54,12 @@ module anton_neopixel_registers (
     end
 
     if (reg_ctrl_init) begin
-      reg_ctrl_limit    <= 'b0;
-      reg_ctrl_run      <= 'b0;
-      reg_ctrl_loop     <= 'b0;
-      reg_ctrl_32bit    <= 'b0;
+      reg_ctrl_limit <= 'b0;
+      reg_ctrl_run   <= 'b0;
+      reg_ctrl_loop  <= 'b0;
+      reg_ctrl_32bit <= 'b0;
 
-      initSlow        <= 'b1;
+      initSlow       <= 'b1;
     end
       if (busWrite) begin
         if (busAddr[13] == 'b0) begin
