@@ -48,7 +48,6 @@ class NeoPixelDriver {
  private:
   uint32_t base;
   uint16_t pixels;
-  bool     doubleBuffer;
 
   void writeRegister(NeoPixelReg::Type, uint8_t value);
 
@@ -59,7 +58,6 @@ class NeoPixelDriver {
   uint8_t readRegister(NeoPixelReg::Type addr);
 
  public:
-  NeoPixelDriver(uint32_t base, uint16_t pixels, bool doubleBuffer);
   NeoPixelDriver(uint32_t base, uint16_t pixels);
   NeoPixelDriver(uint32_t base);
 
@@ -67,7 +65,7 @@ class NeoPixelDriver {
   void cleanBuffers();
   void cleanBuffer(uint8_t buffer);
 
-  void setPixelLength(uint16_t pixels);
+  void     setPixelLength(uint16_t pixels);
   uint16_t getPixelLength();
   // void setPixel(uint32_t color);
   // void setPixel(uint8_t red, uint8_t green, uint8_t blue);
@@ -76,23 +74,20 @@ class NeoPixelDriver {
   // TODO: Peripheral reset (with wait)
 
   // TODO: Pixel words
-  void writePixelByte(uint16_t pixel, uint8_t value);
+  void    writePixelByte(uint16_t pixel, uint8_t value);
   uint8_t readPixelByte(uint16_t pixel);
 
-  void writeRegisterMax(uint16_t value);
+  void     writeRegisterMax(uint16_t value);
   uint16_t readRegisterMax();
 
-  void writeRegisterCtrl(uint8_t value);
-  void writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
+  void    writeRegisterCtrl(uint8_t value);
+  void    writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
   uint8_t readRegisterCtrl();
   uint8_t testRegisterCtrl(uint8_t mask);
 
   uint8_t readRegisterState();
 
-  void switchBuffer();
-  void switchBufferSafely();
-  void setDoubleBuffer(bool value);
-  bool isDoubleBuffer();
+  void waitForSafeBuffer();
 
   void updateLeds();
   void syncUpdateLeds();

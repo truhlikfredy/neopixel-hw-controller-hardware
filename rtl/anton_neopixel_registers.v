@@ -20,12 +20,11 @@ module anton_neopixel_registers (
   output        reg_ctrl_run,
   output        reg_ctrl_loop,
   output        reg_ctrl_32bit,
-  output        reg_buffer_select,
   output        initSlow,
   input         initSlowDone
 );
 
-  reg [7:0]  pixelsBuffers[2][BUFFER_END:0];
+  reg [7:0]  pixels[BUFFER_END:0];
   reg [7:0]  busDataOut;
 
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
@@ -37,7 +36,6 @@ module anton_neopixel_registers (
   reg        reg_ctrl_run      = 'b0;
   reg        reg_ctrl_loop     = 'b0;
   reg        reg_ctrl_32bit    = 'b0; // Change this only when the pixel data are not streamed
-  reg        reg_buffer_select = 'b0;
 
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
@@ -58,7 +56,6 @@ module anton_neopixel_registers (
       reg_ctrl_run      <= 'b0;
       reg_ctrl_loop     <= 'b0;
       reg_ctrl_32bit    <= 'b0;
-      reg_buffer_select <= 'b0;
 
       initSlow        <= 'b1;
     end
@@ -66,7 +63,7 @@ module anton_neopixel_registers (
         if (busAddr[13] == 'b0) begin
 
           // Write buffer
-          pixelsBuffers[reg_buffer_select][busAddr[BUFFER_BITS-1:0]] <= busDataIn;
+          pixels[busAddr[BUFFER_BITS-1:0]] <= busDataIn;
         end else begin
 
           // Write register
@@ -75,7 +72,6 @@ module anton_neopixel_registers (
             0: reg_max[7:0]  <= busDataIn;
             1: reg_max[12:8] <= busDataIn[4:0];
             2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
-            4: reg_buffer_select <= busDataIn[0];
           endcase
         end
       end
@@ -83,7 +79,7 @@ module anton_neopixel_registers (
         if (busAddr[13] == 'b0) begin
           
           // Read buffer
-          busDataOut <= pixelsBuffers[reg_buffer_select][busAddr[BUFFER_BITS-1:0]];
+          busDataOut <= pixels[busAddr[BUFFER_BITS-1:0]];
         end else begin
 
           // Read register
@@ -92,7 +88,6 @@ module anton_neopixel_registers (
             1: busDataOut <= { 3'b000, reg_max[12:8] };
             2: busDataOut <= { 3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init };
             3: busDataOut <= { 7'b0000000, state };
-            4: busDataOut <= { 7'b0000000, reg_buffer_select };
           endcase
         end
     end
@@ -103,6 +98,5 @@ module anton_neopixel_registers (
 
   always @(posedge busClk) if (syncStart) reg_ctrl_run <= 'b1;
 
-  assign pixels = pixelsBuffers[!reg_buffer_select];
 
 endmodule

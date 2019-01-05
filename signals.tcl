@@ -42,7 +42,6 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.initSlowDone"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.reg_ctrl_run"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.reg_ctrl_loop"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.reg_ctrl_32bit"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.reg_buffer_select"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.reg_state_reset"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.reg_state_off"
 

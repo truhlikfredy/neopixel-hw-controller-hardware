@@ -13,9 +13,11 @@ VerilatedVcdC* tfp;
 vluint64_t sim_time;
 NeoPixelDriver* driver;
 
+
 double sc_time_stamp() {
   return sim_time * 50;
 }
+
 
 void simulationDone() {
   // Done simulating
@@ -33,12 +35,14 @@ void simulationDone() {
   delete uut;
 }
 
+
 void simulationHardLimitReached() {
   std::cout << "ERROR: Simulation time reached hard limit, probably stuck at something. Terminating the simulation." << std::endl;
     
   simulationDone();
   exit(1);
 }
+
 
 void cycleClocks() {
   if (sim_time > SIMULATION_HARD_LIMIT) {
@@ -55,10 +59,12 @@ void cycleClocks() {
   tfp->dump(sim_time += 25);
 }
 
+
 void testHeader(std::string text) {
   std::cout << "---------------------------------------------" << std::endl;
   std::cout << text << std::endl;
 }
+
 
 void test1() {
   testHeader("Test 1 - populate buffer with values");
@@ -68,12 +74,12 @@ void test1() {
   driver->selfTestPopulatePixelBuffer();
 }
 
-void test2() {
-  testHeader("Test 2 - double buffering");
-  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
 
-  driver->selfTestSwitchBuffer();
+void test2() {
+  testHeader("Test 2 - double buffering - skipped as its implementation got removed");
+  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
 }
+
 
 void test3() {
   testHeader("Test 3 - write and read back MAX register");
@@ -81,6 +87,7 @@ void test3() {
 
   driver->selfTestMaxRegister();
 }
+
 
 void test4() {
   testHeader(
@@ -91,6 +98,7 @@ void test4() {
   driver->selfTestSoftLimit32bit();
 }
 
+
 void test5() {
   testHeader(
       "Test 5 - After one run is finished switch to 8bit with hard limit mode");
@@ -98,6 +106,7 @@ void test5() {
 
   driver->selfTestHardLimit8bit();
 }
+
 
 void test6() {
   testHeader(
@@ -107,6 +116,7 @@ void test6() {
 
   driver->selfTestSoftLimit8bitLoop();
 }
+
 
 int main(int argc, char** argv) {
   sim_time = 0;
@@ -129,14 +139,10 @@ int main(int argc, char** argv) {
   uut->anton_neopixel_apb_top__DOT__test_unit = 0;
 
   driver = new NeoPixelDriver(0x0);
-  driver->setDoubleBuffer(true);
 
   testStart();
   test1();
   test2();
-  if (driver->isDoubleBuffer()) {
-    driver->switchBuffer();
-  } 
   test3();
   test4();
   // just add delay so it's more visible on gtk wave

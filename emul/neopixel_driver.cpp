@@ -4,25 +4,17 @@
 #include "neopixel_hal.h"
 #include "test_helper.h"
 
+
 NeoPixelDriver::NeoPixelDriver(uint32_t base, 
-                               uint16_t pixels, 
-                               bool     doubleBuffer) {
+                               uint16_t pixels) {
   this->base         = base;
-  this->doubleBuffer = doubleBuffer;
   initHardware();
   setPixelLength(pixels);
 }
 
-NeoPixelDriver::NeoPixelDriver(uint32_t base, uint16_t pixels) {
-  this->base         = base;
-  this->doubleBuffer = false;
-  initHardware();
-  setPixelLength(pixels);
-}
 
 NeoPixelDriver::NeoPixelDriver(uint32_t base) {
   this->base         = base;
-  this->doubleBuffer = false;
   initHardware();
 }
 
@@ -35,10 +27,12 @@ void NeoPixelDriver::initHardware() {
   while (testRegisterCtrl(NeoPixelCtrl::INIT));
 }
 
+
 void NeoPixelDriver::cleanBuffers() {
   cleanBuffer(0);
   cleanBuffer(1);
 }
+
 
 void NeoPixelDriver::cleanBuffer(uint8_t buffer) {
   uint8_t currentBuffer = readRegister(NeoPixelReg::BUFFER);
@@ -51,6 +45,7 @@ void NeoPixelDriver::cleanBuffer(uint8_t buffer) {
   writeRegister(NeoPixelReg::BUFFER, currentBuffer);
 }
 
+
 void NeoPixelDriver::setPixelLength(uint16_t pixels) {
   if (testRegisterCtrl(NeoPixelCtrl::MODE32)) {
     writeRegisterMax(pixels <<2);
@@ -58,6 +53,7 @@ void NeoPixelDriver::setPixelLength(uint16_t pixels) {
     writeRegisterMax(pixels);
   }
 }
+
 
 uint16_t NeoPixelDriver::getPixelLength() {
   if (testRegisterCtrl(NeoPixelCtrl::MODE32)) {
@@ -67,9 +63,11 @@ uint16_t NeoPixelDriver::getPixelLength() {
   }
 }
 
+
 void NeoPixelDriver::writeRegister(NeoPixelReg::Type addr, uint8_t data) {
   neopixelWriteApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT, data);
 }
+
 
 void NeoPixelDriver::writeRegisterMasked(NeoPixelReg::Type addr,
                                          uint8_t mask,
@@ -77,39 +75,48 @@ void NeoPixelDriver::writeRegisterMasked(NeoPixelReg::Type addr,
   writeRegister(addr,(readRegister(addr) & ~mask) | (value & mask));
 }
 
+
 uint8_t NeoPixelDriver::readRegister(NeoPixelReg::Type addr) {
   return (neopixelReadApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT));
 }
+
 
 void NeoPixelDriver::writePixelByte(uint16_t pixel, uint8_t value) {
   neopixelWriteApbByte(pixel << 2 & NEOPIXEL_CTRL_BIT_MASK, value);
 }
 
+
 uint8_t NeoPixelDriver::readPixelByte(uint16_t addr) {
   return (neopixelReadApbByte(addr << 2 & NEOPIXEL_CTRL_BIT_MASK));
 }
+
 
 void NeoPixelDriver::writeRegisterMax(uint16_t value) {
   writeRegister(NeoPixelReg::MAX_LOW, value & 0xFF);
   writeRegister(NeoPixelReg::MAX_HIGH, (value >> 8) & 0xFF);
 }
 
+
 uint16_t NeoPixelDriver::readRegisterMax() {
   return ((uint16_t)(readRegister(NeoPixelReg::MAX_LOW)) |
           (uint16_t)(readRegister(NeoPixelReg::MAX_HIGH)) << 8);
 }
 
+
 void NeoPixelDriver::writeRegisterCtrl(uint8_t value) {
   writeRegister(NeoPixelReg::CTRL, value);
 }
+
 
 void NeoPixelDriver::writeRegisterCtrlMasked(uint8_t mask, uint8_t value) {
   writeRegisterMasked(NeoPixelReg::CTRL, mask, value);
 }
 
+
 uint8_t NeoPixelDriver::readRegisterCtrl() {
   return (readRegister(NeoPixelReg::CTRL));
 }
+
 
 uint8_t NeoPixelDriver::testRegisterCtrl(uint8_t mask) {
   return (readRegister(NeoPixelReg::CTRL) & mask);
@@ -120,13 +127,8 @@ uint8_t NeoPixelDriver::readRegisterState() {
   return (readRegister(NeoPixelReg::STATE));
 }
 
-void NeoPixelDriver::switchBuffer() {
-  if (doubleBuffer) {
-    writeRegister(NeoPixelReg::BUFFER, ~readRegister(NeoPixelReg::BUFFER));
-  }
-}
 
-void NeoPixelDriver::switchBufferSafely() {
+void NeoPixelDriver::waitForSafeBuffer() {
   // if the double buffering will be disabled but underlying application was
   // using it as a way to synch/slow-down the application, then still this
   // function will just do that, but without switching a buffer
@@ -134,24 +136,18 @@ void NeoPixelDriver::switchBufferSafely() {
     // if the stream is running, then wait for the reset phase to switch buffer
     while (!readRegister(NeoPixelReg::STATE));
   }
-  switchBuffer();
 }
 
-void NeoPixelDriver::setDoubleBuffer(bool value) {
-  doubleBuffer = value;
-}
-
-bool NeoPixelDriver::isDoubleBuffer() {
-  return this->doubleBuffer;
-}
 
 void NeoPixelDriver::updateLeds() {
   writeRegisterCtrl(NeoPixelCtrl::RUN | readRegisterCtrl());
 }
 
+
 void NeoPixelDriver::syncUpdateLeds() {
   neopixelSyncUpdate();
 }
+
 
 /******************** SELF TEST IMPLEMENTATION **********************/
 #ifdef NEOPIXEL_SELFTEST
@@ -174,31 +170,6 @@ void NeoPixelDriver::selfTestPopulatePixelBuffer() {
   }
 }
 
-void NeoPixelDriver::selfTestSwitchBuffer() {
-  if (doubleBuffer) {
-    testAssertEquals<uint8_t>("Buffer A should be set by default", 0,
-                              readRegister(NeoPixelReg::BUFFER));
-
-    switchBuffer();
-    testAssertEquals<uint8_t>("Buffer should switch to B", 1,
-                              readRegister(NeoPixelReg::BUFFER));
-
-    for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-      testAssertEquals<uint8_t>("Reading empty pixel from buffer B", 0x00,  
-        readPixelByte(i));
-    }
-
-    switchBuffer();
-    testAssertEquals<uint8_t>("Buffer should switch back to A", 0,
-                              readRegister(NeoPixelReg::BUFFER));
-
-    for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-      testAssertEquals<uint8_t>(
-          "Reading previously populated pixel from buffer A",
-          neopixel_selftest_colors[i], readPixelByte(i));
-    }
-  }
-}
 
 void NeoPixelDriver::selfTestMaxRegister() {
   writeRegisterMax(0x1ace);
@@ -213,6 +184,7 @@ void NeoPixelDriver::selfTestMaxRegister() {
   testAssertEquals<uint16_t>("Small value in MAX control register", 7,
                              readRegisterMax());
 }
+
 
 void NeoPixelDriver::selfTestSoftLimit32bit() {
   writeRegisterCtrl(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);
@@ -246,6 +218,7 @@ void NeoPixelDriver::selfTestSoftLimit32bit() {
   testWait(2);
 }
 
+
 void NeoPixelDriver::selfTestHardLimit8bit() {
   writeRegisterCtrl(NeoPixelCtrl::NONE);
   updateLeds();
@@ -258,6 +231,7 @@ void NeoPixelDriver::selfTestHardLimit8bit() {
     testWait();  // Wait for the next cycle to finish
   }
 }
+
 
 void NeoPixelDriver::selfTestSoftLimit8bitLoop() {
   writeRegisterCtrl(NeoPixelCtrl::LOOP | NeoPixelCtrl::LIMIT);
@@ -272,5 +246,6 @@ void NeoPixelDriver::selfTestSoftLimit8bitLoop() {
     testWait();
   }
 }
+
 
 #endif

@@ -42,7 +42,6 @@ module anton_neopixel_module (
   wire        reg_ctrl_run;
   wire        reg_ctrl_loop;
   wire        reg_ctrl_32bit;
-  wire        reg_buffer_select;
   wire        initSlow;
   wire        initSlowDone;
   
@@ -68,7 +67,6 @@ module anton_neopixel_module (
     .reg_ctrl_run(reg_ctrl_run),
     .reg_ctrl_loop(reg_ctrl_loop),
     .reg_ctrl_32bit(reg_ctrl_32bit),
-    .reg_buffer_select(reg_buffer_select),
     .initSlow(initSlow),
     .initSlowDone(initSlowDone)
   );
