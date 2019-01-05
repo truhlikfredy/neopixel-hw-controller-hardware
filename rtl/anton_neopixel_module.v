@@ -37,8 +37,8 @@ module anton_neopixel_module #(
   wire        regCtrl32bit;
   wire        initSlow;
   wire        initSlowDone;
+  wire        streamSyncOf;
   
-
   anton_neopixel_registers #(
     .BUFFER_END(BUFFER_END)
   ) registers(
@@ -65,16 +65,14 @@ module anton_neopixel_module #(
   );
 
 
-  wire [2:0] bitPatternIndex;
-  wire [4:0] pixelBitIndex;
+  wire [2:0]             bitPatternIndex;
+  wire [4:0]             pixelBitIndex;
   wire [BUFFER_BITS-1:0] pixelIndex;
   wire [BUFFER_BITS-1:0] pixelIndexMax;
-  wire streamOutput;
-  wire streamReset;
-  wire streamBitOf;
-  wire streamPixelOf;
-  wire streamSyncOf;
-
+  wire                   streamOutput;
+  wire                   streamReset;
+  wire                   streamBitOf;
+  wire                   streamPixelOf;
 
   anton_neopixel_stream #(
     .BUFFER_END(BUFFER_END)
