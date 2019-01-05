@@ -24,6 +24,9 @@ module anton_neopixel_registers (
   input         initSlowDone
 );
 
+  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
+  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
+
   reg [7:0]  pixels[BUFFER_END:0];
   reg [7:0]  busDataOut;
 
@@ -39,8 +42,6 @@ module anton_neopixel_registers (
   reg        reg_ctrl_loop  = 'b0;
   reg        reg_ctrl_32bit = 'b0; // Change this only when the pixel data are not streamed
 
-  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
-  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
 
 
   // TODO: detect verilator and use it only there
