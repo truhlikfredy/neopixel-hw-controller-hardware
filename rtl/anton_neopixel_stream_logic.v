@@ -1,8 +1,9 @@
 `include "anton_common.vh"
 
 module anton_neopixel_stream_logic #(
-  parameter BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
-  parameter RESET_DELAY = `RESET_DELAY_DEFAULT // read anton_common.vh
+  parameter  BUFFER_END  = `BUFFER_END_DEFAULT,  // read anton_common.vh
+  parameter  RESET_DELAY = `RESET_DELAY_DEFAULT, // read anton_common.vh
+  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1)  // minimum required amount of bits to store the BUFFER_END
 )(
   input  clk6_4mhz,
   input  regCtrlInit,
@@ -26,8 +27,6 @@ module anton_neopixel_stream_logic #(
   output streamPixelOf,
   output streamSyncOf
 );
-
-  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
 
   reg [2:0]             bitPatternIndex  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
   reg [4:0]             pixelBitIndex    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
