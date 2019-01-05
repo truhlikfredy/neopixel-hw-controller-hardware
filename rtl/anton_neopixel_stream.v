@@ -1,6 +1,6 @@
 `include "anton_common.vh"
 
-//`define HARDCODED_PIXELS 1
+//TODO: Index naming could shortened to Ix and Buf to B (or use SV and do not use buf at all)
 
 module anton_neopixel_stream #(
   parameter BUFFER_END = `BUFFER_END_DEFAULT // read anton_common.vh
