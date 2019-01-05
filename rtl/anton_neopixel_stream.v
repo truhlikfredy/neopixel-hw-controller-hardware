@@ -3,7 +3,8 @@
 //TODO: Index naming could shortened to Ix and Buf to B (or use SV and do not use buf at all)
 
 module anton_neopixel_stream #(
-  parameter BUFFER_END = `BUFFER_END_DEFAULT // read anton_common.vh
+  parameter  BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
+  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1) // minimum required amount of bits to store the BUFFER_END
 )(
   input [7:0]              pixels[BUFFER_END:0],
   input                    state,
@@ -16,11 +17,9 @@ module anton_neopixel_stream #(
   output                   neoData
 );
 
-  reg [7:0]                neoPatternLookup = 'd0;  // move to wire
-  reg                      neoDataBuf       = 'b0;
-  reg [23:0]               pixelColourValue = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
-  
-  localparam BUFFER_BITS = `CLOG2(BUFFER_END+1); // minimum required amount of bits to store the BUFFER_END
+  reg [7:0]  neoPatternLookup = 'd0;  // move to wire
+  reg        neoDataBuf       = 'b0;
+  reg [23:0] pixelColourValue = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
 
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
