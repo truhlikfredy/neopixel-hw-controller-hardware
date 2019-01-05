@@ -69,7 +69,7 @@ void testHeader(std::string text) {
 void test1() {
   testHeader("Test 1 - populate buffer with values");
   //TODO: make sure they are registers and save int the DOTs
-  uut->anton_neopixel_apb_top__DOT__test_unit = 1;
+  uut->anton_neopixel_apb_top__DOT__testUnit = 1;
 
   driver->selfTestPopulatePixelBuffer();
 }
@@ -77,13 +77,13 @@ void test1() {
 
 void test2() {
   testHeader("Test 2 - double buffering - skipped as its implementation got removed");
-  uut->anton_neopixel_apb_top__DOT__test_unit = 2;
+  uut->anton_neopixel_apb_top__DOT__testUnit = 2;
 }
 
 
 void test3() {
   testHeader("Test 3 - write and read back MAX register");
-  uut->anton_neopixel_apb_top__DOT__test_unit = 3;
+  uut->anton_neopixel_apb_top__DOT__testUnit = 3;
 
   driver->selfTestMaxRegister();
 }
@@ -93,7 +93,7 @@ void test4() {
   testHeader(
       "Test 4 - run 32bit - soft limit mode with 7bytes max -> 8 bytes size "
       "(which is 2 pixels in 32bit mode)");
-  uut->anton_neopixel_apb_top__DOT__test_unit = 4;
+  uut->anton_neopixel_apb_top__DOT__testUnit = 4;
 
   driver->selfTestSoftLimit32bit();
 }
@@ -102,7 +102,7 @@ void test4() {
 void test5() {
   testHeader(
       "Test 5 - After one run is finished switch to 8bit with hard limit mode");
-  uut->anton_neopixel_apb_top__DOT__test_unit = 5;
+  uut->anton_neopixel_apb_top__DOT__testUnit = 5;
 
   driver->selfTestHardLimit8bit();
 }
@@ -112,7 +112,7 @@ void test6() {
   testHeader(
       "Test 6 - Keep 8bit mode, but enable looping and software limit, and "
       "start it with a synch input");
-  uut->anton_neopixel_apb_top__DOT__test_unit = 6;
+  uut->anton_neopixel_apb_top__DOT__testUnit = 6;
 
   driver->selfTestSoftLimit8bitLoop();
 }
@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
   tfp->open(vcdname.c_str());
   uut->clk6_4mhz = 0;
   uut->syncStart = 0;
-  uut->anton_neopixel_apb_top__DOT__test_unit = 0;
+  uut->anton_neopixel_apb_top__DOT__testUnit = 0;
 
   driver = new NeoPixelDriver(0x0);
 

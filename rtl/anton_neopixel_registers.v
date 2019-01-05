@@ -1,6 +1,5 @@
 `include "anton_common.vh"
 
-// TODO more consistent naming
 module anton_neopixel_registers (
   input         busClk,
   input  [13:0] busAddr,
@@ -9,17 +8,17 @@ module anton_neopixel_registers (
   input         busRead,
   output [7:0]  busDataOut,
 
-  input         stream_sync_of,
+  input         streamSyncOf,
 
   input         syncStart,
   input         state,
   output [7:0]  pixels[BUFFER_END:0],
-  output [12:0] reg_max,
-  output        reg_ctrl_init,
-  output        reg_ctrl_limit,
-  output        reg_ctrl_run,
-  output        reg_ctrl_loop,
-  output        reg_ctrl_32bit,
+  output [12:0] regMax,
+  output        regCtrlInit,
+  output        regCtrlLimit,
+  output        regCtrlRun,
+  output        regCtrlLoop,
+  output        regCtrl32bit,
   output        initSlow,
   input         initSlowDone
 );
@@ -32,15 +31,15 @@ module anton_neopixel_registers (
 
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
-  reg [12:0] reg_maxBuf; 
+  reg [12:0] regMaxBuf; 
 
-  reg        initSlowBuf       = 'b0;
+  reg        initSlowBuf     = 'b0;
   
-  reg        reg_ctrl_initBuf  = 'b0;
-  reg        reg_ctrl_limitBuf = 'b0; // Change this only when the pixel data are not streamed
-  reg        reg_ctrl_runBuf   = 'b0;
-  reg        reg_ctrl_loopBuf  = 'b0;
-  reg        reg_ctrl_32bitBuf = 'b0; // Change this only when the pixel data are not streamed
+  reg        regCtrlInitBuf  = 'b0;
+  reg        regCtrlLimitBuf = 'b0; // Change this only when the pixel data are not streamed
+  reg        regCtrlRunBuf   = 'b0;
+  reg        regCtrlLoopBuf  = 'b0;
+  reg        regCtrl32bitBuf = 'b0; // Change this only when the pixel data are not streamed
 
 
   // TODO: detect verilator and use it only there
@@ -49,17 +48,17 @@ module anton_neopixel_registers (
   
   always @(posedge busClk) begin
     if (initSlowDone) begin
-      reg_ctrl_initBuf <= 'b0;
-      initSlowBuf      <= 'b0;
+      regCtrlInitBuf <= 'b0;
+      initSlowBuf    <= 'b0;
     end
 
-    if (reg_ctrl_initBuf) begin
-      reg_ctrl_limitBuf <= 'b0;
-      reg_ctrl_runBuf   <= 'b0;
-      reg_ctrl_loopBuf  <= 'b0;
-      reg_ctrl_32bitBuf <= 'b0;
+    if (regCtrlInitBuf) begin
+      regCtrlLimitBuf <= 'b0;
+      regCtrlRunBuf   <= 'b0;
+      regCtrlLoopBuf  <= 'b0;
+      regCtrl32bitBuf <= 'b0;
 
-      initSlowBuf       <= 'b1;
+      initSlowBuf     <= 'b1;
     end
       if (busWrite) begin
         if (busAddr[13] == 'b0) begin
@@ -71,9 +70,9 @@ module anton_neopixel_registers (
           // Write register
           // TODO: enums for registers indexes
           case (busAddr[2:0])
-            0: reg_maxBuf[7:0]  <= busDataIn;
-            1: reg_maxBuf[12:8] <= busDataIn[4:0];
-            2: {reg_ctrl_32bitBuf, reg_ctrl_loopBuf, reg_ctrl_runBuf, reg_ctrl_limitBuf, reg_ctrl_initBuf} <= busDataIn[4:0];
+            0: regMaxBuf[7:0]  <= busDataIn;
+            1: regMaxBuf[12:8] <= busDataIn[4:0];
+            2: {regCtrl32bitBuf, regCtrlLoopBuf, regCtrlRunBuf, regCtrlLimitBuf, regCtrlInitBuf} <= busDataIn[4:0];
           endcase
         end
       end
@@ -86,9 +85,9 @@ module anton_neopixel_registers (
 
           // Read register
           case (busAddr[2:0])
-            0: busDataOutBuf <= reg_maxBuf[7:0];
-            1: busDataOutBuf <= { 3'b000, reg_maxBuf[12:8] };
-            2: busDataOutBuf <= { 3'b000, reg_ctrl_32bitBuf, reg_ctrl_loopBuf, reg_ctrl_runBuf, reg_ctrl_limitBuf, reg_ctrl_initBuf };
+            0: busDataOutBuf <= regMaxBuf[7:0];
+            1: busDataOutBuf <= { 3'b000, regMaxBuf[12:8] };
+            2: busDataOutBuf <= { 3'b000, regCtrl32bitBuf, regCtrlLoopBuf, regCtrlRunBuf, regCtrlLimitBuf, regCtrlInitBuf };
             3: busDataOutBuf <= { 7'b0000000, state };
           endcase
         end
@@ -96,19 +95,19 @@ module anton_neopixel_registers (
   end
 
 
-  always @(posedge busClk) if (stream_sync_of) reg_ctrl_runBuf <= reg_ctrl_loopBuf;
+  always @(posedge busClk) if (streamSyncOf) regCtrlRunBuf <= regCtrlLoopBuf;
 
-  always @(posedge busClk) if (syncStart) reg_ctrl_runBuf <= 'b1;
+  always @(posedge busClk) if (syncStart) regCtrlRunBuf <= 'b1;
 
   // Assign the register buffers to their outputs
-  assign pixels         = pixelsBuf;
-  assign busDataOut     = busDataOutBuf;
-  assign reg_max        = reg_maxBuf;
-  assign initSlow       = initSlowBuf;
-  assign reg_ctrl_init  = reg_ctrl_initBuf;
-  assign reg_ctrl_limit = reg_ctrl_limitBuf;
-  assign reg_ctrl_run   = reg_ctrl_runBuf;
-  assign reg_ctrl_loop  = reg_ctrl_loopBuf;
-  assign reg_ctrl_32bit = reg_ctrl_32bitBuf;
+  assign pixels       = pixelsBuf;
+  assign busDataOut   = busDataOutBuf;
+  assign regMax       = regMaxBuf;
+  assign initSlow     = initSlowBuf;
+  assign regCtrlInit  = regCtrlInitBuf;
+  assign regCtrlLimit = regCtrlLimitBuf;
+  assign regCtrlRun   = regCtrlRunBuf;
+  assign regCtrlLoop  = regCtrlLoopBuf;
+  assign regCtrl32bit = regCtrl32bitBuf;
 
 endmodule

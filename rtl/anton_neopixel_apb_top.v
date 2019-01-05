@@ -25,18 +25,18 @@ module anton_neopixel_apb_top (
 
   parameter  BUFFER_END = `BUFFER_END_DEFAULT; // read anton_common.vh
 
-  wire wr_enable;
-  wire rd_enable;
+  wire wrEnable;
+  wire rdEnable;
   wire [13:0]address; // correct address packed down from 32bit aligned access to 8bit access, will be limited to 8192 pixels
 
   assign apbPready  = 1'd1; // always ready, never delaying with a waiting state
   assign apbPslverr = 1'd0; // never report errors
   
-  assign wr_enable = (apbPenable && apbPwrite && apbPselx);
-  assign rd_enable = (!apbPwrite && apbPselx);
-  assign address   = apbPaddr[15:2]; // 4 bytes (word) aligned to 1 byte aligned
+  assign wrEnable = (apbPenable && apbPwrite && apbPselx);
+  assign rdEnable = (!apbPwrite && apbPselx);
+  assign address  = apbPaddr[15:2]; // 4 bytes (word) aligned to 1 byte aligned
 
-  reg [2:0]  test_unit; // TODO: disable when not in simulation/debug
+  reg [2:0]  testUnit; // TODO: disable when not in simulation/debug
   
   anton_neopixel_module #(
     .BUFFER_END(BUFFER_END)
@@ -48,8 +48,8 @@ module anton_neopixel_apb_top (
     .busAddr(address),
     .busDataIn(apbPwData),
     .busClk(apbPclk),
-    .busWrite(wr_enable),
-    .busRead(rd_enable),
+    .busWrite(wrEnable),
+    .busRead(rdEnable),
     .busDataOut(apbPrData)
   );
 

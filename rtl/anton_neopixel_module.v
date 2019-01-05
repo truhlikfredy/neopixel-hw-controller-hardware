@@ -2,7 +2,7 @@
 
 // TODO: use bits and size properly https://stackoverflow.com/questions/13340301/size-bits-verilog
 
-// TODO: rename stream_reset to stream_sync, stream_run = stream_output + stream_sync
+// TODO: rename streamReset to stream_sync, stream_run = streamOutput + stream_sync
 
 // TODO: mss ready / reset signals
 
@@ -36,12 +36,12 @@ module anton_neopixel_module (
 
 
   wire [7:0]  pixels[BUFFER_END:0];
-  wire [12:0] reg_max;
-  wire        reg_ctrl_init;
-  wire        reg_ctrl_limit;
-  wire        reg_ctrl_run;
-  wire        reg_ctrl_loop;
-  wire        reg_ctrl_32bit;
+  wire [12:0] regMax;
+  wire        regCtrlInit;
+  wire        regCtrlLimit;
+  wire        regCtrlRun;
+  wire        regCtrlLoop;
+  wire        regCtrl32bit;
   wire        initSlow;
   wire        initSlowDone;
   
@@ -56,31 +56,31 @@ module anton_neopixel_module (
     .busRead(busRead),
     .busDataOut(busDataOut),
 
-    .stream_sync_of(stream_sync_of),
+    .streamSyncOf(streamSyncOf),
 
     .syncStart(syncStart),
     .state(neoState),
     .pixels(pixels),
-    .reg_max(reg_max),
-    .reg_ctrl_init(reg_ctrl_init),
-    .reg_ctrl_limit(reg_ctrl_limit),
-    .reg_ctrl_run(reg_ctrl_run),
-    .reg_ctrl_loop(reg_ctrl_loop),
-    .reg_ctrl_32bit(reg_ctrl_32bit),
+    .regMax(regMax),
+    .regCtrlInit(regCtrlInit),
+    .regCtrlLimit(regCtrlLimit),
+    .regCtrlRun(regCtrlRun),
+    .regCtrlLoop(regCtrlLoop),
+    .regCtrl32bit(regCtrl32bit),
     .initSlow(initSlow),
     .initSlowDone(initSlowDone)
   );
 
 
-  wire [2:0] bit_pattern_index;
-  wire [4:0] pixel_bit_index;
-  wire [BUFFER_BITS-1:0] pixel_index;
-  wire [BUFFER_BITS-1:0] pixel_index_max;
-  wire stream_output;
-  wire stream_reset;
-  wire stream_bit_of;
-  wire stream_pixel_of;
-  wire stream_sync_of;
+  wire [2:0] bitPatternIndex;
+  wire [4:0] pixelBitIndex;
+  wire [BUFFER_BITS-1:0] pixelIndex;
+  wire [BUFFER_BITS-1:0] pixelIndexMax;
+  wire streamOutput;
+  wire streamReset;
+  wire streamBitOf;
+  wire streamPixelOf;
+  wire streamSyncOf;
 
 
   anton_neopixel_stream #(
@@ -88,11 +88,11 @@ module anton_neopixel_module (
   ) stream(
     .pixels(pixels),
     .state(neoState),
-    .pixel_index(pixel_index),
-    .pixel_bit_index(pixel_bit_index),
-    .bit_pattern_index(bit_pattern_index),
-    .reg_ctrl_32bit(reg_ctrl_32bit),
-    .reg_ctrl_run(reg_ctrl_run),
+    .pixelIndex(pixelIndex),
+    .pixelBitIndex(pixelBitIndex),
+    .bitPatternIndex(bitPatternIndex),
+    .regCtrl32bit(regCtrl32bit),
+    .regCtrlRun(regCtrlRun),
     .neoData(neoData)
   );
 
@@ -102,26 +102,26 @@ module anton_neopixel_module (
     .RESET_DELAY(RESET_DELAY)
   ) stream_logic(
     .clk6_4mhz(clk6_4mhz),
-    .reg_ctrl_init(reg_ctrl_init),
-    .reg_ctrl_run(reg_ctrl_run),
-    .reg_ctrl_loop(reg_ctrl_loop),
-    .reg_ctrl_limit(reg_ctrl_limit),
-    .reg_ctrl_32bit(reg_ctrl_32bit),
-    .reg_max(reg_max),
+    .regCtrlInit(regCtrlInit),
+    .regCtrlRun(regCtrlRun),
+    .regCtrlLoop(regCtrlLoop),
+    .regCtrlLimit(regCtrlLimit),
+    .regCtrl32bit(regCtrl32bit),
+    .regMax(regMax),
 
     .initSlow(initSlow),
     .initSlowDone(initSlowDone),
 
-    .bit_pattern_index(bit_pattern_index),
-    .pixel_bit_index(pixel_bit_index),
-    .pixel_index(pixel_index),
-    .pixel_index_max(pixel_index_max),
+    .bitPatternIndex(bitPatternIndex),
+    .pixelBitIndex(pixelBitIndex),
+    .pixelIndex(pixelIndex),
+    .pixelIndexMax(pixelIndexMax),
     .state(neoState),
-    .stream_output(stream_output),
-    .stream_reset(stream_reset),
-    .stream_bit_of(stream_bit_of),
-    .stream_pixel_of(stream_pixel_of),
-    .stream_sync_of(stream_sync_of)
+    .streamOutput(streamOutput),
+    .streamReset(streamReset),
+    .streamBitOf(streamBitOf),
+    .streamPixelOf(streamPixelOf),
+    .streamSyncOf(streamSyncOf)
   );
 
   
