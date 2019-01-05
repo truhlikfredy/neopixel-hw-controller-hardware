@@ -27,21 +27,20 @@ module anton_neopixel_registers (
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
 
-  reg [7:0]  pixels[BUFFER_END:0];
-  reg [7:0]  busDataOut;
+  reg [7:0]  pixelsBuf[BUFFER_END:0];
+  reg [7:0]  busDataOutBuf;
 
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
-  reg [12:0] reg_max; 
+  reg [12:0] reg_maxBuf; 
 
-  reg        initSlow       = 'b0;
+  reg        initSlowBuf       = 'b0;
   
-  reg        reg_ctrl_init  = 'b0;
-  reg        reg_ctrl_limit = 'b0; // Change this only when the pixel data are not streamed
-  reg        reg_ctrl_run   = 'b0;
-  reg        reg_ctrl_loop  = 'b0;
-  reg        reg_ctrl_32bit = 'b0; // Change this only when the pixel data are not streamed
-
+  reg        reg_ctrl_initBuf  = 'b0;
+  reg        reg_ctrl_limitBuf = 'b0; // Change this only when the pixel data are not streamed
+  reg        reg_ctrl_runBuf   = 'b0;
+  reg        reg_ctrl_loopBuf  = 'b0;
+  reg        reg_ctrl_32bitBuf = 'b0; // Change this only when the pixel data are not streamed
 
 
   // TODO: detect verilator and use it only there
@@ -50,17 +49,17 @@ module anton_neopixel_registers (
   
   always @(posedge busClk) begin
     if (initSlowDone) begin
-      reg_ctrl_init <= 'b0;
-      initSlow      <= 'b0;
+      reg_ctrl_initBuf <= 'b0;
+      initSlowBuf      <= 'b0;
     end
 
-    if (reg_ctrl_init) begin
-      reg_ctrl_limit <= 'b0;
-      reg_ctrl_run   <= 'b0;
-      reg_ctrl_loop  <= 'b0;
-      reg_ctrl_32bit <= 'b0;
+    if (reg_ctrl_initBuf) begin
+      reg_ctrl_limitBuf <= 'b0;
+      reg_ctrl_runBuf   <= 'b0;
+      reg_ctrl_loopBuf  <= 'b0;
+      reg_ctrl_32bitBuf <= 'b0;
 
-      initSlow       <= 'b1;
+      initSlowBuf       <= 'b1;
     end
       if (busWrite) begin
         if (busAddr[13] == 'b0) begin
@@ -72,9 +71,9 @@ module anton_neopixel_registers (
           // Write register
           // TODO: enums for registers indexes
           case (busAddr[2:0])
-            0: reg_max[7:0]  <= busDataIn;
-            1: reg_max[12:8] <= busDataIn[4:0];
-            2: {reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init} <= busDataIn[4:0];
+            0: reg_maxBuf[7:0]  <= busDataIn;
+            1: reg_maxBuf[12:8] <= busDataIn[4:0];
+            2: {reg_ctrl_32bitBuf, reg_ctrl_loopBuf, reg_ctrl_runBuf, reg_ctrl_limitBuf, reg_ctrl_initBuf} <= busDataIn[4:0];
           endcase
         end
       end
@@ -82,24 +81,34 @@ module anton_neopixel_registers (
         if (busAddr[13] == 'b0) begin
           
           // Read buffer
-          busDataOut <= pixels[busAddr[BUFFER_BITS-1:0]];
+          busDataOutBuf <= pixels[busAddr[BUFFER_BITS-1:0]];
         end else begin
 
           // Read register
           case (busAddr[2:0])
-            0: busDataOut <= reg_max[7:0];
-            1: busDataOut <= { 3'b000, reg_max[12:8] };
-            2: busDataOut <= { 3'b000, reg_ctrl_32bit, reg_ctrl_loop, reg_ctrl_run, reg_ctrl_limit, reg_ctrl_init };
-            3: busDataOut <= { 7'b0000000, state };
+            0: busDataOutBuf <= reg_maxBuf[7:0];
+            1: busDataOutBuf <= { 3'b000, reg_maxBuf[12:8] };
+            2: busDataOutBuf <= { 3'b000, reg_ctrl_32bitBuf, reg_ctrl_loopBuf, reg_ctrl_runBuf, reg_ctrl_limitBuf, reg_ctrl_initBuf };
+            3: busDataOutBuf <= { 7'b0000000, state };
           endcase
         end
     end
   end
 
 
-  always @(posedge busClk) if (stream_sync_of) reg_ctrl_run <= reg_ctrl_loop;
+  always @(posedge busClk) if (stream_sync_of) reg_ctrl_runBuf <= reg_ctrl_loopBuf;
 
-  always @(posedge busClk) if (syncStart) reg_ctrl_run <= 'b1;
+  always @(posedge busClk) if (syncStart) reg_ctrl_runBuf <= 'b1;
 
+  // Assign the register buffers to their outputs
+  assign pixels         = pixelsBuf;
+  assign busDataOut     = busDataOutBuf;
+  assign reg_max        = reg_maxBuf;
+  assign initSlow       = initSlowBuf;
+  assign reg_ctrl_init  = reg_ctrl_initBuf;
+  assign reg_ctrl_limit = reg_ctrl_limitBuf;
+  assign reg_ctrl_run   = reg_ctrl_runBuf;
+  assign reg_ctrl_loop  = reg_ctrl_loopBuf;
+  assign reg_ctrl_32bit = reg_ctrl_32bitBuf;
 
 endmodule
