@@ -28,15 +28,15 @@ module anton_neopixel_stream_logic #(
   output streamSyncOf
 );
 
-  reg [2:0]             bitPatternIndex  = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
-  reg [4:0]             pixelBitIndex    = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
-  reg [BUFFER_BITS-1:0] pixelIndex       = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
-  reg [11:0]            resetDelayCount  = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 1959ticks (306ns)
+  reg [2:0]             bitPatternIndexBuf = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
+  reg [4:0]             pixelBitIndexBuf   = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
+  reg [BUFFER_BITS-1:0] pixelIndexBuf      = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
+  reg [11:0]            resetDelayCount    = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 1959ticks (306ns)
 
-  reg                   state            = 'b0;  // 0 = transmit bits, 1 = reset mode
-  reg [3:0]             cycle            = 'd0;  
+  reg                   stateBuf           = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg [3:0]             cycle              = 'd0;  
 
-  reg                   initSlowDone     = 'b0;
+  reg                   initSlowDone       = 'b0;
   
 
   // When 32bit mode enabled use
@@ -44,19 +44,19 @@ module anton_neopixel_stream_logic #(
   wire [BUFFER_BITS-1:0] pixelIndexEquiv = (regCtrl32bit) ? {pixelIndex[BUFFER_BITS-1:2], 2'b11} : pixelIndex;
 
 
-  assign streamOutput      = !regCtrlInit && regCtrlRun && state == `ENUM_STATE_TRANSMIT; 
-  assign streamReset       = !regCtrlInit && regCtrlRun && state == `ENUM_STATE_RESET;
+  assign streamOutput      = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATEBuf_TRANSMIT; 
+  assign streamReset       = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATEBuf_RESET;
 
-  wire   streamPatternOf = streamOutput && bitPatternIndex == 'd7;    // does sub-bit pattern overflowing
-  assign streamBitOf     = streamPatternOf && pixelBitIndex == 'd23; // does bit index overflowing
+  wire   streamPatternOf = streamOutput && bitPatternIndexBuf == 'd7;    // does sub-bit pattern overflowing
+  assign streamBitOf     = streamPatternOf && pixelBitIndexBuf == 'd23; // does bit index overflowing
   wire   streamPixelLast = pixelIndexEquiv == pixelIndexMax;
   assign streamPixelOf   = streamBitOf && streamPixelLast;
 
 
   always @(posedge clk6_4mhz) begin
     if (initSlow) begin
-      pixelIndex    <= {BUFFER_BITS{1'b0}};
-      pixelBitIndex <= 'd0;  
+      pixelIndexBuf    <= {BUFFER_BITS{1'b0}};
+      pixelBitIndexBuf <= 'd0;  
       initSlowDone  <= 'b1; // after the init is done signal a flag
     end
 
@@ -66,12 +66,12 @@ module anton_neopixel_stream_logic #(
   end
 
 
-  always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndex <= bitPatternIndex + 1;
+  always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
 
 
   // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
   // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-  always @(posedge clk6_4mhz) if (streamPatternOf) pixelBitIndex <= (streamBitOf) ? 0 : pixelBitIndex +1;
+  always @(posedge clk6_4mhz) if (streamPatternOf) pixelBitIndexBuf <= (streamBitOf) ? 0 : pixelBitIndexBuf +1;
 
 
   // When limit is enabled, use software limit, but when disabled use whole buffer
@@ -86,17 +86,17 @@ module anton_neopixel_stream_logic #(
       // of 2 it will need to be by 1 bit to match the size
         if (streamPixelLast)  begin
           // for the very last pixel overflow 0 and start reset
-          pixelIndex <= 'd0;
+          pixelIndexBuf <= 'd0;
         end else begin
           // For all pixels except the last one go to the next pixel.
           // In 32bit mode increment differently than in 8bit
-          pixelIndex <= (regCtrl32bit) ? pixelIndex + 'd4 : pixelIndex + 'd1;
+          pixelIndexBuf <= (regCtrl32bit) ? pixelIndexBuf + 'd4 : pixelIndexBuf + 'd1;
         end
     end
   end
 
-  // if last pixel is reached turn into reset state
-  always @(posedge clk6_4mhz) if (streamPixelOf) state <= `ENUM_STATE_RESET;
+  // if last pixel is reached turn into reset stateBuf
+  always @(posedge clk6_4mhz) if (streamPixelOf) stateBuf <= `ENUM_STATEBuf_RESET;
 
 
   assign streamSyncOf = (resetDelayCount == RESET_DELAY);
@@ -104,7 +104,7 @@ module anton_neopixel_stream_logic #(
 
   always @(posedge clk6_4mhz) begin
     if (streamReset) begin
-      // when in the reset state, count 300ns (RESET_DELAY ticks / 7MHz clock)
+      // when in the reset stateBuf, count 300ns (RESET_DELAY ticks / 7MHz clock)
       resetDelayCount <= resetDelayCount + 'b1;
     end
   end
@@ -112,13 +112,17 @@ module anton_neopixel_stream_logic #(
 
   always @(posedge clk6_4mhz) begin
     if (streamSyncOf) begin  
-      // predefined wait in reset state was reached, let's 
+      // predefined wait in reset stateBuf was reached, let's 
       if (cycle == 'd5) $finish; // stop simulation here
-      state           <= `ENUM_STATE_TRANSMIT;
+      stateBuf           <= `ENUM_STATEBuf_TRANSMIT;
       cycle           <= cycle + 'd1;
       resetDelayCount <= 'd0;
     end
   end
 
+  // Set the register buffers to the ports
+  assign bitPatternIndex = bitPatternIndexBuf;
+  assign pixelBitIndex   = pixelBitIndexBuf;
+  assign state           = stateBuf;
 
 endmodule
