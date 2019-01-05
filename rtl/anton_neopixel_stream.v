@@ -17,7 +17,7 @@ module anton_neopixel_stream #(
 );
 
   reg [7:0]                neoPatternLookup = 'd0;  // move to wire
-  reg                      dataInt          = 'b0;
+  reg                      neoDataBuf       = 'b0;
   reg [23:0]               pixelColourValue = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1); // minimum required amount of bits to store the BUFFER_END
@@ -73,14 +73,14 @@ module anton_neopixel_stream #(
   always @(*) begin
     if (state == `ENUM_STATE_TRANSMIT && regCtrlRun) begin
       // push pattern of a single bit inside a pixel 
-      dataInt = neoPatternLookup[bitPatternIndex[2:0]];
+      neoDataBuf = neoPatternLookup[bitPatternIndex[2:0]];
     end else begin
       // reset state, stay LOW
-      dataInt = 'd0;
+      neoDataBuf = 'd0;
     end
   end
   
    
-  assign neoData    = dataInt;
+  assign neoData = neoDataBuf;
   
 endmodule
