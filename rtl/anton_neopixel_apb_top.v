@@ -20,9 +20,11 @@ module anton_neopixel_apb_top (
   output [7:0]apbPrData,
   output apbPready,
   output apbPslverr
-  );
+);
 
-  parameter  BUFFER_END = `BUFFER_END_DEFAULT; // read anton_common.vh
+  // number of bytes counting from zero, so the size is BUFFER_END+1, maximum 
+  // 8192 pixels, which should have 4Hz refresh
+  parameter BUFFER_END = `BUFFER_END_DEFAULT; // read anton_common.vh
 
   wire wrEnable;
   wire rdEnable;

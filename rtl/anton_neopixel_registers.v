@@ -1,6 +1,8 @@
 `include "anton_common.vh"
 
-module anton_neopixel_registers (
+module anton_neopixel_registers #(
+  parameter BUFFER_END = `BUFFER_END_DEFAULT // read anton_common.vh
+)(
   input         busClk,
   input  [13:0] busAddr,
   input  [7:0]  busDataIn,
@@ -23,7 +25,6 @@ module anton_neopixel_registers (
   input         initSlowDone
 );
 
-  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;   // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);  // minimum required amount of bits to store the BUFFER_END
 
   reg [7:0]  pixelsBuf[BUFFER_END:0];

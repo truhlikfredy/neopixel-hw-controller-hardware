@@ -2,7 +2,9 @@
 
 //`define HARDCODED_PIXELS 1
 
-module anton_neopixel_stream (
+module anton_neopixel_stream #(
+  parameter BUFFER_END = `BUFFER_END_DEFAULT // read anton_common.vh
+)(
   input [7:0]              pixels[BUFFER_END:0],
   input                    state,
   input [BUFFER_BITS-1:0]  pixelIndex,     // index to the current pixel transmitting
@@ -12,13 +14,12 @@ module anton_neopixel_stream (
   input                    regCtrlRun,
 
   output                   neoData
-  );
+);
 
   reg [7:0]                neoPatternLookup = 'd0;  // move to wire
   reg                      dataInt          = 'b0;
   reg [23:0]               pixelColourValue = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
   
-  parameter  BUFFER_END  = `BUFFER_END_DEFAULT;  // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1); // minimum required amount of bits to store the BUFFER_END
 
   // as combinational logic should be enough
