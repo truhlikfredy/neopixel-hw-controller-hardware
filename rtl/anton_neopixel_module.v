@@ -10,7 +10,7 @@
 
 module anton_neopixel_module #(
   parameter BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
-  parameter RESET_DELAY = `RESET_DELAY_DEFAULT;
+  parameter RESET_DELAY = `RESET_DELAY_DEFAULT
 )(
   input  clk6_4mhz,
   input  syncStart,
