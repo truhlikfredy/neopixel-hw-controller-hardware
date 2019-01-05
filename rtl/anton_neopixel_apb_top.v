@@ -26,6 +26,11 @@ module anton_neopixel_apb_top (
   // 8192 pixels, which should have 4Hz refresh
   parameter BUFFER_END = `BUFFER_END_DEFAULT; // read anton_common.vh
 
+  // How long the reset delay will be happening, minimum spec is so 
+  // 50us => 50000ns/(1/6.4) = 320 000 ticks. But some arrays need bit more:
+  // 81us => 81000ns/(1/6.4) = 518 400 ticks
+  parameter RESET_DELAY = `RESET_DELAY_DEFAULT;
+
   wire wrEnable;
   wire rdEnable;
   wire [13:0]address; // correct address packed down from 32bit aligned access to 8bit access, will be limited to 8192 pixels

@@ -9,7 +9,8 @@
 // TODO: nodemon killall first
 
 module anton_neopixel_module #(
-  parameter BUFFER_END = `BUFFER_END_DEFAULT // read anton_common.vh
+  parameter BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
+  parameter RESET_DELAY = `RESET_DELAY_DEFAULT;
 )(
   input  clk6_4mhz,
   input  syncStart,
@@ -24,14 +25,8 @@ module anton_neopixel_module #(
   output [7:0]busDataOut
 );
 
-// How long the reset delay will be happening, minimum spec is so 
-// 50us => 50000ns/(1/6.4) = 320 000 ticks. But some arrays need bit more:
-// 81us => 81000ns/(1/6.4) = 518 400 ticks
-  parameter  RESET_DELAY = `RESET_DELAY_DEFAULT; 
-
   // minimum required amount of bits to store the BUFFER_END
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   
-
 
   wire [7:0]  pixels[BUFFER_END:0];
   wire [12:0] regMax;
