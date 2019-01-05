@@ -48,6 +48,10 @@ module anton_neopixel_registers #(
   // reset nothing funny is happening
   
   always @(posedge busClk) begin
+    if (streamSyncOf) regCtrlRunBuf <= regCtrlLoopBuf;
+
+    if (syncStart) regCtrlRunBuf <= 'b1;
+
     if (initSlowDone) begin
       regCtrlInitBuf <= 'b0;
       initSlowBuf    <= 'b0;
@@ -95,10 +99,6 @@ module anton_neopixel_registers #(
     end
   end
 
-
-  always @(posedge busClk) if (streamSyncOf) regCtrlRunBuf <= regCtrlLoopBuf;
-
-  always @(posedge busClk) if (syncStart) regCtrlRunBuf <= 'b1;
 
   // Assign the register buffers to their outputs
   assign pixels       = pixelsBuf;

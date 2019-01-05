@@ -54,6 +54,10 @@ module anton_neopixel_stream_logic #(
 
 
   always @(posedge clk6_4mhz) begin
+    // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
+    // on 'd23 => 24th bit do start on a new pixel with bit 'd0
+    if (streamPatternOf) pixelBitIndexBuf <= (streamBitOf) ? 0 : pixelBitIndexBuf +1;
+
     if (initSlow) begin
       pixelIndexBuf    <= {BUFFER_BITS{1'b0}};
       pixelBitIndexBuf <= 'd0;  
@@ -67,12 +71,6 @@ module anton_neopixel_stream_logic #(
 
 
   always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
-
-
-  // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-  // on 'd23 => 24th bit do start on a new pixel with bit 'd0
-  always @(posedge clk6_4mhz) if (streamPatternOf) pixelBitIndexBuf <= (streamBitOf) ? 0 : pixelBitIndexBuf +1;
-
 
   // When limit is enabled, use software limit, but when disabled use whole buffer
   // what is the rechable maximum depending on the settings
@@ -95,22 +93,19 @@ module anton_neopixel_stream_logic #(
     end
   end
 
-  // if last pixel is reached turn into reset stateBuf
-  always @(posedge clk6_4mhz) if (streamPixelOf) stateBuf <= `ENUM_STATE_RESET;
-
 
   assign streamSyncOf = (resetDelayCount == RESET_DELAY);
 
 
   always @(posedge clk6_4mhz) begin
+    // if last pixel is reached turn into reset stateBuf
+    if (streamPixelOf) stateBuf <= `ENUM_STATE_RESET;
+
     if (streamReset) begin
       // when in the reset stateBuf, count 300ns (RESET_DELAY ticks / 7MHz clock)
       resetDelayCount <= resetDelayCount + 'b1;
     end
-  end
 
-
-  always @(posedge clk6_4mhz) begin
     if (streamSyncOf) begin  
       // predefined wait in reset stateBuf was reached, let's 
       if (cycle == 'd5) $finish; // stop simulation here
