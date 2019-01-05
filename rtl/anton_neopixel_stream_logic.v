@@ -36,7 +36,7 @@ module anton_neopixel_stream_logic #(
   reg                   stateBuf           = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg [3:0]             cycle              = 'd0;  
 
-  reg                   initSlowDone       = 'b0;
+  reg                   initSlowDoneBuf    = 'b0;
   
 
   // When 32bit mode enabled use
@@ -44,8 +44,8 @@ module anton_neopixel_stream_logic #(
   wire [BUFFER_BITS-1:0] pixelIndexEquiv = (regCtrl32bit) ? {pixelIndex[BUFFER_BITS-1:2], 2'b11} : pixelIndex;
 
 
-  assign streamOutput      = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATEBuf_TRANSMIT; 
-  assign streamReset       = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATEBuf_RESET;
+  assign streamOutput      = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
+  assign streamReset       = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_RESET;
 
   wire   streamPatternOf = streamOutput && bitPatternIndexBuf == 'd7;    // does sub-bit pattern overflowing
   assign streamBitOf     = streamPatternOf && pixelBitIndexBuf == 'd23; // does bit index overflowing
@@ -57,11 +57,11 @@ module anton_neopixel_stream_logic #(
     if (initSlow) begin
       pixelIndexBuf    <= {BUFFER_BITS{1'b0}};
       pixelBitIndexBuf <= 'd0;  
-      initSlowDone  <= 'b1; // after the init is done signal a flag
+      initSlowDoneBuf  <= 'b1; // after the init is done signal a flag
     end
 
-    if (initSlowDone) begin
-      initSlowDone  <= 'b0; // after one slow clock, it should be enough to de-assert the flag
+    if (initSlowDoneBuf) begin
+      initSlowDoneBuf  <= 'b0; // after one slow clock, it should be enough to de-assert the flag
     end
   end
 
@@ -96,7 +96,7 @@ module anton_neopixel_stream_logic #(
   end
 
   // if last pixel is reached turn into reset stateBuf
-  always @(posedge clk6_4mhz) if (streamPixelOf) stateBuf <= `ENUM_STATEBuf_RESET;
+  always @(posedge clk6_4mhz) if (streamPixelOf) stateBuf <= `ENUM_STATE_RESET;
 
 
   assign streamSyncOf = (resetDelayCount == RESET_DELAY);
@@ -114,7 +114,7 @@ module anton_neopixel_stream_logic #(
     if (streamSyncOf) begin  
       // predefined wait in reset stateBuf was reached, let's 
       if (cycle == 'd5) $finish; // stop simulation here
-      stateBuf           <= `ENUM_STATEBuf_TRANSMIT;
+      stateBuf           <= `ENUM_STATE_TRANSMIT;
       cycle           <= cycle + 'd1;
       resetDelayCount <= 'd0;
     end

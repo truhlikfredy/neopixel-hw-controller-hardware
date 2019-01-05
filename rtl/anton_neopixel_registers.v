@@ -65,7 +65,7 @@ module anton_neopixel_registers #(
         if (busAddr[13] == 'b0) begin
 
           // Write buffer
-          pixels[busAddr[BUFFER_BITS-1:0]] <= busDataIn;
+          pixelsBuf[busAddr[BUFFER_BITS-1:0]] <= busDataIn;
         end else begin
 
           // Write register
@@ -81,7 +81,7 @@ module anton_neopixel_registers #(
         if (busAddr[13] == 'b0) begin
           
           // Read buffer
-          busDataOutBuf <= pixels[busAddr[BUFFER_BITS-1:0]];
+          busDataOutBuf <= pixelsBuf[busAddr[BUFFER_BITS-1:0]];
         end else begin
 
           // Read register
