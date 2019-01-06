@@ -69,7 +69,7 @@ module anton_neopixel_registers #(
         if (busAddr[13] == 'b0) begin
 
           // Write buffer
-          pixelsBuf[busAddr[BUFFER_BITS-1:0]] <= busDataIn;
+          pixelsBuf[busAddr[BUFFER_BITS-1:0]] <= busDataIn; // 12:0 are usable address bits for pixels, 2^13 = 8192 bytes
         end else begin
 
           // Write register

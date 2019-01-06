@@ -43,6 +43,14 @@
   x == 2048 || x == 4096 || x == 8192 \
   ) ? 1 : 0
 
+`define MAX_BITS_IN_PIXEL_BUFFER (16-2-1)  // 16 bits, but 1 byte aligned to DWord and 1 bit dedicated for Ctrl REG = 13bits
+`define MAX_BYTES_IN_BUFFER ( 1 << `MAX_BITS_IN_PIXEL_BUFFER) // 13^2 = 8192
+`define MIN_BYTES_IN_BUFFER 4 // this will cover 1 pixel in 32bit mode
+
+`define MIN_OF_TWO(NUM_A, NUM_B) ((NUM_A) < (NUM_B) ? (NUM_A) : (NUM_B))
+`define MAX_OF_TWO(NUM_A, NUM_B) ((NUM_A) > (NUM_B) ? (NUM_A) : (NUM_B))
+
+`define SANITIZE_BUFFER_END(SIZE) ( `MIN_OF_TWO(`MAX_BYTES_IN_BUFFER, `MAX_OF_TWO( `MIN_BYTES_IN_BUFFER, (SIZE) )))
 
 // If I will make SystemVerilog variant then use proper enums for this
 `define ENUM_STATE_TRANSMIT 1'b0  

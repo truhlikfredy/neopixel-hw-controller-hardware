@@ -40,7 +40,7 @@ module anton_neopixel_module #(
   wire        streamSyncOf;
   
   anton_neopixel_registers #(
-    .BUFFER_END(BUFFER_END)
+    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
   ) registers(
     .busClk(busClk),
     .busAddr(busAddr),
@@ -75,7 +75,7 @@ module anton_neopixel_module #(
   wire                   streamPixelOf;
 
   anton_neopixel_stream #(
-    .BUFFER_END(BUFFER_END)
+    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
   ) stream(
     .pixels(pixels),
     .state(neoState),
@@ -89,7 +89,7 @@ module anton_neopixel_module #(
 
 
   anton_neopixel_stream_logic #(
-    .BUFFER_END(BUFFER_END),
+    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END)),
     .RESET_DELAY(RESET_DELAY)
   ) stream_logic(
     .clk6_4mhz(clk6_4mhz),
