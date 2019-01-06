@@ -41,7 +41,8 @@ module anton_neopixel_stream_logic #(
 
   // When 32bit mode enabled use
   // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
-  wire [BUFFER_BITS-1:0] pixelIndexEquiv = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], 2'b11} : pixelIndexBuf;
+  wire [BUFFER_BITS-1:0] pixelIndexEquiv    = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], 2'b11} : pixelIndexBuf;
+  wire [BUFFER_BITS-1:0] pixelIndexMaxEquiv = (regCtrl32bit) ? {pixelIndexMax[BUFFER_BITS-1:2], 2'b00} : pixelIndexMax;
 
 
   assign streamOutput    = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
@@ -49,7 +50,7 @@ module anton_neopixel_stream_logic #(
 
   wire   streamPatternOf = streamOutput    && bitPatternIndexBuf == 'd7;  // does sub-bit pattern overflowing
   assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd23; // does bit index overflowing
-  wire   streamPixelLast = pixelIndexEquiv >= pixelIndexMax;
+  wire   streamPixelLast = pixelIndexEquiv >= pixelIndexMaxEquiv;
   assign streamPixelOf   = streamBitOf && streamPixelLast;
 
   always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
