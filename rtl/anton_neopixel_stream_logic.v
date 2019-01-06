@@ -49,7 +49,7 @@ module anton_neopixel_stream_logic #(
 
   wire   streamPatternOf = streamOutput    && bitPatternIndexBuf == 'd7;  // does sub-bit pattern overflowing
   assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd23; // does bit index overflowing
-  wire   streamPixelLast = pixelIndexEquiv == pixelIndexMax;
+  wire   streamPixelLast = pixelIndexEquiv >= pixelIndexMax;
   assign streamPixelOf   = streamBitOf && streamPixelLast;
 
   always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
