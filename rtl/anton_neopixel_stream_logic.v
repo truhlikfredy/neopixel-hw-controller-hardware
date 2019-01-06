@@ -52,8 +52,14 @@ module anton_neopixel_stream_logic #(
   wire   streamPixelLast = pixelIndexEquiv == pixelIndexMax;
   assign streamPixelOf   = streamBitOf && streamPixelLast;
 
+  always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
 
-  always @(posedge clk6_4mhz) begin
+  // When limit is enabled, use software limit, but when disabled use whole buffer
+  // what is the rechable maximum depending on the settings
+  assign pixelIndexMax = (regCtrlLimit)? regMax[BUFFER_BITS-1:0] : BUFFER_END;
+
+
+  always @(posedge clk6_4mhz) begin 
     // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
     // on 'd23 => 24th bit do start on a new pixel with bit 'd0
     if (streamPatternOf) pixelBitIndexBuf <= (streamBitOf) ? 0 : pixelBitIndexBuf +1;
@@ -67,17 +73,7 @@ module anton_neopixel_stream_logic #(
     if (initSlowDoneBuf) begin
       initSlowDoneBuf  <= 'b0; // after one slow clock, it should be enough to de-assert the flag
     end
-  end
 
-
-  always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
-
-  // When limit is enabled, use software limit, but when disabled use whole buffer
-  // what is the rechable maximum depending on the settings
-  assign pixelIndexMax = (regCtrlLimit)? regMax[BUFFER_BITS-1:0] : BUFFER_END;
-
-
-  always @(posedge clk6_4mhz) begin 
     if (streamBitOf) begin
       // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if 
       // maximum buffer size was reached, but in cases the buffer size is power 
