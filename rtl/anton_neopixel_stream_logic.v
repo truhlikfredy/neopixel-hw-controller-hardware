@@ -41,14 +41,14 @@ module anton_neopixel_stream_logic #(
 
   // When 32bit mode enabled use
   // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
-  wire [BUFFER_BITS-1:0] pixelIndexEquiv = (regCtrl32bit) ? {pixelIndex[BUFFER_BITS-1:2], 2'b11} : pixelIndex;
+  wire [BUFFER_BITS-1:0] pixelIndexEquiv = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], 2'b11} : pixelIndexBuf;
 
 
-  assign streamOutput      = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
-  assign streamReset       = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_RESET;
+  assign streamOutput    = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
+  assign streamReset     = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_RESET;
 
-  wire   streamPatternOf = streamOutput && bitPatternIndexBuf == 'd7;    // does sub-bit pattern overflowing
-  assign streamBitOf     = streamPatternOf && pixelBitIndexBuf == 'd23; // does bit index overflowing
+  wire   streamPatternOf = streamOutput    && bitPatternIndexBuf == 'd7;  // does sub-bit pattern overflowing
+  assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd23; // does bit index overflowing
   wire   streamPixelLast = pixelIndexEquiv == pixelIndexMax;
   assign streamPixelOf   = streamBitOf && streamPixelLast;
 
@@ -109,7 +109,7 @@ module anton_neopixel_stream_logic #(
     if (streamSyncOf) begin  
       // predefined wait in reset stateBuf was reached, let's 
       if (cycle == 'd5) $finish; // stop simulation here
-      stateBuf           <= `ENUM_STATE_TRANSMIT;
+      stateBuf        <= `ENUM_STATE_TRANSMIT;
       cycle           <= cycle + 'd1;
       resetDelayCount <= 'd0;
     end
@@ -118,6 +118,8 @@ module anton_neopixel_stream_logic #(
   // Set the register buffers to the ports
   assign bitPatternIndex = bitPatternIndexBuf;
   assign pixelBitIndex   = pixelBitIndexBuf;
+  assign pixelIndex      = pixelIndexBuf;
   assign state           = stateBuf;
+  assign initSlowDone    = initSlowDoneBuf;
 
 endmodule
