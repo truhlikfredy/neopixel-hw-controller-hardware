@@ -57,12 +57,12 @@ module anton_neopixel_stream #(
         };
       end else begin
         // 8bit mode
-        // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2-0]Red
-        // 8B, 8R, 8G = 32bit destination format =>  xxxxBxBx xxRxRxRx xxGxGxGx  high bits are sent first (so reorder them to the right)
+        // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2:0]Red
+        // 8B, 8R, 8G = 32bit destination format =>  xxxxBxxB xxRxRxxR xxGxGxGx  high bits are sent first (so reorder them to the right)
         pixelColourValue = { 
-          5'b0000, pixels[pixelIndex][6], 1'b0, pixels[pixelIndex][7], 1'b0,                                // 2bits Blues
-          4'b00,   pixels[pixelIndex][0], 1'b0, pixels[pixelIndex][1], 1'b0, pixels[pixelIndex][2], 1'b0,   // 3bits Red
-          4'b00,   pixels[pixelIndex][3], 1'b0, pixels[pixelIndex][4], 1'b0, pixels[pixelIndex][5], 1'b0    // 3bits Green
+          4'b0000, pixels[pixelIndex][6], 2'b00, pixels[pixelIndex][7],                                    // 2bits Blues
+          2'b00,   pixels[pixelIndex][0], 1'b0,  pixels[pixelIndex][1], 2'b00, pixels[pixelIndex][2],      // 3bits Red
+          2'b00,   pixels[pixelIndex][3], 1'b0,  pixels[pixelIndex][4], 1'b0,  pixels[pixelIndex][5], 1'b0 // 3bits Green
         };
       end
     `endif
