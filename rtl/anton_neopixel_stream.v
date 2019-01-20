@@ -48,12 +48,12 @@ module anton_neopixel_stream #(
       endcase
     `else
       if (regCtrl32bit) begin
-        // In 32bit mode use 3 bytes to concatinate RGB values and reordered 
-        // them to make it convient (4th byte is dropped)
+        // In 32bit mode use 3 bytes to concatenate RGB values and reordered 
+        // them to make it convenient (4th byte is dropped)
         pixelColourValue = { 
-          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b10}], // Blue
-          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b00}], // Red
-          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b01}]  // Green
+          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b10}][7:0], // Blue
+          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b00}][7:0], // Red
+          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b01}][7:0]  // Green
         };
       end else begin
         // 8bit mode
