@@ -6,7 +6,8 @@
 // pixels, which should have 4Hz refresh reason why it's not buffer size is 
 // because the verilator is akward and for size which are power of 2 was 
 // expecting 1 bit bigger VARREF even when the number was subtracted
-`define BUFFER_END_DEFAULT 31
+//`define BUFFER_END_DEFAULT (((15+50+64+128+256)*4)-1)  // 15 + 50 are DCS panels + 8x8 panel + 16x16 panel + 128 ring panel in 32bit mode
+`define BUFFER_END_DEFAULT (((16)*4)-1)  // 8x8 panel in 32bit mode
 
 
 // How long the reset delay will be happening, minimum spec is so 
