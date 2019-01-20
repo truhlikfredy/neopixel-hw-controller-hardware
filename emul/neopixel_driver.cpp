@@ -223,7 +223,7 @@ void NeoPixelDriver::selfTestHardLimit8bit() {
   writeRegisterCtrl(NeoPixelCtrl::NONE);
   updateLeds();
 
-  testTimeoutStart(3000);
+  testTimeoutStart(60000);
   while (testRegisterCtrl(NeoPixelCtrl::RUN)) {
     testAssertEquals<bool>("Finished before timeout", false,
                            testTimeoutIsExpired(), false);
