@@ -56,8 +56,8 @@ module anton_neopixel_stream_logic #(
   always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
 
   // When limit is enabled, use software limit, but when disabled use whole buffer
-  // what is the rechable maximum depending on the settings
-  assign pixelIndexMax = (regCtrlLimit)? regMax[BUFFER_BITS-1:0] : BUFFER_END;
+  // what is the reachable maximum depending on the settings
+  assign pixelIndexMax = (regCtrlLimit) ? regMax[BUFFER_BITS-1:0] : BUFFER_END[BUFFER_BITS-1:0];
 
 
   always @(posedge clk6_4mhz) begin 
