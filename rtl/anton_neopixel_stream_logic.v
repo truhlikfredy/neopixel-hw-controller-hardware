@@ -85,7 +85,7 @@ module anton_neopixel_stream_logic #(
         end else begin
           // For all pixels except the last one go to the next pixel.
           // In 32bit mode increment differently than in 8bit
-          pixelIndexBuf <= (regCtrl32bit) ? pixelIndexBuf + 'd4 : pixelIndexBuf + 'd1;
+          pixelIndexBuf <= (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2]+1, 2'b00} : pixelIndexBuf + 'd1;
         end
     end
   end
