@@ -21,6 +21,11 @@ module anton_neopixel_stream #(
   reg        neoDataBuf       = 'b0;
   reg [23:0] pixelColourValue = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
 
+  // Pixel values for 32bit RGB mode
+  wire [7:0] pRed   = pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b00}];
+  wire [7:0] pGreen = pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b01}];
+  wire [7:0] pBlue  = pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b10}];
+
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
   always @(*) begin
@@ -51,9 +56,9 @@ module anton_neopixel_stream #(
         // In 32bit mode use 3 bytes to concatenate RGB values and reordered 
         // them to make it convenient (4th byte is dropped)
         pixelColourValue = { 
-          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b10}][7:0], // Blue
-          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b00}][7:0], // Red
-          pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b01}][7:0]  // Green
+          pBlue[0],  pBlue[1],  pBlue[2],  pBlue[3],  pBlue[4],  pBlue[5],  pBlue[6],  pBlue[7], // Blue
+          pRed[0],   pRed[1],   pRed[2],   pRed[3],   pRed[4],   pRed[5],   pRed[6],   pRed[7],  // Red
+          pGreen[0], pGreen[1], pGreen[2], pGreen[3], pGreen[4], pGreen[5], pGreen[6], pGreen[7] // Green          
         };
       end else begin
         // 8bit mode
