@@ -43,6 +43,7 @@ module anton_neopixel_stream_logic #(
   // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
   wire [BUFFER_BITS-1:0] pixelIndexEquiv    = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], 2'b11} : pixelIndexBuf;
   wire [BUFFER_BITS-1:0] pixelIndexMaxEquiv = (regCtrl32bit) ? {pixelIndexMax[BUFFER_BITS-1:2], 2'b00} : pixelIndexMax;
+  wire [BUFFER_BITS-3:0] pixelIndexPartial  = pixelIndexBuf[BUFFER_BITS-1:2] + 1; // in 32bit mode we +4 and have 00s in the last 2
 
 
   assign streamOutput    = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
@@ -85,7 +86,7 @@ module anton_neopixel_stream_logic #(
         end else begin
           // For all pixels except the last one go to the next pixel.
           // In 32bit mode increment differently than in 8bit
-          pixelIndexBuf <= (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2]+1, 2'b00} : pixelIndexBuf + 'd1;
+          pixelIndexBuf <= (regCtrl32bit) ? {pixelIndexPartial, 2'b00} : pixelIndexBuf + 'd1;
         end
     end
   end
