@@ -22,9 +22,9 @@ module anton_neopixel_stream #(
   reg [23:0] pixelColourValue = 'd0;  // Blue Red Green, order is from right to left and the MSB are sent first
 
   // Pixel values for 32bit RGB mode
-  wire [7:0] pRed   = pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b00}];
-  wire [7:0] pGreen = pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b01}];
-  wire [7:0] pBlue  = pixels[{pixelIndex[BUFFER_BITS-1: 2], 2'b10}];
+  wire [7:0] pRed   = pixels[{pixelIndex[BUFFER_BITS-1:2], 2'b00}][7:0];
+  wire [7:0] pGreen = pixels[{pixelIndex[BUFFER_BITS-1:2], 2'b01}][7:0];
+  wire [7:0] pBlue  = pixels[{pixelIndex[BUFFER_BITS-1:2], 2'b10}][7:0];
 
   // as combinational logic should be enough
   // https://electronics.stackexchange.com/questions/29553/how-are-verilog-always-statements-implemented-in-hardware
