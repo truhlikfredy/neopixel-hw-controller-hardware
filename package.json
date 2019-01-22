@@ -10,16 +10,16 @@
   },
   "scripts": {
     "doc": "cd ./images_src && ./generate_images.sh",
-    "lint": "cd rtl && verilator --lint-only $npm_package_config_top_module.v",
+    "lint": "cd hdl && verilator --lint-only $npm_package_config_top_module.v",
     "clean": "cd emul && rm -rf *.o build/* *~ *.txt *.vcd *.mif *.orig",
-    "build": "cd emul && verilator -Wno-fatal -I../rtl --cc $npm_package_config_top_module.v --coverage-line --trace --exe ../$npm_package_config_cpp ../neopixel_driver.cpp ../neopixel_hal_simulation.cpp ../test_helper.cpp ../test_helper_bsp_simulation.cpp -Mdir build -CFLAGS \"-g -O3\" && make -C build -f V$npm_package_config_top_module.mk",
+    "build": "cd emul && verilator -Wno-fatal -I../hdl --cc $npm_package_config_top_module.v --coverage-line --trace --exe ../$npm_package_config_cpp ../neopixel_driver.cpp ../neopixel_hal_simulation.cpp ../test_helper.cpp ../test_helper_bsp_simulation.cpp -Mdir build -CFLAGS \"-g -O3\" && make -C build -f V$npm_package_config_top_module.mk",
     "run": "cd emul/build && ./V$npm_package_config_top_module",
     "coverage:html-report": "mkdir report; cd report; genhtml ../emul/build/lcov.info",
     "coverage:coveralls": "cat emul/build/lcov.info | coveralls",
     "wave": "gtkwave ./emul/build/V$npm_package_config_top_module.vcd -S signals.tcl",
     "all": "npm run-script clean && npm run-script build && npm run-script run && npm run-script coverage:html-report",
-    "monitor:lint": "nodemon -V --watch rtl -e v --exec 'npm run-script lint'",
-    "monitor:all": "nodemon -V --watch rtl --watch emul --ignore emul/build -e cpp,c,h,v --exec 'npm run-script all'"
+    "monitor:lint": "nodemon -V --watch hdl -e v --exec 'npm run-script lint'",
+    "monitor:all": "nodemon -V --watch hdl --watch emul --ignore emul/build -e cpp,c,h,v --exec 'npm run-script all'"
   },
   "author": "",
   "license": "ISC",
