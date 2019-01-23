@@ -82,7 +82,7 @@ module anton_neopixel_stream_logic #(
 
     if (streamBitOf) begin
       // Count R, G and B (on B it will be streamChannelOf so it will reset itself to 0)
-      channelIndexBuf <= (streamChannelOf) ? 0 : channelIndexBuf + 'd1;
+      channelIndexBuf <= (streamChannelOf) ? 'd0 : channelIndexBuf + 'd1;
     end
 
     if (streamChannelOf) begin
@@ -125,6 +125,7 @@ module anton_neopixel_stream_logic #(
   // Set the register buffers to the ports
   assign bitPatternIndex = bitPatternIndexBuf;
   assign pixelBitIndex   = pixelBitIndexBuf;
+  assign channelIndex    = channelIndexBuf;
   assign pixelIndex      = pixelIndexBuf;
   assign state           = stateBuf;
   assign initSlowDone    = initSlowDoneBuf;
