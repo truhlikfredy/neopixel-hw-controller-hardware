@@ -17,21 +17,24 @@ module anton_neopixel_stream_logic #(
   output initSlowDone,
 
   output [2:0] bitPatternIndex,
-  output [4:0] pixelBitIndex,
+  output [2:0] pixelBitIndex,
+  output [1:0] channelIndex,
   output [BUFFER_BITS-1:0] pixelIndex,
   output [BUFFER_BITS-1:0] pixelIndexMax,
   output state,
   output streamOutput,
   output streamReset,
   output streamBitOf,
+  output streamChannelOf,
   output streamPixelOf,
   output streamSyncOf
 );
 
   reg [2:0]             bitPatternIndexBuf = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
-  reg [4:0]             pixelBitIndexBuf   = 'd0;  // 0 - 23 to count whole 24bits of a RGB pixel
+  reg [2:0]             pixelBitIndexBuf   = 'd0;  // 0 - 7 to count part of the 8bits of a RGB pixel
   reg [BUFFER_BITS-1:0] pixelIndexBuf      = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
   reg [11:0]            resetDelayCount    = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 1959ticks (306ns)
+  reg [1:0]             channelIndexBuf    = 'd0;  // R G B channels inside the pixel
 
   reg                   stateBuf           = 'b0;  // 0 = transmit bits, 1 = reset mode
   reg [3:0]             cycle              = 'd0;  
@@ -49,10 +52,11 @@ module anton_neopixel_stream_logic #(
   assign streamOutput    = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
   assign streamReset     = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_RESET;
 
-  wire   streamPatternOf = streamOutput    && bitPatternIndexBuf == 'd7;  // does sub-bit pattern overflowing
-  assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd23; // does bit index overflowing
-  wire   streamPixelLast = pixelIndexEquiv >= pixelIndexMaxEquiv;
-  assign streamPixelOf   = streamBitOf && streamPixelLast;
+  wire   streamPatternOf = streamOutput    && bitPatternIndexBuf == 'd7; // does sub-bit pattern overflowing
+  assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd7; // does bit index overflowing
+  assign streamChannelOf = streamBitOf     && channelIndexBuf    == 'd2; // On the 3rd channel of RGB the whole pixel is done
+  wire   streamPixelLast = pixelIndexEquiv >= pixelIndexMaxEquiv;        // we are on the last pixel in the buffer
+  assign streamPixelOf   = streamChannelOf && streamPixelLast;               // toggle the LAST PIXEL flag only on overflow of the last bit of the last channel in the pixel
 
   always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
 
@@ -62,8 +66,8 @@ module anton_neopixel_stream_logic #(
 
 
   always @(posedge clk6_4mhz) begin 
-    // for 'd0 - 'd22 => 23bits of a pixel just go for the next bit
-    // on 'd23 => 24th bit do start on a new pixel with bit 'd0
+    // for 'd0 - 'd6 => 7bits of a pixel just go for the next bit
+    // on 'd7 => 8th bit do start on a new pixel with bit 'd0
     if (streamPatternOf) pixelBitIndexBuf <= (streamBitOf) ? 0 : pixelBitIndexBuf +1;
 
     if (initSlow) begin
@@ -77,6 +81,11 @@ module anton_neopixel_stream_logic #(
     end
 
     if (streamBitOf) begin
+      // Count R, G and B (on B it will be streamChannelOf so it will reset itself to 0)
+      channelIndexBuf <= (streamChannelOf) ? 0 : channelIndexBuf + 'd1;
+    end
+
+    if (streamChannelOf) begin
       // Compare the index equivalent (in 32bit mode it jumps by 4bytes) if 
       // maximum buffer size was reached, but in cases the buffer size is power 
       // of 2 it will need to be by 1 bit to match the size
