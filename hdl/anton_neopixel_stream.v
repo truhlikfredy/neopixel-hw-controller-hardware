@@ -77,7 +77,7 @@ module anton_neopixel_stream #(
         case (channelIndex)
           'd0: pixelColourValue = {2'b00,   pixels[pixelIndex][3], 1'b0,  pixels[pixelIndex][4], 1'b0,  pixels[pixelIndex][5], 1'b0 }; // 3bits Green
           'd1: pixelColourValue = {4'b0000, pixels[pixelIndex][6], 2'b00, pixels[pixelIndex][7]                                     }; // 2bits Blues
-          'd1: pixelColourValue = {2'b00,   pixels[pixelIndex][0], 1'b0,  pixels[pixelIndex][1], 2'b00, pixels[pixelIndex][2]       }; // 3bits Red
+          'd2: pixelColourValue = {2'b00,   pixels[pixelIndex][0], 1'b0,  pixels[pixelIndex][1], 2'b00, pixels[pixelIndex][2]       }; // 3bits Red
           default: pixelColourValue = 8'h00;
         endcase
       end
