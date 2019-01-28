@@ -71,7 +71,7 @@ module anton_neopixel_stream #(
         };
 
       end else begin
-        // 8bit mode
+        // 8bit mode, to calculate inside speed calc: hex( (Red >> 5) + ((Green >> 5) << 3 ) +  ((Blue >> 6) << 6) )
         // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2:0]Red
         // 8B, 8R, 8G = 32bit destination format =>  xxxxBxxB xxRxRxxR xxGxGxGx  high bits are sent first (so reorder them to the right)
         case (channelIndex)
