@@ -65,13 +65,15 @@ module anton_neopixel_module #(
   );
 
 
-  wire [2:0]             bitPatternIndex;
-  wire [4:0]             pixelBitIndex;
+  wire [2:0]             bitPatternIndex; // 8 patterns in a bit
+  wire [2:0]             pixelBitIndex;   // 8 bits in channel
+  wire [1:0]             channelIndex;    // 3 channels in pixel
   wire [BUFFER_BITS-1:0] pixelIndex;
   wire [BUFFER_BITS-1:0] pixelIndexMax;
   wire                   streamOutput;
   wire                   streamReset;
   wire                   streamBitOf;
+  wire                   streamChannelOf;
   wire                   streamPixelOf;
 
   anton_neopixel_stream #(
@@ -80,6 +82,7 @@ module anton_neopixel_module #(
     .pixels(pixels),
     .state(neoState),
     .pixelIndex(pixelIndex),
+    .channelIndex(channelIndex),
     .pixelBitIndex(pixelBitIndex),
     .bitPatternIndex(bitPatternIndex),
     .regCtrl32bit(regCtrl32bit),
@@ -105,12 +108,14 @@ module anton_neopixel_module #(
 
     .bitPatternIndex(bitPatternIndex),
     .pixelBitIndex(pixelBitIndex),
+    .channelIndex(channelIndex),
     .pixelIndex(pixelIndex),
     .pixelIndexMax(pixelIndexMax),
     .state(neoState),
     .streamOutput(streamOutput),
     .streamReset(streamReset),
     .streamBitOf(streamBitOf),
+    .streamChannelOf(streamChannelOf),
     .streamPixelOf(streamPixelOf),
     .streamSyncOf(streamSyncOf)
   );
