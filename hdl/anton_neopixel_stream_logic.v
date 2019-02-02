@@ -5,85 +5,85 @@ module anton_neopixel_stream_logic #(
   parameter  RESET_DELAY = `RESET_DELAY_DEFAULT, // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1)  // minimum required amount of bits to store the BUFFER_END
 )(
-  input  clk6_4mhz,
-  input  regCtrlInit,
-  input  regCtrlRun,
-  input  regCtrlLoop,
-  input  regCtrlLimit,
-  input  regCtrl32bit,
-  input  [12:0] regMax, // 13 bits in total apb is using 16 bus but -2 bit are dropped for word alignment and 1 bit used to detect control registry accesses
+  input                    clk6_4mhz,
+  input                    regCtrlInit,
+  input                    regCtrlRun,
+  input                    regCtrlLoop,
+  input                    regCtrlLimit,
+  input                    regCtrl32bit,
+  input                    [12:0] regMax, // 13 bits in total apb is using 16 bus but -2 bit are dropped for word alignment and 1 bit used to detect control registry accesses
   
-  input  initSlow,
-  output initSlowDone,
+  input                    initSlow,
+  output                   initSlowDone,
 
-  output [2:0] bitPatternIndex,
-  output [2:0] pixelBitIndex,
-  output [1:0] channelIndex,
-  output [BUFFER_BITS-1:0] pixelIndexMax,
-  output [BUFFER_BITS-1:0] pixelIndexComb,
-  output state,
-  output streamOutput,
-  output streamReset,
-  output streamBitOf,
-  output streamChannelOf,
-  output streamPixelOf,
-  output streamSyncOf
+  output [2:0]             bitPatternIx,
+  output [2:0]             pixelBitIx,
+  output [1:0]             channelIx,
+  output [BUFFER_BITS-1:0] pixelIxMax,
+  output [BUFFER_BITS-1:0] pixelIxComb,
+  output                   state,
+  output                   streamOutput,
+  output                   streamReset,
+  output                   streamBitOf,
+  output                   streamChannelOf,
+  output                   streamPixelOf,
+  output                   streamSyncOf
 );
 
-  reg [2:0]             bitPatternIndexBuf = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
-  reg [2:0]             pixelBitIndexBuf   = 'd0;  // 0 - 7 to count part of the 8bits of a RGB pixel
-  reg [BUFFER_BITS-1:0] pixelIndexBuf      = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
-  reg [11:0]            resetDelayCount    = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 1959ticks (306ns)
-  reg [1:0]             channelIndexBuf    = 'd0;  // R G B channels inside the pixel
+  reg [2:0]             bitPatternIxB   = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
+  reg [2:0]             pixelBitIxB     = 'd0;  // 0 - 7 to count part of the 8bits of a RGB pixel
+  reg [BUFFER_BITS-1:0] pixelIxB        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
+  reg [11:0]            resetDelayCount = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 1959ticks (306ns)
+  reg [1:0]             channelIxB      = 'd0;  // R G B channels inside the pixel
 
-  reg                   stateBuf           = 'b0;  // 0 = transmit bits, 1 = reset mode
-  reg [3:0]             cycle              = 'd0;  
+  reg                   stateB          = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg [3:0]             cycle           = 'd0;  
 
-  reg                   initSlowDoneBuf    = 'b0;
+  reg                   initSlowDoneB   = 'b0;
   
 
   // When 32bit mode enabled use
   // index to the current pixel transmitting, adjusted depending on 32/8 bit mode
-  wire [BUFFER_BITS-1:0] pixelIndexEquiv    = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], 2'b11} : pixelIndexBuf;
-  wire [BUFFER_BITS-1:0] pixelIndexMaxEquiv = (regCtrl32bit) ? {pixelIndexMax[BUFFER_BITS-1:2], 2'b00} : pixelIndexMax;
-  wire [BUFFER_BITS-3:0] pixelIndexPartial  = pixelIndexBuf[BUFFER_BITS-1:2] + 1; // in 32bit mode we +4 and have 00s in the last 2
-  wire [BUFFER_BITS-1:0] pixelIndexComb     = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], channelIndexBuf} : pixelIndexBuf[BUFFER_BITS-1:0]; // in 32bit mode include the channelIndex
+  wire [BUFFER_BITS-1:0] pixelIxEquiv    = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], 2'b11} : pixelIxB;
+  wire [BUFFER_BITS-1:0] pixelIxMaxEquiv = (regCtrl32bit) ? {pixelIxMax[BUFFER_BITS-1:2], 2'b00} : pixelIxMax;
+  wire [BUFFER_BITS-3:0] pixelIxPartial  = pixelIxB[BUFFER_BITS-1:2] + 1; // in 32bit mode we +4 and have 00s in the last 2
+  wire [BUFFER_BITS-1:0] pixelIxComb     = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], channelIxB} : pixelIxB[BUFFER_BITS-1:0]; // in 32bit mode include the channelIx
 
 
-  assign streamOutput    = !regCtrlInit    && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
-  assign streamReset     = !regCtrlInit    && regCtrlRun && stateBuf == `ENUM_STATE_RESET;
+  assign streamOutput    = !regCtrlInit    && regCtrlRun && stateB == `ENUM_STATE_TRANSMIT; 
+  assign streamReset     = !regCtrlInit    && regCtrlRun && stateB == `ENUM_STATE_RESET;
 
-  wire   streamPatternOf = streamOutput    && bitPatternIndexBuf == 'd7; // does sub-bit pattern overflowing
-  assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd7; // does bit index overflowing
-  assign streamChannelOf = streamBitOf     && channelIndexBuf    == 'd2; // On the 3rd channel of RGB the whole pixel is done
-  wire   streamPixelLast = pixelIndexEquiv >= pixelIndexMaxEquiv;        // we are on the last pixel in the buffer
-  assign streamPixelOf   = streamChannelOf && streamPixelLast;           // toggle the LAST PIXEL flag only on overflow of the last bit of the last channel in the pixel
+  wire   streamPatternOf = streamOutput    && bitPatternIxB == 'd7; // does sub-bit pattern overflowing
+  assign streamBitOf     = streamPatternOf && pixelBitIxB   == 'd7; // does bit index overflowing
+  assign streamChannelOf = streamBitOf     && channelIxB    == 'd2; // On the 3rd channel of RGB the whole pixel is done
+  wire   streamPixelLast = pixelIxEquiv    >= pixelIxMaxEquiv;        // we are on the last pixel in the buffer
+  assign streamPixelOf   = streamChannelOf && streamPixelLast;        // toggle the LAST PIXEL flag only on overflow of the last bit of the last channel in the pixel
 
-  always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
+  always @(posedge clk6_4mhz) if (streamOutput) bitPatternIxB <= bitPatternIxB + 1;
 
   // When limit is enabled, use software limit, but when disabled use whole buffer
   // what is the reachable maximum depending on the settings
-  assign pixelIndexMax = (regCtrlLimit) ? regMax[BUFFER_BITS-1:0] : BUFFER_END[BUFFER_BITS-1:0];
+  assign pixelIxMax = (regCtrlLimit) ? regMax[BUFFER_BITS-1:0] : BUFFER_END[BUFFER_BITS-1:0];
 
 
   always @(posedge clk6_4mhz) begin 
     // for 'd0 - 'd6 => 7bits of a pixel just go for the next bit
     // on 'd7 => 8th bit do start on a new pixel with bit 'd0
-    if (streamPatternOf) pixelBitIndexBuf <= (streamBitOf) ? 0 : pixelBitIndexBuf +1;
+    if (streamPatternOf) pixelBitIxB <= (streamBitOf) ? 0 : pixelBitIxB +1;
 
     if (initSlow) begin
-      pixelIndexBuf    <= {BUFFER_BITS{1'b0}};
-      pixelBitIndexBuf <= 'd0;  
-      initSlowDoneBuf  <= 'b1; // after the init is done signal a flag
+      pixelIxB    <= {BUFFER_BITS{1'b0}};
+      pixelBitIxB <= 'd0;  
+      initSlowDoneB  <= 'b1; // after the init is done signal a flag
     end
 
-    if (initSlowDoneBuf) begin
-      initSlowDoneBuf  <= 'b0; // after one slow clock, it should be enough to de-assert the flag
+    if (initSlowDoneB) begin
+      initSlowDoneB  <= 'b0; // after one slow clock, it should be enough to de-assert the flag
     end
 
     if (streamBitOf) begin
       // Count R, G and B (on B it will be streamChannelOf so it will reset itself to 0)
-      channelIndexBuf <= (streamChannelOf) ? 'd0 : channelIndexBuf + 'd1;
+      channelIxB <= (streamChannelOf) ? 'd0 : channelIxB + 'd1;
     end
 
     if (streamChannelOf) begin
@@ -92,11 +92,11 @@ module anton_neopixel_stream_logic #(
       // of 2 it will need to be by 1 bit to match the size
         if (streamPixelLast)  begin
           // for the very last pixel overflow 0 and start reset
-          pixelIndexBuf <= 'd0;
+          pixelIxB <= 'd0;
         end else begin
           // For all pixels except the last one go to the next pixel.
           // In 32bit mode increment differently than in 8bit
-          pixelIndexBuf <= (regCtrl32bit) ? {pixelIndexPartial, 2'b00} : pixelIndexBuf + 'd1;
+          pixelIxB <= (regCtrl32bit) ? {pixelIxPartial, 2'b00} : pixelIxB + 'd1;
         end
     end
   end
@@ -106,28 +106,28 @@ module anton_neopixel_stream_logic #(
 
 
   always @(posedge clk6_4mhz) begin
-    // if last pixel is reached turn into reset stateBuf
-    if (streamPixelOf) stateBuf <= `ENUM_STATE_RESET;
+    // if last pixel is reached turn into reset stateB
+    if (streamPixelOf) stateB <= `ENUM_STATE_RESET;
 
     if (streamReset) begin
-      // when in the reset stateBuf, count 300ns (RESET_DELAY ticks / 7MHz clock)
+      // when in the reset stateB, count 300ns (RESET_DELAY ticks / 7MHz clock)
       resetDelayCount <= resetDelayCount + 'b1;
     end
 
     if (streamSyncOf) begin  
-      // predefined wait in reset stateBuf was reached, let's 
+      // predefined wait in reset stateB was reached, let's 
       if (cycle == 'd5) $finish; // stop simulation here
-      stateBuf        <= `ENUM_STATE_TRANSMIT;
+      stateB          <= `ENUM_STATE_TRANSMIT;
       cycle           <= cycle + 'd1;
       resetDelayCount <= 'd0;
     end
   end
 
   // Set the register buffers to the ports
-  assign bitPatternIndex = bitPatternIndexBuf;
-  assign pixelBitIndex   = pixelBitIndexBuf;
-  assign channelIndex    = channelIndexBuf;
-  assign state           = stateBuf;
-  assign initSlowDone    = initSlowDoneBuf;
+  assign bitPatternIx = bitPatternIxB;
+  assign pixelBitIx   = pixelBitIxB;
+  assign channelIx    = channelIxB;
+  assign state        = stateB;
+  assign initSlowDone = initSlowDoneB;
 
 endmodule

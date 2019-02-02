@@ -38,7 +38,7 @@ module anton_neopixel_module #(
   wire                   initSlowDone;
   wire                   streamSyncOf;
 
-  wire [BUFFER_BITS-1:0] pixelIndexComb;
+  wire [BUFFER_BITS-1:0] pixelIxComb;
   wire [7:0]             pixelByte;
   
   anton_neopixel_registers #(
@@ -51,7 +51,7 @@ module anton_neopixel_module #(
     .busRead(busRead),
     .busDataOut(busDataOut),
 
-    .pixelIndexComb(pixelIndexComb),
+    .pixelIxComb(pixelIxComb),
     .pixelByte(pixelByte),
 
     .streamSyncOf(streamSyncOf),
@@ -69,10 +69,10 @@ module anton_neopixel_module #(
   );
 
 
-  wire [2:0]             bitPatternIndex; // 8 patterns in a bit
-  wire [2:0]             pixelBitIndex;   // 8 bits in channel
-  wire [1:0]             channelIndex;    // 3 channels in pixel
-  wire [BUFFER_BITS-1:0] pixelIndexMax;
+  wire [2:0]             bitPatternIx; // 8 patterns in a bit
+  wire [2:0]             pixelBitIx;   // 8 bits in channel
+  wire [1:0]             channelIx;    // 3 channels in pixel
+  wire [BUFFER_BITS-1:0] pixelIxMax;
   wire                   streamOutput;
   wire                   streamReset;
   wire                   streamBitOf;
@@ -94,11 +94,11 @@ module anton_neopixel_module #(
     .initSlow(initSlow),
     .initSlowDone(initSlowDone),
 
-    .bitPatternIndex(bitPatternIndex),
-    .pixelBitIndex(pixelBitIndex),
-    .channelIndex(channelIndex),
-    .pixelIndexMax(pixelIndexMax),
-    .pixelIndexComb(pixelIndexComb),
+    .bitPatternIx(bitPatternIx),
+    .pixelBitIx(pixelBitIx),
+    .channelIx(channelIx),
+    .pixelIxMax(pixelIxMax),
+    .pixelIxComb(pixelIxComb),
     .state(neoState),
     .streamOutput(streamOutput),
     .streamReset(streamReset),
@@ -114,9 +114,9 @@ module anton_neopixel_module #(
   ) stream(
     .pixelByte(pixelByte),
     .state(neoState),
-    .channelIndex(channelIndex),
-    .pixelBitIndex(pixelBitIndex),
-    .bitPatternIndex(bitPatternIndex),
+    .channelIx(channelIx),
+    .pixelBitIx(pixelBitIx),
+    .bitPatternIx(bitPatternIx),
     .regCtrl32bit(regCtrl32bit),
     .regCtrlRun(regCtrlRun),
     .neoData(neoData)
