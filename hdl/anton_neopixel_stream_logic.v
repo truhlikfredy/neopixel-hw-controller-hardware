@@ -47,7 +47,7 @@ module anton_neopixel_stream_logic #(
   wire [BUFFER_BITS-1:0] pixelIxEquiv    = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], 2'b11} : pixelIxB;
   wire [BUFFER_BITS-1:0] pixelIxMaxEquiv = (regCtrl32bit) ? {pixelIxMax[BUFFER_BITS-1:2], 2'b00} : pixelIxMax;
   wire [BUFFER_BITS-3:0] pixelIxPartial  = pixelIxB[BUFFER_BITS-1:2] + 1; // in 32bit mode we +4 and have 00s in the last 2
-  wire [BUFFER_BITS-1:0] pixelIxComb     = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], channelIxB} : pixelIxB[BUFFER_BITS-1:0]; // in 32bit mode include the channelIx
+  wire [BUFFER_BITS-1:0] pixelIxComb     = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], channelIxRemapped} : pixelIxB[BUFFER_BITS-1:0]; // in 32bit mode include the channelIx
 
 
   assign streamOutput    = !regCtrlInit    && regCtrlRun && stateB == `ENUM_STATE_TRANSMIT; 
@@ -65,6 +65,16 @@ module anton_neopixel_stream_logic #(
   // what is the reachable maximum depending on the settings
   assign pixelIxMax = (regCtrlLimit) ? regMax[BUFFER_BITS-1:0] : BUFFER_END[BUFFER_BITS-1:0];
 
+  wire [1:0] channelIxRemapped;
+
+  // The neopixel channels ordering is GRB but I want to be storing in the memory RGB, so do remapping
+  always @(*) begin
+    case (channelIxB)
+      default: channelIxRemapped = 'd1; // the 'd0 and default are the same
+      'd1:     channelIxRemapped = 'd0; 
+      'd2:     channelIxRemapped = 'd2; 
+    endcase
+  end
 
   always @(posedge clk6_4mhz) begin 
     // for 'd0 - 'd6 => 7bits of a pixel just go for the next bit
