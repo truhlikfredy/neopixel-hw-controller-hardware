@@ -21,6 +21,7 @@ module anton_neopixel_stream_logic #(
   output [1:0] channelIndex,
   output [BUFFER_BITS-1:0] pixelIndex,
   output [BUFFER_BITS-1:0] pixelIndexMax,
+  output [BUFFER_BITS-1:0] pixelIndexComb,
   output state,
   output streamOutput,
   output streamReset,
@@ -47,6 +48,7 @@ module anton_neopixel_stream_logic #(
   wire [BUFFER_BITS-1:0] pixelIndexEquiv    = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], 2'b11} : pixelIndexBuf;
   wire [BUFFER_BITS-1:0] pixelIndexMaxEquiv = (regCtrl32bit) ? {pixelIndexMax[BUFFER_BITS-1:2], 2'b00} : pixelIndexMax;
   wire [BUFFER_BITS-3:0] pixelIndexPartial  = pixelIndexBuf[BUFFER_BITS-1:2] + 1; // in 32bit mode we +4 and have 00s in the last 2
+  wire [BUFFER_BITS-1:0] pixelIndexComb     = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], channelIndexBuf} : pixelIndexBuf[BUFFER_BITS-1:0]; // in 32bit mode include the channelIndex
 
 
   assign streamOutput    = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
@@ -56,7 +58,7 @@ module anton_neopixel_stream_logic #(
   assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd7; // does bit index overflowing
   assign streamChannelOf = streamBitOf     && channelIndexBuf    == 'd2; // On the 3rd channel of RGB the whole pixel is done
   wire   streamPixelLast = pixelIndexEquiv >= pixelIndexMaxEquiv;        // we are on the last pixel in the buffer
-  assign streamPixelOf   = streamChannelOf && streamPixelLast;               // toggle the LAST PIXEL flag only on overflow of the last bit of the last channel in the pixel
+  assign streamPixelOf   = streamChannelOf && streamPixelLast;           // toggle the LAST PIXEL flag only on overflow of the last bit of the last channel in the pixel
 
   always @(posedge clk6_4mhz) if (streamOutput) bitPatternIndexBuf <= bitPatternIndexBuf + 1;
 
@@ -126,7 +128,6 @@ module anton_neopixel_stream_logic #(
   assign bitPatternIndex = bitPatternIndexBuf;
   assign pixelBitIndex   = pixelBitIndexBuf;
   assign channelIndex    = channelIndexBuf;
-  assign pixelIndex      = pixelIndexBuf;
   assign state           = stateBuf;
   assign initSlowDone    = initSlowDoneBuf;
 

@@ -14,6 +14,9 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndex"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndexEquiv"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndexMax"
 
+lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixelIndexComb"
+lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixelVal"
+
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.resetDelayCount"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.resetDelay"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.cycle"
@@ -52,17 +55,5 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.resetRegCtrlRun"
 
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.cycle"
 
-#lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels"
-
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(0)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(1)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(2)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(3)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(4)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(5)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(6)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(7)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(8)"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixels(9)"
 
 set num_added [ gtkwave::addSignalsFromList $signals ]
