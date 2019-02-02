@@ -13,26 +13,27 @@ module anton_neopixel_apb_top #(
   // 81us => 81000ns/(1/6.4) = 518 400 ticks
   parameter RESET_DELAY = `RESET_DELAY_DEFAULT
 )(
-  input  clk6_4mhz,
-  input  syncStart,
-  output neoData,
-  output neoState,
+  input         clk6_4mhz,
+  input         syncStart,
+  output        neoData,
+  output        neoState,
 
-  input apbPenable,
-  input [15:0]apbPaddr,  // control registers 15 + LED data 14:2 +  ignored 1:0
-  input [7:0]apbPwData,
-  input apbPclk,
-  input apbPselx,
-  input apbPresern,
-  input apbPwrite,
+  input         apbPenable,
+  input  [15:0] apbPaddr,  // control registers 15 + LED data 14:2 +  ignored 1:0
+  input  [7:0]  apbPwData,
+  input         apbPclk,
+  input         apbPselx,
+  input         apbPresern,
+  input         apbPwrite,
 
-  output [7:0]apbPrData,
-  output apbPready,
-  output apbPslverr
+  output [7:0]  apbPrData,
+  output        apbPready,
+  output        apbPslverr
 );
-  wire wrEnable;
-  wire rdEnable;
-  wire [13:0]address; // correct address packed down from 32bit aligned access to 8bit access, will be limited to 8192 pixels
+
+  wire        wrEnable;
+  wire        rdEnable;
+  wire [13:0] address; // correct address packed down from 32bit aligned access to 8bit access, will be limited to 8192 pixels
 
   assign apbPready  = 1'd1; // always ready, never delaying with a waiting state
   assign apbPslverr = 1'd0; // never report errors
