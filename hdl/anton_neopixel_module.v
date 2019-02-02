@@ -68,7 +68,6 @@ module anton_neopixel_module #(
     .initSlowDone(initSlowDone)
   );
 
-
   wire [2:0]             bitPatternIx; // 8 patterns in a bit
   wire [2:0]             pixelBitIx;   // 8 bits in channel
   wire [1:0]             channelIx;    // 3 channels in pixel

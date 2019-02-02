@@ -3,6 +3,7 @@
 // Synplify inference patterns into blocks:
 // https://www.microsemi.com/document-portal/doc_view/129966-inferring-microsemi-smartfusion2-ram-blocks-app-note
 
+// Using LSRAM 18K blocks
 module anton_ram_2port_raddreg #(
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT,  // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1)  // minimum required amount of bits to store the BUFFER_END

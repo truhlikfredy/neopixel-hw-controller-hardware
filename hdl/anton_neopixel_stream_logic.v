@@ -53,9 +53,9 @@ module anton_neopixel_stream_logic #(
   assign streamOutput    = !regCtrlInit    && regCtrlRun && stateB == `ENUM_STATE_TRANSMIT; 
   assign streamReset     = !regCtrlInit    && regCtrlRun && stateB == `ENUM_STATE_RESET;
 
-  wire   streamPatternOf = streamOutput    && bitPatternIxB == 'd7; // does sub-bit pattern overflowing
-  assign streamBitOf     = streamPatternOf && pixelBitIxB   == 'd7; // does bit index overflowing
-  assign streamChannelOf = streamBitOf     && channelIxB    == 'd2; // On the 3rd channel of RGB the whole pixel is done
+  wire   streamPatternOf = streamOutput    && bitPatternIxB == 'd7;   // does sub-bit pattern overflowing
+  assign streamBitOf     = streamPatternOf && pixelBitIxB   == 'd7;   // does bit index overflowing
+  assign streamChannelOf = streamBitOf     && channelIxB    == 'd2;   // On the 3rd channel of RGB the whole pixel is done
   wire   streamPixelLast = pixelIxEquiv    >= pixelIxMaxEquiv;        // we are on the last pixel in the buffer
   assign streamPixelOf   = streamChannelOf && streamPixelLast;        // toggle the LAST PIXEL flag only on overflow of the last bit of the last channel in the pixel
 

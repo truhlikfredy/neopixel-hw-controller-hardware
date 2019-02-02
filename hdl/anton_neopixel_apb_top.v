@@ -38,9 +38,9 @@ module anton_neopixel_apb_top #(
   assign apbPready  = 1'd1; // always ready, never delaying with a waiting state
   assign apbPslverr = 1'd0; // never report errors
   
-  assign wrEnable = (apbPenable && apbPwrite && apbPselx);
-  assign rdEnable = (!apbPwrite && apbPselx);
-  assign address  = apbPaddr[15:2]; // 4 bytes (word) aligned to 1 byte aligned, 16bit addr but only 14bits are used
+  assign wrEnable   = (apbPenable && apbPwrite && apbPselx);
+  assign rdEnable   = (!apbPwrite && apbPselx);
+  assign address    = apbPaddr[15:2]; // 4 bytes (word) aligned to 1 byte aligned, 16bit addr but only 14bits are used
 
   reg [2:0]  testUnit; // TODO: disable when not in simulation/debug
 
