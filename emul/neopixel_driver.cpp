@@ -158,16 +158,18 @@ void NeoPixelDriver::selfTestPopulatePixelBuffer() {
     writePixelByte(i, neopixel_selftest_colors[i]);
   }
 
-  // read it back and verify if they match, reading back is disabled, only 2 port mem used
-  // for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-  //   if (readPixelByte(i) != neopixel_selftest_colors[i]) {
-  //     std::cout << "Pixel data @" << i << " doesn't match actual "
-  //               << readPixelByte(i) << " != expected "
-  //               << neopixel_selftest_colors[i] << std::endl;
+  // read from buffer is disabled, only 2 port mem block is used
 
-  //     testFailed();
-  //   }
-  // }
+  // read back and and expect 0xff
+  for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
+    if (readPixelByte(i) != 0xff) {
+      std::cout << "Pixel data @" << i << " doesn't match actual "
+                << readPixelByte(i) << " != expected "
+                << neopixel_selftest_colors[i] << std::endl;
+
+      testFailed();
+    }
+  }
 }
 
 

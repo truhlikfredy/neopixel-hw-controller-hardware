@@ -8,7 +8,6 @@ module anton_neopixel_stream #(
 )(
   input [7:0]              pixelByte,
   input                    state,
-  input [BUFFER_BITS-1:0]  pixelIndex,     // index to the current pixel transmitting
   input [2:0]              pixelBitIndex,  // 0 - 7 to count whole 8bits of a one channel (RGB) inside a pixel
   input [1:0]              channelIndex,
   input [2:0]              bitPatternIndex,
@@ -36,49 +35,24 @@ module anton_neopixel_stream #(
 
 
   always @(*) begin
-    `ifdef HARDCODED_PIXELS
-      // hardcoded predefined colours for 3 pixels in a strip
-      // TODO: use casez so bigger arrays could be auto filled with these 
-      // values in tiling/overflow method
-      case ({pixelIndex, channelIndex})
-        'd0:      pixelColourValue = 8'hff;
-        'd1:      pixelColourValue = 8'h00;
-        'd2:      pixelColourValue = 8'hd5;
+    if (regCtrl32bit) begin
+      // In 32bit mode use 3 bytes to concatenate RGB values and reordered 
+      // them to make it convenient (4th byte is dropped)
+      pixelColourValue = {
+        pixelByte[0], pixelByte[1], pixelByte[2], pixelByte[3], pixelByte[4], pixelByte[5], pixelByte[6], pixelByte[7] // RGB depending on the channelIndex
+      };
 
-        'd4:      pixelColourValue = 8'h00;
-        'd5:      pixelColourValue = 8'h88;
-        'd6:      pixelColourValue = 8'h00;
-
-        'd8:      pixelColourValue = 8'h00;
-        'd9:      pixelColourValue = 8'h00;
-        'd10:     pixelColourValue = 8'h90;
-
-        'd11:     pixelColourValue = 8'h00;
-        'd12:     pixelColourValue = 8'h00;
-        'd13:     pixelColourValue = 8'h10;
-
-        default:  pixelColourValue = 8'h10; // slightly light to show there might be problem in configuration
+    end else begin
+      // 8bit mode 
+      // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2:0]Red
+      // 8B, 8R, 8G = 32bit destination format =>  xxxxBxxB xxRxRxxR xxGxGxGx  high bits are sent first (so reorder them to the right)
+      case (channelIndex)
+        'd0: pixelColourValue = {2'b00,   pixelByte[3], 1'b0,  pixelByte[4], 1'b0,  pixelByte[5], 1'b0 }; // 3bits Green
+        'd1: pixelColourValue = {2'b00,   pixelByte[0], 1'b0,  pixelByte[1], 2'b00, pixelByte[2]       }; // 3bits Red
+        'd2: pixelColourValue = {4'b0000, pixelByte[6], 2'b00, pixelByte[7]                           }; // 2bits Blues
+        default: pixelColourValue = 8'h00;
       endcase
-    `else
-      if (regCtrl32bit) begin
-        // In 32bit mode use 3 bytes to concatenate RGB values and reordered 
-        // them to make it convenient (4th byte is dropped)
-        pixelColourValue = {
-          pixelByte[0], pixelByte[1], pixelByte[2], pixelByte[3], pixelByte[4], pixelByte[5], pixelByte[6], pixelByte[7] // RGB depending on the channelIndex
-        };
-
-      end else begin
-        // 8bit mode 
-        // 2B, 3G, 3R = 8bit source format       => [7:6]Blue,  [5:3]Green, [2:0]Red
-        // 8B, 8R, 8G = 32bit destination format =>  xxxxBxxB xxRxRxxR xxGxGxGx  high bits are sent first (so reorder them to the right)
-        case (channelIndex)
-          'd0: pixelColourValue = {2'b00,   pixelByte[3], 1'b0,  pixelByte[4], 1'b0,  pixelByte[5], 1'b0 }; // 3bits Green
-          'd1: pixelColourValue = {2'b00,   pixelByte[0], 1'b0,  pixelByte[1], 2'b00, pixelByte[2]       }; // 3bits Red
-          'd2: pixelColourValue = {4'b0000, pixelByte[6], 2'b00, pixelByte[7]                           }; // 2bits Blues
-          default: pixelColourValue = 8'h00;
-        endcase
-      end
-    `endif
+    end
   end
 
 

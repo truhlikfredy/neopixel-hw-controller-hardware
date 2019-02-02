@@ -12,31 +12,31 @@ module anton_neopixel_module #(
   parameter BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
   parameter RESET_DELAY = `RESET_DELAY_DEFAULT
 )(
-  input  clk6_4mhz,
-  input  syncStart,
-  output neoData,
-  output neoState,
+  input         clk6_4mhz,
+  input         syncStart,
+  output        neoData,
+  output        neoState,
 
-  input  [13:0]busAddr,
-  input  [7:0]busDataIn,
-  input  busClk,
-  input  busWrite,
-  input  busRead,
-  output [7:0]busDataOut
+  input  [13:0] busAddr,
+  input  [7:0]  busDataIn,
+  input         busClk,
+  input         busWrite,
+  input         busRead,
+  output [7:0]  busDataOut
 );
 
   // minimum required amount of bits to store the BUFFER_END
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   
 
-  wire [12:0] regMax;
-  wire        regCtrlInit;
-  wire        regCtrlLimit;
-  wire        regCtrlRun;
-  wire        regCtrlLoop;
-  wire        regCtrl32bit;
-  wire        initSlow;
-  wire        initSlowDone;
-  wire        streamSyncOf;
+  wire [12:0]            regMax;
+  wire                   regCtrlInit;
+  wire                   regCtrlLimit;
+  wire                   regCtrlRun;
+  wire                   regCtrlLoop;
+  wire                   regCtrl32bit;
+  wire                   initSlow;
+  wire                   initSlowDone;
+  wire                   streamSyncOf;
 
   wire [BUFFER_BITS-1:0] pixelIndexComb;
   wire [7:0]             pixelByte;
@@ -72,7 +72,6 @@ module anton_neopixel_module #(
   wire [2:0]             bitPatternIndex; // 8 patterns in a bit
   wire [2:0]             pixelBitIndex;   // 8 bits in channel
   wire [1:0]             channelIndex;    // 3 channels in pixel
-  wire [BUFFER_BITS-1:0] pixelIndex;
   wire [BUFFER_BITS-1:0] pixelIndexMax;
   wire                   streamOutput;
   wire                   streamReset;
@@ -98,7 +97,6 @@ module anton_neopixel_module #(
     .bitPatternIndex(bitPatternIndex),
     .pixelBitIndex(pixelBitIndex),
     .channelIndex(channelIndex),
-    .pixelIndex(pixelIndex),
     .pixelIndexMax(pixelIndexMax),
     .pixelIndexComb(pixelIndexComb),
     .state(neoState),
@@ -116,7 +114,6 @@ module anton_neopixel_module #(
   ) stream(
     .pixelByte(pixelByte),
     .state(neoState),
-    .pixelIndex(pixelIndex),
     .channelIndex(channelIndex),
     .pixelBitIndex(pixelBitIndex),
     .bitPatternIndex(bitPatternIndex),

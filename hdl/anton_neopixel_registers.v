@@ -14,48 +14,51 @@ module anton_neopixel_registers #(
   input [BUFFER_BITS-1:0] pixelIndexComb,
   output [7:0]            pixelByte,
 
-  input         streamSyncOf,
+  input                   streamSyncOf,
 
-  input         syncStart,
-  input         state,
-  output [12:0] regMax,
-  output        regCtrlInit,
-  output        regCtrlLimit,
-  output        regCtrlRun,
-  output        regCtrlLoop,
-  output        regCtrl32bit,
-  output        initSlow,
-  input         initSlowDone
+  input                   syncStart,
+  input                   state,
+  output [12:0]           regMax,
+  output                  regCtrlInit,
+  output                  regCtrlLimit,
+  output                  regCtrlRun,
+  output                  regCtrlLoop,
+  output                  regCtrl32bit,
+  output                  initSlow,
+  input                   initSlowDone
 );
 
-  reg [7:0]  busDataOutBuf;
+  reg  [7:0]             busDataOutBuf;
 
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
-  reg [12:0] regMaxBuf; 
+  reg  [12:0]            regMaxBuf; 
 
-  reg        initSlowBuf     = 'b0;
+  reg                    initSlowBuf     = 'b0;
   
-  reg        regCtrlInitBuf  = 'b0;
-  reg        regCtrlLimitBuf = 'b0; // Change this only when the pixel data are not streamed
-  reg        regCtrlRunBuf   = 'b0;
-  reg        regCtrlLoopBuf  = 'b0;
-  reg        regCtrl32bitBuf = 'b0; // Change this only when the pixel data are not streamed
+  reg                    regCtrlInitBuf  = 'b0;
+  reg                    regCtrlLimitBuf = 'b0; // Change this only when the pixel data are not streamed
+  reg                    regCtrlRunBuf   = 'b0;
+  reg                    regCtrlLoopBuf  = 'b0;
+  reg                    regCtrl32bitBuf = 'b0; // Change this only when the pixel data are not streamed
 
   reg                    ramTwoPortWrite = 'b0;
 
   wire [BUFFER_BITS-1:0] pixelIndexComb;
   wire [7:0]             pixelByte;
 
+  // instantiate LSRAM 18K memory blocks
   anton_ram_2port_raddreg #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
   ) tpram(
     .clk(busClk), 
-    .wr(ramTwoPortWrite), 
+
     .raddr(pixelIndexComb), 
-    .din(busDataIn), 
+    .dout(pixelByte),
+
+    .wr(ramTwoPortWrite), 
     .waddr(busAddr[BUFFER_BITS-1:0]), 
-    .dout(pixelByte)
+    .din(busDataIn)
   );
 
   // TODO: detect verilator and use it only there
@@ -101,7 +104,7 @@ module anton_neopixel_registers #(
       if (busAddr[13] == 'b0) begin
 
         // Read buffer - disabled because using only 2 port memory for frame buffer
-
+        busDataOutBuf <= 8'b11111111;
       end else begin
 
         // Read register

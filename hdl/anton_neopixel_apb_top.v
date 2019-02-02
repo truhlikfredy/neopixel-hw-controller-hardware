@@ -29,13 +29,6 @@ module anton_neopixel_apb_top #(
   output [7:0]apbPrData,
   output apbPready,
   output apbPslverr
-
-//  output [7:0]tpWD,
-// input  [7:0]tpRD,
-//  output [9:0]tpWAddr,
-// output [9:0]tpRAddr,
-// output tpWEn,
-// output tpREn
 );
   wire wrEnable;
   wire rdEnable;
@@ -50,47 +43,6 @@ module anton_neopixel_apb_top #(
 
   reg [2:0]  testUnit; // TODO: disable when not in simulation/debug
 
-/*
-  #reg [7:0]tpWDB;
- # reg [9:0]tpWAddrB;
-#  reg [9:0]tpRAddrB;
-  #reg tpWEnB = 0;
- # reg tpREnB = 0;
-
-#  reg [1:0] writeState = 0;
-
-  #always @(posedge apbPclk) begin
- #   case (writeState)
-#      'd0: begin
-     #   if (wrEnable) begin 
-    #      writeState = 1;
-   #       tpWAddrB = address[9:0];
-  #        tpWDB = apbPrData;
- #       end
-#      end
-
-      #'d1: begin
-     #   writeState = 2;
-    #    tpWEnB = 1;
-   #   end
-
-  #    'd2: begin
- #       writeState = 3;
-#      end
-
-     # 'd3: begin
-    #    writeState = 0;
-   #   end
-  #  endcase
-
- # end
-
-#  assign tpWD    = tpWDB;
-#  assign tpWAddr = tpWAddrB;
-#  assign tpRAddr = tpRAddrB;
-  #assign tpWEn   = tpWEnB;
-#  assign tpREn   = tpREnB;
-  */
   anton_neopixel_module #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
   ) neopixel(

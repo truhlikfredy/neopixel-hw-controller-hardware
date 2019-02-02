@@ -19,7 +19,6 @@ module anton_neopixel_stream_logic #(
   output [2:0] bitPatternIndex,
   output [2:0] pixelBitIndex,
   output [1:0] channelIndex,
-  output [BUFFER_BITS-1:0] pixelIndex,
   output [BUFFER_BITS-1:0] pixelIndexMax,
   output [BUFFER_BITS-1:0] pixelIndexComb,
   output state,
@@ -51,8 +50,8 @@ module anton_neopixel_stream_logic #(
   wire [BUFFER_BITS-1:0] pixelIndexComb     = (regCtrl32bit) ? {pixelIndexBuf[BUFFER_BITS-1:2], channelIndexBuf} : pixelIndexBuf[BUFFER_BITS-1:0]; // in 32bit mode include the channelIndex
 
 
-  assign streamOutput    = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
-  assign streamReset     = !regCtrlInit && regCtrlRun && stateBuf == `ENUM_STATE_RESET;
+  assign streamOutput    = !regCtrlInit    && regCtrlRun && stateBuf == `ENUM_STATE_TRANSMIT; 
+  assign streamReset     = !regCtrlInit    && regCtrlRun && stateBuf == `ENUM_STATE_RESET;
 
   wire   streamPatternOf = streamOutput    && bitPatternIndexBuf == 'd7; // does sub-bit pattern overflowing
   assign streamBitOf     = streamPatternOf && pixelBitIndexBuf   == 'd7; // does bit index overflowing

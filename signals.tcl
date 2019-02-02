@@ -10,7 +10,7 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream.pixelColourValue"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.bitPatternIndex"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelBitIndex"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.channelIndex"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndex"
+lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndexBuf"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndexEquiv"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndexMax"
 
