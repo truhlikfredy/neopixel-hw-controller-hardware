@@ -39,7 +39,7 @@ module anton_neopixel_module #(
   wire        streamSyncOf;
 
   wire [BUFFER_BITS-1:0] pixelIndexComb;
-  wire [7:0]             pixelVal;
+  wire [7:0]             pixelByte;
   
   anton_neopixel_registers #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
@@ -52,7 +52,7 @@ module anton_neopixel_module #(
     .busDataOut(busDataOut),
 
     .pixelIndexComb(pixelIndexComb),
-    .pixelVal(pixelVal),
+    .pixelByte(pixelByte),
 
     .streamSyncOf(streamSyncOf),
 
@@ -114,7 +114,7 @@ module anton_neopixel_module #(
   anton_neopixel_stream #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
   ) stream(
-    .pixelVal(pixelVal),
+    .pixelByte(pixelByte),
     .state(neoState),
     .pixelIndex(pixelIndex),
     .channelIndex(channelIndex),

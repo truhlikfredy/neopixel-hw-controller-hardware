@@ -15,7 +15,7 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndexEqui
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.pixelIndexMax"
 
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixelIndexComb"
-lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixelVal"
+lappend signals "TOP.anton_neopixel_apb_top.neopixel.pixelByte"
 
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.resetDelayCount"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.resetDelay"

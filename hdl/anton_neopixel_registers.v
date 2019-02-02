@@ -12,7 +12,7 @@ module anton_neopixel_registers #(
   output [7:0]            busDataOut,
 
   input [BUFFER_BITS-1:0] pixelIndexComb,
-  output [7:0]            pixelVal,
+  output [7:0]            pixelByte,
 
   input         streamSyncOf,
 
@@ -45,7 +45,7 @@ module anton_neopixel_registers #(
   reg                    ramTwoPortWrite = 'b0;
 
   wire [BUFFER_BITS-1:0] pixelIndexComb;
-  wire [7:0]             pixelVal;
+  wire [7:0]             pixelByte;
 
   anton_ram_2port_raddreg #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
@@ -55,7 +55,7 @@ module anton_neopixel_registers #(
     .raddr(pixelIndexComb), 
     .din(busDataIn), 
     .waddr(busAddr[BUFFER_BITS-1:0]), 
-    .dout(pixelVal)
+    .dout(pixelByte)
   );
 
   // TODO: detect verilator and use it only there
