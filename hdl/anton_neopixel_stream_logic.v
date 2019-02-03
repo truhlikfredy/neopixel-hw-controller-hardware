@@ -48,7 +48,7 @@ module anton_neopixel_stream_logic #(
   wire [BUFFER_BITS-1:0] pixelIxEquiv    = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], 2'b11} : pixelIxB;
   wire [BUFFER_BITS-1:0] pixelIxMaxEquiv = (regCtrl32bit) ? {pixelIxMax[BUFFER_BITS-1:2], 2'b00} : pixelIxMax;
   wire [BUFFER_BITS-3:0] pixelIxPartial  = pixelIxB[BUFFER_BITS-1:2] + 1; // in 32bit mode we +4 and have 00s in the last 2
-  wire [BUFFER_BITS-1:0] pixelIxComb     = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], channelIxRemapped} : pixelIxB[BUFFER_BITS-1:0]; // in 32bit mode include the channelIx
+  reg  [BUFFER_BITS-1:0] pixelIxCombB    = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], channelIxRemapped} : pixelIxB[BUFFER_BITS-1:0]; // in 32bit mode include the channelIx
 
 
   assign streamOutput    = !regCtrlInit    && regCtrlRun && stateB == `ENUM_STATE_TRANSMIT; 
@@ -137,6 +137,7 @@ module anton_neopixel_stream_logic #(
   assign bitPatternIx = bitPatternIxB;
   assign pixelBitIx   = pixelBitIxB;
   assign channelIx    = channelIxB;
+  assign pixelIxComb  = pixelIxCombB;
   assign state        = stateB;
   assign initSlowDone = initSlowDoneB;
 
