@@ -11,11 +11,11 @@ module anton_ram_2port_raddreg #(
   input                    clk,
 
   input  [BUFFER_BITS-1:0] raddr,
-  output [7:0]             dout
+  output [7:0]             dout,
 
   input                    wr,
   input  [BUFFER_BITS-1:0] waddr,
-  input  [7:0]             din,
+  input  [7:0]             din
 );
 
 reg [BUFFER_BITS-1:0] raddr_reg;
