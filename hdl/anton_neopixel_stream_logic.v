@@ -30,16 +30,17 @@ module anton_neopixel_stream_logic #(
   output                   streamSyncOf
 );
 
-  reg [2:0]             bitPatternIxB   = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
-  reg [2:0]             pixelBitIxB     = 'd0;  // 0 - 7 to count part of the 8bits of a RGB pixel
-  reg [BUFFER_BITS-1:0] pixelIxB        = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
-  reg [11:0]            resetDelayCount = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 1959ticks (306ns)
-  reg [1:0]             channelIxB      = 'd0;  // R G B channels inside the pixel
+  reg [2:0]             bitPatternIxB     = 'd0;  // counting 0 - 7 (2:0) for 8x sub-bit steps @ 7MHz and counting to 8 (3:0) to detect overflow
+  reg [2:0]             pixelBitIxB       = 'd0;  // 0 - 7 to count part of the 8bits of a RGB pixel
+  reg [BUFFER_BITS-1:0] pixelIxB          = {BUFFER_BITS{1'b0}};  // index to the current pixel transmitting 
+  reg [11:0]            resetDelayCount   = 'd0;  // 12 bits can go up to 4096 so should be enough to count the RESET_DELAY_DEFAULT 1959ticks (306ns)
+  reg [1:0]             channelIxB        = 'd0;  // R G B channels inside the pixel
+  reg [1:0]             channelIxRemapped = 'd0;
 
-  reg                   stateB          = 'b0;  // 0 = transmit bits, 1 = reset mode
-  reg [3:0]             cycle           = 'd0;  
+  reg                   stateB            = 'b0;  // 0 = transmit bits, 1 = reset mode
+  reg [3:0]             cycle             = 'd0;  
 
-  reg                   initSlowDoneB   = 'b0;
+  reg                   initSlowDoneB     = 'b0;
   
 
   // When 32bit mode enabled use
@@ -47,7 +48,7 @@ module anton_neopixel_stream_logic #(
   wire [BUFFER_BITS-1:0] pixelIxEquiv    = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], 2'b11} : pixelIxB;
   wire [BUFFER_BITS-1:0] pixelIxMaxEquiv = (regCtrl32bit) ? {pixelIxMax[BUFFER_BITS-1:2], 2'b00} : pixelIxMax;
   wire [BUFFER_BITS-3:0] pixelIxPartial  = pixelIxB[BUFFER_BITS-1:2] + 1; // in 32bit mode we +4 and have 00s in the last 2
-  wire [BUFFER_BITS-1:0] pixelIxComb     = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], channelIxRemapped} : pixelIxB[BUFFER_BITS-1:0]; // in 32bit mode include the channelIx
+  reg  [BUFFER_BITS-1:0] pixelIxCombB    = (regCtrl32bit) ? {pixelIxB[BUFFER_BITS-1:2], channelIxRemapped} : pixelIxB[BUFFER_BITS-1:0]; // in 32bit mode include the channelIx
 
 
   assign streamOutput    = !regCtrlInit    && regCtrlRun && stateB == `ENUM_STATE_TRANSMIT; 
@@ -65,7 +66,6 @@ module anton_neopixel_stream_logic #(
   // what is the reachable maximum depending on the settings
   assign pixelIxMax = (regCtrlLimit) ? regMax[BUFFER_BITS-1:0] : BUFFER_END[BUFFER_BITS-1:0];
 
-  wire [1:0] channelIxRemapped;
 
   // The neopixel channels ordering is GRB but I want to be storing in the memory RGB, so do remapping
   always @(*) begin
@@ -137,6 +137,7 @@ module anton_neopixel_stream_logic #(
   assign bitPatternIx = bitPatternIxB;
   assign pixelBitIx   = pixelBitIxB;
   assign channelIx    = channelIxB;
+  assign pixelIxComb  = pixelIxCombB;
   assign state        = stateB;
   assign initSlowDone = initSlowDoneB;
 
