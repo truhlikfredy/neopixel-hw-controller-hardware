@@ -44,7 +44,6 @@ module anton_neopixel_registers #(
 
   reg                    ramTwoPortWrite = 'b0;
 
-  wire [BUFFER_BITS-1:0] pixelIxComb;
   wire [7:0]             pixelByte;
 
   // instantiate LSRAM 18K memory blocks
