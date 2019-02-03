@@ -16,10 +16,6 @@
 // 300us => 300/(1/6.4) = 1959 ticks
 `define RESET_DELAY_DEFAULT 1959
 
-// When enabled few hard-coded colors will be displayed instead of buffer.
-// Good to debug hardware without a need for correct firmware to populate the buffer
-//`define HARDCODED_PIXELS 1
-
 // https://stackoverflow.com/questions/5269634/address-width-from-ram-depth
 `define CLOG2(x) \
   (x <= 2) ? 1 : \

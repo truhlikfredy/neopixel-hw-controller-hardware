@@ -12,32 +12,34 @@ module anton_neopixel_module #(
   parameter BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
   parameter RESET_DELAY = `RESET_DELAY_DEFAULT
 )(
-  input  clk6_4mhz,
-  input  syncStart,
-  output neoData,
-  output neoState,
+  input         clk6_4mhz,
+  input         syncStart,
+  output        neoData,
+  output        neoState,
 
-  input  [13:0]busAddr,
-  input  [7:0]busDataIn,
-  input  busClk,
-  input  busWrite,
-  input  busRead,
-  output [7:0]busDataOut
+  input  [13:0] busAddr,
+  input  [7:0]  busDataIn,
+  input         busClk,
+  input         busWrite,
+  input         busRead,
+  output [7:0]  busDataOut
 );
 
   // minimum required amount of bits to store the BUFFER_END
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1);   
 
-  wire [7:0]  pixels[BUFFER_END:0];
-  wire [12:0] regMax;
-  wire        regCtrlInit;
-  wire        regCtrlLimit;
-  wire        regCtrlRun;
-  wire        regCtrlLoop;
-  wire        regCtrl32bit;
-  wire        initSlow;
-  wire        initSlowDone;
-  wire        streamSyncOf;
+  wire [12:0]            regMax;
+  wire                   regCtrlInit;
+  wire                   regCtrlLimit;
+  wire                   regCtrlRun;
+  wire                   regCtrlLoop;
+  wire                   regCtrl32bit;
+  wire                   initSlow;
+  wire                   initSlowDone;
+  wire                   streamSyncOf;
+
+  wire [BUFFER_BITS-1:0] pixelIxComb;
+  wire [7:0]             pixelByte;
   
   anton_neopixel_registers #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
@@ -49,11 +51,13 @@ module anton_neopixel_module #(
     .busRead(busRead),
     .busDataOut(busDataOut),
 
+    .pixelIxComb(pixelIxComb),
+    .pixelByte(pixelByte),
+
     .streamSyncOf(streamSyncOf),
 
     .syncStart(syncStart),
     .state(neoState),
-    .pixels(pixels),
     .regMax(regMax),
     .regCtrlInit(regCtrlInit),
     .regCtrlLimit(regCtrlLimit),
@@ -64,32 +68,15 @@ module anton_neopixel_module #(
     .initSlowDone(initSlowDone)
   );
 
-
-  wire [2:0]             bitPatternIndex; // 8 patterns in a bit
-  wire [2:0]             pixelBitIndex;   // 8 bits in channel
-  wire [1:0]             channelIndex;    // 3 channels in pixel
-  wire [BUFFER_BITS-1:0] pixelIndex;
-  wire [BUFFER_BITS-1:0] pixelIndexMax;
+  wire [2:0]             bitPatternIx; // 8 patterns in a bit
+  wire [2:0]             pixelBitIx;   // 8 bits in channel
+  wire [1:0]             channelIx;    // 3 channels in pixel
+  wire [BUFFER_BITS-1:0] pixelIxMax;
   wire                   streamOutput;
   wire                   streamReset;
   wire                   streamBitOf;
   wire                   streamChannelOf;
   wire                   streamPixelOf;
-
-  anton_neopixel_stream #(
-    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
-  ) stream(
-    .pixels(pixels),
-    .state(neoState),
-    .pixelIndex(pixelIndex),
-    .channelIndex(channelIndex),
-    .pixelBitIndex(pixelBitIndex),
-    .bitPatternIndex(bitPatternIndex),
-    .regCtrl32bit(regCtrl32bit),
-    .regCtrlRun(regCtrlRun),
-    .neoData(neoData)
-  );
-
 
   anton_neopixel_stream_logic #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END)),
@@ -106,11 +93,12 @@ module anton_neopixel_module #(
     .initSlow(initSlow),
     .initSlowDone(initSlowDone),
 
-    .bitPatternIndex(bitPatternIndex),
-    .pixelBitIndex(pixelBitIndex),
-    .channelIndex(channelIndex),
-    .pixelIndex(pixelIndex),
-    .pixelIndexMax(pixelIndexMax),
+    .bitPatternIx(bitPatternIx),
+    .pixelBitIx(pixelBitIx),
+    .channelIx(channelIx),
+    .pixelIxMax(pixelIxMax),
+    .pixelIxComb(pixelIxComb),
+    
     .state(neoState),
     .streamOutput(streamOutput),
     .streamReset(streamReset),
@@ -120,5 +108,18 @@ module anton_neopixel_module #(
     .streamSyncOf(streamSyncOf)
   );
 
+
+  anton_neopixel_stream #(
+    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
+  ) stream(
+    .pixelByte(pixelByte),
+    .state(neoState),
+    .channelIx(channelIx),
+    .pixelBitIx(pixelBitIx),
+    .bitPatternIx(bitPatternIx),
+    .regCtrl32bit(regCtrl32bit),
+    .regCtrlRun(regCtrlRun),
+    .neoData(neoData)
+  );
   
 endmodule
