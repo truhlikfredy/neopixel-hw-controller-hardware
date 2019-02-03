@@ -4,28 +4,28 @@ module anton_neopixel_registers #(
   parameter  BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1) // minimum required amount of bits to store the BUFFER_END
 )(
-  input                   busClk,
-  input  [13:0]           busAddr,
-  input  [7:0]            busDataIn,
-  input                   busWrite,
-  input                   busRead,
-  output [7:0]            busDataOut,
+  input                    busClk,
+  input  [13:0]            busAddr,
+  input  [7:0]             busDataIn,
+  input                    busWrite,
+  input                    busRead,
+  output [7:0]             busDataOut,
 
-  input [BUFFER_BITS-1:0] pixelIxComb,
-  output [7:0]            pixelByte,
+  input  [BUFFER_BITS-1:0] pixelIxComb,
+  output [7:0]             pixelByte,
 
-  input                   streamSyncOf,
+  input                    streamSyncOf,
 
-  input                   syncStart,
-  input                   state,
-  output [12:0]           regMax,
-  output                  regCtrlInit,
-  output                  regCtrlLimit,
-  output                  regCtrlRun,
-  output                  regCtrlLoop,
-  output                  regCtrl32bit,
-  output                  initSlow,
-  input                   initSlowDone
+  input                    syncStart,
+  input                    state,
+  output [12:0]            regMax,
+  output                   regCtrlInit,
+  output                   regCtrlLimit,
+  output                   regCtrlRun,
+  output                   regCtrlLoop,
+  output                   regCtrl32bit,
+  output                   initSlow,
+  input                    initSlowDone
 );
 
   reg  [7:0]             busDataOutB;

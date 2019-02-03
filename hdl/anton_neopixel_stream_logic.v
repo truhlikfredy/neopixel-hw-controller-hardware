@@ -21,6 +21,7 @@ module anton_neopixel_stream_logic #(
   output [1:0]             channelIx,
   output [BUFFER_BITS-1:0] pixelIxMax,
   output [BUFFER_BITS-1:0] pixelIxComb,
+  
   output                   state,
   output                   streamOutput,
   output                   streamReset,

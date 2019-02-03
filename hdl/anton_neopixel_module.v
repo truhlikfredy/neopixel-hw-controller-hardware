@@ -98,6 +98,7 @@ module anton_neopixel_module #(
     .channelIx(channelIx),
     .pixelIxMax(pixelIxMax),
     .pixelIxComb(pixelIxComb),
+    
     .state(neoState),
     .streamOutput(streamOutput),
     .streamReset(streamReset),
