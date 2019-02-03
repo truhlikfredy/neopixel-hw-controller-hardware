@@ -44,7 +44,6 @@ module anton_neopixel_registers #(
 
   reg                    ramTwoPortWrite = 'b0;
 
-  wire [7:0]             pixelByte;
 
   // instantiate LSRAM 18K pipelined memory blocks, example #18
   anton_ram_2port_raddreg #(
