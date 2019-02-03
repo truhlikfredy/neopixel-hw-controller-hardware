@@ -46,18 +46,18 @@ module anton_neopixel_registers #(
 
   wire [7:0]             pixelByte;
 
-  // instantiate LSRAM 18K memory blocks
+  // instantiate LSRAM 18K pipelined memory blocks, example #18
   anton_ram_2port_raddreg #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
   ) tpram(
     .clk(busClk), 
 
-    .raddr(pixelIxComb), 
-    .dout(pixelByte),
+    .rAddr(pixelIxComb), 
+    .dOut(pixelByte),
 
     .wr(ramTwoPortWrite), 
-    .waddr(busAddr[BUFFER_BITS-1:0]), 
-    .din(busDataIn)
+    .wAddr(busAddr[BUFFER_BITS-1:0]), 
+    .dIn(busDataIn)
   );
 
   // TODO: detect verilator and use it only there
