@@ -98,10 +98,10 @@ module anton_neopixel_registers #(
           2: {regCtrl32bitB, regCtrlLoopB, regCtrlRunB, regCtrlLimitB, regCtrlInitB} <= busDataIn[4:0];
 
           5: regWidth[7:0] <= busDataIn;
-          6: regWidth[13:8] <= busDataIn;
+          6: regWidth[13:8] <= busDataIn[5:0];
 
           7: regHeight[7:0] <= busDataIn;
-          8: regHeight[13:8] <= busDataIn;
+          8: regHeight[13:8] <= busDataIn[5:0];
         endcase
       end
     end
@@ -121,10 +121,10 @@ module anton_neopixel_registers #(
           3: busDataOutB <= { 7'b0000000, state };
 
           5: busDataOutB <= regWidth[7:0];
-          6: busDataOutB <= regWidth[13:8];
+          6: busDataOutB <= { 2'b00, regWidth[13:8] };
 
           7: busDataOutB <= regHeight[7:0];
-          8: busDataOutB <= regHeight[13:8];
+          8: busDataOutB <= { 2'b00, regHeight[13:8] };
         endcase
       end
     end
