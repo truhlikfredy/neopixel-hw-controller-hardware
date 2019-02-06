@@ -25,11 +25,15 @@ struct NeoPixelCtrl {
 
 struct NeoPixelReg {
   typedef enum {
-    MAX_LOW  = 0,
-    MAX_HIGH = 1,
-    CTRL     = 2,
-    STATE    = 3,
-    BUFFER   = 4
+    MAX_LOW     = 0,
+    MAX_HIGH    = 1,
+    CTRL        = 2,
+    STATE       = 3,
+    BUFFER      = 4,
+    WIDTH_LOW   = 5,
+    WIDTH_HIGH  = 6,
+    HEIGHT_LOW  = 7,
+    HEIGHT_HIGH = 8
   } Type;
 };
 
@@ -56,6 +60,7 @@ class NeoPixelDriver {
                            uint8_t value);
 
   uint8_t readRegister(NeoPixelReg::Type addr);
+  
 
  public:
   NeoPixelDriver(uint32_t base, uint16_t pixels);
@@ -77,6 +82,11 @@ class NeoPixelDriver {
   void    writePixelByte(uint16_t pixel, uint8_t value);
   uint8_t readPixelByte(uint16_t pixel);
 
+  void writeRegisterLowHigh(NeoPixelReg::Type regLow,
+                            NeoPixelReg::Type regHigh, uint16_t value);
+  uint16_t readRegisterLowHigh(NeoPixelReg::Type regLow,
+                               NeoPixelReg::Type regHigh);
+
   void     writeRegisterMax(uint16_t value);
   uint16_t readRegisterMax();
 
@@ -95,7 +105,7 @@ class NeoPixelDriver {
   // self test methods
 #ifdef NEOPIXEL_SELFTEST
   void selfTestPopulatePixelBuffer();
-  void selfTestMaxRegister();
+  void selfTestLowHighRegisters();
   void selfTestSwitchBuffer();
   void selfTestSoftLimit32bit();
   void selfTestHardLimit8bit();

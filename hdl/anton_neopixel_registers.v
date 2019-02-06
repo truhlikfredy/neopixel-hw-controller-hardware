@@ -41,6 +41,8 @@ module anton_neopixel_registers #(
   reg                    regCtrlRunB   = 'b0;
   reg                    regCtrlLoopB  = 'b0;
   reg                    regCtrl32bitB = 'b0; // Change this only when the pixel data are not streamed
+  reg  [13:0]            regWidth      = 'd0; // Similar range as regMax, but counting from 1 and not from 0
+  reg  [13:0]            regHeight     = 'd0; // Similar range as regMax, but counting from 1 and not from 0
 
   reg                    ramTwoPortWrite = 'b0;
 
@@ -90,10 +92,16 @@ module anton_neopixel_registers #(
 
         // Write register
         // TODO: enums for registers indexes
-        case (busAddr[2:0])
+        case (busAddr[3:0])
           0: regMaxB[7:0]  <= busDataIn;
           1: regMaxB[12:8] <= busDataIn[4:0];
           2: {regCtrl32bitB, regCtrlLoopB, regCtrlRunB, regCtrlLimitB, regCtrlInitB} <= busDataIn[4:0];
+
+          5: regWidth[7:0] <= busDataIn;
+          6: regWidth[13:8] <= busDataIn;
+
+          7: regHeight[7:0] <= busDataIn;
+          8: regHeight[13:8] <= busDataIn;
         endcase
       end
     end
@@ -106,11 +114,17 @@ module anton_neopixel_registers #(
       end else begin
 
         // Read register
-          case (busAddr[2:0])
+          case (busAddr[3:0])
           0: busDataOutB <= regMaxB[7:0];
           1: busDataOutB <= { 3'b000, regMaxB[12:8] };
           2: busDataOutB <= { 3'b000, regCtrl32bitB, regCtrlLoopB, regCtrlRunB, regCtrlLimitB, regCtrlInitB };
           3: busDataOutB <= { 7'b0000000, state };
+
+          5: busDataOutB <= regWidth[7:0];
+          6: busDataOutB <= regWidth[13:8];
+
+          7: busDataOutB <= regHeight[7:0];
+          8: busDataOutB <= regHeight[13:8];
         endcase
       end
     end

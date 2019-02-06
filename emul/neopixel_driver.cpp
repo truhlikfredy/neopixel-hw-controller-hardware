@@ -90,6 +90,18 @@ uint8_t NeoPixelDriver::readPixelByte(uint16_t addr) {
   return (neopixelReadApbByte(addr << 2 & NEOPIXEL_CTRL_BIT_MASK));
 }
 
+void NeoPixelDriver::writeRegisterLowHigh(NeoPixelReg::Type regLow,
+                                          NeoPixelReg::Type regHigh,
+                                          uint16_t value) {
+  writeRegister(regLow,   value & 0xFF);
+  writeRegister(regHigh, (value >> 8) & 0xFF);
+}
+
+uint16_t NeoPixelDriver::readRegisterLowHigh(NeoPixelReg::Type regLow,
+                                             NeoPixelReg::Type regHigh) {
+  return ((uint16_t)(readRegister(regLow)) |
+          (uint16_t)(readRegister(regHigh)) << 8);
+}
 
 void NeoPixelDriver::writeRegisterMax(uint16_t value) {
   writeRegister(NeoPixelReg::MAX_LOW, value & 0xFF);
@@ -173,7 +185,7 @@ void NeoPixelDriver::selfTestPopulatePixelBuffer() {
 }
 
 
-void NeoPixelDriver::selfTestMaxRegister() {
+void NeoPixelDriver::selfTestLowHighRegisters() {
   writeRegisterMax(0x1ace);
   testAssertEquals<uint16_t>("Large value in MAX control register", 0x1ace,
                              readRegisterMax());
@@ -186,7 +198,6 @@ void NeoPixelDriver::selfTestMaxRegister() {
   testAssertEquals<uint16_t>("Small value in MAX control register", 7,
                              readRegisterMax());
 }
-
 
 void NeoPixelDriver::selfTestSoftLimit32bit() {
   writeRegisterCtrl(NeoPixelCtrl::MODE32 | NeoPixelCtrl::LIMIT);

@@ -85,7 +85,7 @@ void test3() {
   testHeader("Test 3 - write and read back MAX register");
   uut->anton_neopixel_apb_top__DOT__testUnit = 3;
 
-  driver->selfTestMaxRegister();
+  driver->selfTestLowHighRegisters();
 }
 
 
