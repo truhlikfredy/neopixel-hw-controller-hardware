@@ -197,6 +197,26 @@ void NeoPixelDriver::selfTestLowHighRegisters() {
   writeRegisterMax(7);
   testAssertEquals<uint16_t>("Small value in MAX control register", 7,
                              readRegisterMax());
+
+  writeRegisterLowHigh(NeoPixelReg::WIDTH_LOW, NeoPixelReg::WIDTH_HIGH, 1024);
+  testAssertEquals<uint16_t>(
+      "Width set to 1024", 1024,
+      readRegisterLowHigh(NeoPixelReg::WIDTH_LOW, NeoPixelReg::WIDTH_HIGH));
+
+  writeRegisterLowHigh(NeoPixelReg::WIDTH_LOW, NeoPixelReg::WIDTH_HIGH, 32);
+  testAssertEquals<uint16_t>(
+      "Width set to 32", 32,
+      readRegisterLowHigh(NeoPixelReg::WIDTH_LOW, NeoPixelReg::WIDTH_HIGH));
+
+  writeRegisterLowHigh(NeoPixelReg::HEIGHT_LOW, NeoPixelReg::HEIGHT_HIGH, 8192);
+  testAssertEquals<uint16_t>(
+      "Height set to 8192", 8192,
+      readRegisterLowHigh(NeoPixelReg::HEIGHT_LOW, NeoPixelReg::HEIGHT_HIGH));
+
+  writeRegisterLowHigh(NeoPixelReg::HEIGHT_LOW, NeoPixelReg::HEIGHT_HIGH, 8);
+  testAssertEquals<uint16_t>(
+      "Height set to 8", 8,
+      readRegisterLowHigh(NeoPixelReg::HEIGHT_LOW, NeoPixelReg::HEIGHT_HIGH));
 }
 
 void NeoPixelDriver::selfTestSoftLimit32bit() {
