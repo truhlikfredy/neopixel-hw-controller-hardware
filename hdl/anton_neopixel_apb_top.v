@@ -19,7 +19,7 @@ module anton_neopixel_apb_top #(
   output        neoState,
 
   input         apbPenable,
-  input  [15:0] apbPaddr,  // control registers 15 + LED data 14:2 +  ignored 1:0
+  input  [19:0] apbPaddr,  // control registers/deltas/virtual region/raw region 19:18 + LED raw data 14:2 (or 17:2 for virtual writes) +  ignored 1:0 
   input  [7:0]  apbPwData,
   input         apbPclk,
   input         apbPselx,
@@ -33,14 +33,14 @@ module anton_neopixel_apb_top #(
 
   wire        wrEnable;
   wire        rdEnable;
-  wire [13:0] address; // correct address packed down from 32bit aligned access to 8bit access, will be limited to 8192 pixels
+  wire [17:0] address; // correct address packed down from 32bit aligned access to 8bit access, will be limited to 8192 pixels (but for the virtual deltas 2 writes per pixel and 2 bits for write modes)
 
   assign apbPready  = 1'd1; // always ready, never delaying with a waiting state
   assign apbPslverr = 1'd0; // never report errors
   
   assign wrEnable   = (apbPenable && apbPwrite && apbPselx);
   assign rdEnable   = (!apbPwrite && apbPselx);
-  assign address    = apbPaddr[15:2]; // 4 bytes (word) aligned to 1 byte aligned, 16bit addr but only 14bits are used
+  assign address    = apbPaddr[19:2]; // 4 bytes (word) aligned to 1 byte aligned, 20bit addr but only 18bits are used
 
   reg [2:0]  testUnit; // TODO: disable when not in simulation/debug
 

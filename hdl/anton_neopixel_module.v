@@ -17,7 +17,7 @@ module anton_neopixel_module #(
   output        neoData,
   output        neoState,
 
-  input  [13:0] busAddr,
+  input  [17:0] busAddr,
   input  [7:0]  busDataIn,
   input         busClk,
   input         busWrite,

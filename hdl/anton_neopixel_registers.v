@@ -5,7 +5,7 @@ module anton_neopixel_registers #(
   localparam BUFFER_BITS = `CLOG2(BUFFER_END+1) // minimum required amount of bits to store the BUFFER_END
 )(
   input                    busClk,
-  input  [13:0]            busAddr,
+  input  [17:0]            busAddr,
   input  [7:0]             busDataIn,
   input                    busWrite,
   input                    busRead,
@@ -84,7 +84,7 @@ module anton_neopixel_registers #(
 
     ramTwoPortWrite <= 'b0;
     if (busWrite) begin
-      if (busAddr[13] == 'b0) begin
+      if (busAddr[17:16] == 2'b00) begin
         ramTwoPortWrite <= 'b1;
       end else begin
 
@@ -99,7 +99,7 @@ module anton_neopixel_registers #(
     end
 
     if (busRead) begin
-      if (busAddr[13] == 'b0) begin
+      if (busAddr[17:16] == 2'b00) begin
 
         // Read buffer - disabled because using only 2 port memory for frame buffer
         busDataOutB <= 8'b11111111;
