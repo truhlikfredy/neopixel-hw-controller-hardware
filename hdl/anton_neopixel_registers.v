@@ -88,7 +88,7 @@ module anton_neopixel_registers #(
     if (busWrite) begin
       if (busAddr[17:16] == 2'b00) begin
         ramTwoPortWrite <= 'b1;
-      end else begin
+      end else if (busAddr[17:16] == 2'b11) begin
 
         // Write register
         // TODO: enums for registers indexes
@@ -111,7 +111,7 @@ module anton_neopixel_registers #(
 
         // Read buffer - disabled because using only 2 port memory for frame buffer
         busDataOutB <= 8'b11111111;
-      end else begin
+      end else if (busAddr[17:16] == 2'b11) begin
 
         // Read register
           case (busAddr[3:0])

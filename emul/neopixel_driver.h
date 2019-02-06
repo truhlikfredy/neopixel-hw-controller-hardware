@@ -6,8 +6,8 @@
 // comment out to remove the selftest features
 #define NEOPIXEL_SELFTEST
 
-#define NEOPIXEL_CTRL_BIT ((uint32_t)(3 << 17))
-#define NEOPIXEL_CTRL_BIT_MASK (~(uint32_t)(3 << 17))
+#define NEOPIXEL_CTRL_BIT ((uint32_t)(3 << 18))
+#define NEOPIXEL_CTRL_BIT_MASK (~(uint32_t)(3 << 18))
 
 // Because this driver is used in emulation as well the enum class feature
 // of C++11 can't be used because of verilator limitations. Wrapping enum
