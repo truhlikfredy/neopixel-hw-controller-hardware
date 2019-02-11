@@ -23,7 +23,8 @@ module anton_neopixel_module #(
   input         busClk,
   input         busWrite,
   input         busRead,
-  output [7:0]  busDataOut
+  output [7:0]  busDataOut,
+  output        busReady
 );
 
   // minimum required amount of bits to store the BUFFER_END
@@ -52,6 +53,7 @@ module anton_neopixel_module #(
     .busWrite(busWrite),
     .busRead(busRead),
     .busDataOut(busDataOut),
+    .busReady(busReady),
 
     .pixelIxComb(pixelIxComb),
     .pixelByte(pixelByte),

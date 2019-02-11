@@ -35,7 +35,6 @@ module anton_neopixel_apb_top #(
   wire        rdEnable;
   wire [17:0] address; // correct address packed down from 32bit aligned access to 8bit access, will be limited to 8192 pixels (but for the virtual deltas 2 writes per pixel and 2 bits for write modes)
 
-  assign apbPready  = 1'd1; // always ready, never delaying with a waiting state
   assign apbPslverr = 1'd0; // never report errors
   
   assign wrEnable   = (apbPenable && apbPwrite && apbPselx);
@@ -56,7 +55,8 @@ module anton_neopixel_apb_top #(
     .busClk(apbPclk),
     .busWrite(wrEnable),
     .busRead(rdEnable),
-    .busDataOut(apbPrData)
+    .busDataOut(apbPrData),
+    .busReady(apbPready)
   );
 
 endmodule

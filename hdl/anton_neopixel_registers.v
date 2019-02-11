@@ -12,6 +12,7 @@ module anton_neopixel_registers #(
   input                    busWrite,
   input                    busRead,
   output [7:0]             busDataOut,
+  output                   busReady,
 
   input  [BUFFER_BITS-1:0] pixelIxComb,
   output [7:0]             pixelByte,
@@ -31,6 +32,7 @@ module anton_neopixel_registers #(
 );
 
   reg  [7:0]              busDataOutB;
+  reg                     busReady        = 'b1;
 
   // 13 bits in total apb is using 16 bus but -2 bit are dropped for word 
   // alignment and 1 bit used to detect control registry accesses
@@ -121,12 +123,16 @@ module anton_neopixel_registers #(
       ramVirtualWrite <= 'b0;
       ramTwoPortWrite <= 'b1;
       ramTwoPortAddr  <= regCtrl32bit ? {ramVirtualB[BUFFER_BITS-3:0], ramVirtualChan}: ramVirtualB[BUFFER_BITS-1:0];
+    end else begin
+       // After virtual write finished (or in all other cases) make the bus ready
+       busReady <= 'b1;
     end
 
     if (busWrite) begin
+      busReady <= 'b0;
       if (busAddr[17:16] == 2'b00) begin
 
-        // 1st stage Virtual writes first read the Delta index and then write to the Raw buffer, TODO: delay bus
+        // 1st stage Virtual writes first read the Delta index and then write to the Raw buffer
         ramVirtualWrite <= 'b1;
         ramVirtualAddr  <= regCtrl32bit ? {2'b00, busAddr[VIRTUAL_BITS-1:2]} : busAddr[VIRTUAL_BITS-1:0];
         ramVirtualChan  <= busAddr[1:0];
