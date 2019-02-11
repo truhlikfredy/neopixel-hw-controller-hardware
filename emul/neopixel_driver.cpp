@@ -4,10 +4,20 @@
 #include "neopixel_hal.h"
 #include "test_helper.h"
 
+NeoPixelDriver::NeoPixelDriver(uint32_t base, 
+                               uint16_t pixels, 
+                               uint16_t virtualPixels) {
+  this->base          = base;
+  this->virtualPixels = virtualPixels;
+  initHardware();
+  setPixelLength(pixels);
+}
+
 
 NeoPixelDriver::NeoPixelDriver(uint32_t base, 
                                uint16_t pixels) {
-  this->base = base;
+  this->base          = base;
+  this->virtualPixels = pixels; // If not specified, assume physical and virtual pixel buffers have same size
   initHardware();
   setPixelLength(pixels);
 }
@@ -25,12 +35,22 @@ void NeoPixelDriver::initHardware() {
   // block the driver until the hardware deasserts the init flag.
   // if something is wrong with the hw this will make the firmware to freeze
   while (testRegisterCtrl(NeoPixelCtrl::INIT));
+
+  cleanBuffer();
+  initDelta();
 }
 
 
 void NeoPixelDriver::cleanBuffer() {
   for (uint32_t i = 0; i < pixels; i++) {
     writeRawPixelByte(i, 0x00);
+  }
+}
+
+
+void NeoPixelDriver::initDelta() {
+  for (uint32_t i = 0; i < this->virtualPixels; i++) {
+    writeDelta(i, i); // populate virtual buffer linearly
   }
 }
 
@@ -96,7 +116,7 @@ void NeoPixelDriver::writeDelta(uint16_t index, uint16_t value) {
   neopixelWriteApbByte(
       ((index << 1 + 1) << 2 & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_DELTA,
       value >> 8);
-}
+  }
 
 void NeoPixelDriver::writeRegisterLowHigh(NeoPixelReg::Type regLow,
                                           NeoPixelReg::Type regHigh,
@@ -175,6 +195,8 @@ void NeoPixelDriver::syncUpdateLeds() {
 #ifdef NEOPIXEL_SELFTEST
 
 void NeoPixelDriver::selfTestPopulatePixelBuffer() {
+  initHardware();
+
   // write color values into the buffer
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
     writeRawPixelByte(i, neopixel_selftest_colors[i]);

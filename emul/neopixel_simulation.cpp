@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
   uut->syncStart = 0;
   uut->anton_neopixel_apb_top__DOT__testUnit = 0;
 
-  driver = new NeoPixelDriver(0x0);
+  driver = new NeoPixelDriver(0x0, 16);
 
   testStart();
   test1();

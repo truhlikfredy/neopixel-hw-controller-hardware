@@ -6,7 +6,7 @@
 // comment out to remove the selftest features
 #define NEOPIXEL_SELFTEST
 
-#define NEOPIXEL_MODE_MASK (~(uint32_t)(3 << 18))
+#define NEOPIXEL_MODE_MASK    (~(uint32_t)(3 << 18))
 
 #define NEOPIXEL_MODE_CTRL    ( (uint32_t)(3 << 18))
 #define NEOPIXEL_MODE_RAW     ( (uint32_t)(2 << 18))
@@ -56,6 +56,7 @@ class NeoPixelDriver {
  private:
   uint32_t base;
   uint16_t pixels;
+  uint16_t virtualPixels;
 
   void writeRegister(NeoPixelReg::Type, uint8_t value);
 
@@ -67,48 +68,50 @@ class NeoPixelDriver {
   
 
  public:
-  NeoPixelDriver(uint32_t base, uint16_t pixels);
-  NeoPixelDriver(uint32_t base);
+    NeoPixelDriver(uint32_t base, uint16_t pixels, uint16_t virtualPixels);
+    NeoPixelDriver(uint32_t base, uint16_t pixels);
+    NeoPixelDriver(uint32_t base);
 
-  void initHardware();
-  void cleanBuffer();
+    void initHardware();
+    void cleanBuffer();
+    void initDelta();
 
-  void     setPixelLength(uint16_t pixels);
-  uint16_t getPixelLength();
-  // void setPixel(uint32_t color);
-  // void setPixel(uint8_t red, uint8_t green, uint8_t blue);
-  // void setPixelRaw(uint32_t color);
+    void setPixelLength(uint16_t pixels);
+    uint16_t getPixelLength();
+    // void setPixel(uint32_t color);
+    // void setPixel(uint8_t red, uint8_t green, uint8_t blue);
+    // void setPixelRaw(uint32_t color);
 
-  // TODO: Peripheral reset (with wait)
+    // TODO: Peripheral reset (with wait)
 
-  // TODO: Pixel words
-  void     writeRawPixelByte(uint16_t pixel, uint8_t value);
-  uint8_t  readRawPixelByte(uint16_t addr);
-  void     writeVirtualPixelByte(uint16_t pixel, uint8_t value);
-  void     writeDelta(uint16_t index, uint16_t value);
+    // TODO: Pixel words
+    void writeRawPixelByte(uint16_t pixel, uint8_t value);
+    uint8_t readRawPixelByte(uint16_t addr);
+    void writeVirtualPixelByte(uint16_t pixel, uint8_t value);
+    void writeDelta(uint16_t index, uint16_t value);
 
-  void     writeRegisterLowHigh(NeoPixelReg::Type regLow,
-                                NeoPixelReg::Type regHigh, uint16_t value);
+    void writeRegisterLowHigh(NeoPixelReg::Type regLow,
+                              NeoPixelReg::Type regHigh, uint16_t value);
 
-  uint16_t readRegisterLowHigh(NeoPixelReg::Type regLow,
-                               NeoPixelReg::Type regHigh);
+    uint16_t readRegisterLowHigh(NeoPixelReg::Type regLow,
+                                 NeoPixelReg::Type regHigh);
 
-  void     writeRegisterMax(uint16_t value);
-  uint16_t readRegisterMax();
+    void writeRegisterMax(uint16_t value);
+    uint16_t readRegisterMax();
 
-  void     writeRegisterCtrl(uint8_t value);
-  void     writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
-  uint8_t  readRegisterCtrl();
-  uint8_t  testRegisterCtrl(uint8_t mask);
+    void writeRegisterCtrl(uint8_t value);
+    void writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
+    uint8_t readRegisterCtrl();
+    uint8_t testRegisterCtrl(uint8_t mask);
 
-  uint8_t  readRegisterState();
+    uint8_t readRegisterState();
 
-  void     waitForSafeBuffer();
+    void waitForSafeBuffer();
 
-  void     updateLeds();
-  void     syncUpdateLeds();
+    void updateLeds();
+    void syncUpdateLeds();
 
-  // self test methods
+    // self test methods
 #ifdef NEOPIXEL_SELFTEST
   void selfTestPopulatePixelBuffer();
   void selfTestLowHighRegisters();
