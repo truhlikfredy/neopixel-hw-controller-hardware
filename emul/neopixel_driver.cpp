@@ -7,14 +7,14 @@
 
 NeoPixelDriver::NeoPixelDriver(uint32_t base, 
                                uint16_t pixels) {
-  this->base         = base;
+  this->base = base;
   initHardware();
   setPixelLength(pixels);
 }
 
 
 NeoPixelDriver::NeoPixelDriver(uint32_t base) {
-  this->base         = base;
+  this->base = base;
   initHardware();
 }
 
