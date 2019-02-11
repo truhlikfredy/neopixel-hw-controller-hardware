@@ -71,8 +71,7 @@ class NeoPixelDriver {
   NeoPixelDriver(uint32_t base);
 
   void initHardware();
-  void cleanBuffers();
-  void cleanBuffer(uint8_t buffer);
+  void cleanBuffer();
 
   void     setPixelLength(uint16_t pixels);
   uint16_t getPixelLength();

@@ -28,21 +28,10 @@ void NeoPixelDriver::initHardware() {
 }
 
 
-void NeoPixelDriver::cleanBuffers() {
-  cleanBuffer(0);
-  cleanBuffer(1);
-}
-
-
-void NeoPixelDriver::cleanBuffer(uint8_t buffer) {
-  uint8_t currentBuffer = readRegister(NeoPixelReg::BUFFER);
-  writeRegister(NeoPixelReg::BUFFER, buffer);
-
+void NeoPixelDriver::cleanBuffer() {
   for (uint32_t i = 0; i < pixels; i++) {
     writeRawPixelByte(i, 0x00);
   }
-
-  writeRegister(NeoPixelReg::BUFFER, currentBuffer);
 }
 
 
