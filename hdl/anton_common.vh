@@ -16,6 +16,7 @@
 // 300us => 300/(1/6.4) = 1959 ticks
 `define RESET_DELAY_DEFAULT 1959
 
+
 // https://stackoverflow.com/questions/5269634/address-width-from-ram-depth
 `define CLOG2(x) \
   (x <= 2) ? 1 : \
@@ -34,24 +35,37 @@
   -1
 
 
+`define SF2_LSRAM_WIDTH_FROM_BUF_END(x) \
+  (x <= (2-1))           ? 0 : \
+  (x <= (4-1))           ? 1 : \
+  (x <= (16-1))          ? 2 : \
+  (x <= (512-1))         ? 3 : \
+  (x <= (262144-1))      ? 4 : \
+  (x <+ (68719476736-1)) ? 5 ; \
+  -1
+
+
 `define IS_POWER_OF2(x) ( \
   x == 2    || x == 4    || x == 8   || x == 16  || x == 32   || \
   x == 64   || x == 128  || x == 256 || x == 512 || x == 1024 || \
   x == 2048 || x == 4096 || x == 8192 \
   ) ? 1 : 0
 
+
 `define MAX_BITS_IN_PIXEL_BUFFER (16-2-1)  // 16 bits, but 1 byte aligned to DWord and 1 bit dedicated for Ctrl REG = 13bits
 `define MAX_BYTES_IN_BUFFER ( 1 << `MAX_BITS_IN_PIXEL_BUFFER) // 13^2 = 8192
 `define MIN_BYTES_IN_BUFFER 4 // this will cover 1 pixel in 32bit mode
 
+
 `define MIN_OF_TWO(NUM_A, NUM_B) ((NUM_A) < (NUM_B) ? (NUM_A) : (NUM_B))
 `define MAX_OF_TWO(NUM_A, NUM_B) ((NUM_A) > (NUM_B) ? (NUM_A) : (NUM_B))
 
+
 `define SANITIZE_BUFFER_END(SIZE) ( `MIN_OF_TWO(`MAX_BYTES_IN_BUFFER, `MAX_OF_TWO( `MIN_BYTES_IN_BUFFER, (SIZE) )))
+
 
 // If I will make SystemVerilog variant then use proper enums for this
 `define ENUM_STATE_TRANSMIT 1'b0  
 `define ENUM_STATE_RESET    1'b1
-
 
 `endif

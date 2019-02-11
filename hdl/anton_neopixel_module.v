@@ -10,6 +10,7 @@
 
 module anton_neopixel_module #(
   parameter BUFFER_END  = `BUFFER_END_DEFAULT, // read anton_common.vh
+  parameter VIRTUAL_END = `BUFFER_END_DEFAULT, // read anton_common.vh
   parameter RESET_DELAY = `RESET_DELAY_DEFAULT
 )(
   input         clk6_4mhz,
@@ -42,7 +43,8 @@ module anton_neopixel_module #(
   wire [7:0]             pixelByte;
   
   anton_neopixel_registers #(
-    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
+    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END)),
+    .VIRTUAL_END(`SANITIZE_BUFFER_END(VIRTUAL_END))
   ) registers(
     .busClk(busClk),
     .busAddr(busAddr),
