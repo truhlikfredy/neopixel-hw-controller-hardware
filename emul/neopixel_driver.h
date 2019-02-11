@@ -6,8 +6,12 @@
 // comment out to remove the selftest features
 #define NEOPIXEL_SELFTEST
 
-#define NEOPIXEL_CTRL_BIT ((uint32_t)(3 << 18))
-#define NEOPIXEL_CTRL_BIT_MASK (~(uint32_t)(3 << 18))
+#define NEOPIXEL_MODE_MASK (~(uint32_t)(3 << 18))
+
+#define NEOPIXEL_MODE_CTRL    ( (uint32_t)(3 << 18))
+#define NEOPIXEL_MODE_RAW     ( (uint32_t)(2 << 18))
+#define NEOPIXEL_MODE_DELTA   ( (uint32_t)(1 << 18))
+#define NEOPIXEL_MODE_VIRTUAL ( (uint32_t)(0 << 18)) // In this implementation the virtual mode is 0, this will make the code portable in case the modes change
 
 // Because this driver is used in emulation as well the enum class feature
 // of C++11 can't be used because of verilator limitations. Wrapping enum
@@ -79,28 +83,31 @@ class NeoPixelDriver {
   // TODO: Peripheral reset (with wait)
 
   // TODO: Pixel words
-  void    writePixelByte(uint16_t pixel, uint8_t value);
-  uint8_t readPixelByte(uint16_t pixel);
+  void     writeRawPixelByte(uint16_t pixel, uint8_t value);
+  uint8_t  readRawPixelByte(uint16_t addr);
+  void     writeVirtualPixelByte(uint16_t pixel, uint8_t value);
+  void     writeDelta(uint16_t index, uint16_t value);
 
-  void writeRegisterLowHigh(NeoPixelReg::Type regLow,
-                            NeoPixelReg::Type regHigh, uint16_t value);
+  void     writeRegisterLowHigh(NeoPixelReg::Type regLow,
+                                NeoPixelReg::Type regHigh, uint16_t value);
+
   uint16_t readRegisterLowHigh(NeoPixelReg::Type regLow,
                                NeoPixelReg::Type regHigh);
 
   void     writeRegisterMax(uint16_t value);
   uint16_t readRegisterMax();
 
-  void    writeRegisterCtrl(uint8_t value);
-  void    writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
-  uint8_t readRegisterCtrl();
-  uint8_t testRegisterCtrl(uint8_t mask);
+  void     writeRegisterCtrl(uint8_t value);
+  void     writeRegisterCtrlMasked(uint8_t mask, uint8_t value);
+  uint8_t  readRegisterCtrl();
+  uint8_t  testRegisterCtrl(uint8_t mask);
 
-  uint8_t readRegisterState();
+  uint8_t  readRegisterState();
 
-  void waitForSafeBuffer();
+  void     waitForSafeBuffer();
 
-  void updateLeds();
-  void syncUpdateLeds();
+  void     updateLeds();
+  void     syncUpdateLeds();
 
   // self test methods
 #ifdef NEOPIXEL_SELFTEST

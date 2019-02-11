@@ -39,7 +39,7 @@ void NeoPixelDriver::cleanBuffer(uint8_t buffer) {
   writeRegister(NeoPixelReg::BUFFER, buffer);
 
   for (uint32_t i = 0; i < pixels; i++) {
-    writePixelByte(i, 0x00);
+    writeRawPixelByte(i, 0x00);
   }
 
   writeRegister(NeoPixelReg::BUFFER, currentBuffer);
@@ -65,7 +65,7 @@ uint16_t NeoPixelDriver::getPixelLength() {
 
 
 void NeoPixelDriver::writeRegister(NeoPixelReg::Type addr, uint8_t data) {
-  neopixelWriteApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT, data);
+  neopixelWriteApbByte((uint16_t)(addr) << 2 | NEOPIXEL_MODE_CTRL, data);
 }
 
 
@@ -77,17 +77,36 @@ void NeoPixelDriver::writeRegisterMasked(NeoPixelReg::Type addr,
 
 
 uint8_t NeoPixelDriver::readRegister(NeoPixelReg::Type addr) {
-  return (neopixelReadApbByte((uint16_t)(addr) << 2 | NEOPIXEL_CTRL_BIT));
+  return (neopixelReadApbByte((uint16_t)(addr) << 2 | NEOPIXEL_MODE_CTRL));
 }
 
 
-void NeoPixelDriver::writePixelByte(uint16_t pixel, uint8_t value) {
-  neopixelWriteApbByte(pixel << 2 & NEOPIXEL_CTRL_BIT_MASK, value);
+void NeoPixelDriver::writeRawPixelByte(uint16_t pixel, uint8_t value) {
+  neopixelWriteApbByte((pixel << 2 & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_RAW, value);
+}
+
+uint8_t NeoPixelDriver::readRawPixelByte(uint16_t addr) {
+  return (neopixelReadApbByte((addr << 2 & NEOPIXEL_MODE_MASK) |
+                              NEOPIXEL_MODE_RAW));
 }
 
 
-uint8_t NeoPixelDriver::readPixelByte(uint16_t addr) {
-  return (neopixelReadApbByte(addr << 2 & NEOPIXEL_CTRL_BIT_MASK));
+void NeoPixelDriver::writeVirtualPixelByte(uint16_t pixel, uint8_t value) {
+  neopixelWriteApbByte((pixel << 2 & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_VIRTUAL,
+                       value);
+}
+
+
+void NeoPixelDriver::writeDelta(uint16_t index, uint16_t value) {
+  // Write LOW 8bit of the value
+  neopixelWriteApbByte(
+      ((index << 1 + 0) << 2 & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_DELTA,
+      value & 0xff);
+
+  // Write HIGH 8bit of the value
+  neopixelWriteApbByte(
+      ((index << 1 + 1) << 2 & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_DELTA,
+      value >> 8);
 }
 
 void NeoPixelDriver::writeRegisterLowHigh(NeoPixelReg::Type regLow,
@@ -97,14 +116,16 @@ void NeoPixelDriver::writeRegisterLowHigh(NeoPixelReg::Type regLow,
   writeRegister(regHigh, (value >> 8) & 0xFF);
 }
 
+
 uint16_t NeoPixelDriver::readRegisterLowHigh(NeoPixelReg::Type regLow,
                                              NeoPixelReg::Type regHigh) {
   return ((uint16_t)(readRegister(regLow)) |
           (uint16_t)(readRegister(regHigh)) << 8);
 }
 
+
 void NeoPixelDriver::writeRegisterMax(uint16_t value) {
-  writeRegister(NeoPixelReg::MAX_LOW, value & 0xFF);
+  writeRegister(NeoPixelReg::MAX_LOW,   value       & 0xFF);
   writeRegister(NeoPixelReg::MAX_HIGH, (value >> 8) & 0xFF);
 }
 
@@ -167,16 +188,16 @@ void NeoPixelDriver::syncUpdateLeds() {
 void NeoPixelDriver::selfTestPopulatePixelBuffer() {
   // write color values into the buffer
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    writePixelByte(i, neopixel_selftest_colors[i]);
+    writeRawPixelByte(i, neopixel_selftest_colors[i]);
   }
 
   // read from buffer is disabled, only 2 port mem block is used
 
   // read back and and expect 0xff
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    if (readPixelByte(i) != 0xff) {
+    if (readRawPixelByte(i) != 0xff) {
       std::cout << "Pixel data @" << i << " doesn't match actual "
-                << readPixelByte(i) << " != expected "
+                << readRawPixelByte(i) << " != expected "
                 << neopixel_selftest_colors[i] << std::endl;
 
       testFailed();
