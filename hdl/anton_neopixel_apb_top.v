@@ -8,6 +8,7 @@ module anton_neopixel_apb_top #(
   // 8192 bytes (8192 pixels in 8bit mode and 2048 pixels in 32bit mode), which should have ~4Hz refresh
   parameter BUFFER_END = `BUFFER_END_DEFAULT, // read anton_common.vh
 
+  parameter VIRTUAL_END = `BUFFER_END_DEFAULT, // read anton_common.vh
   // How long the reset delay will be happening, minimum spec is so 
   // 50us => 50000ns/(1/6.4) = 320 000 ticks. But some arrays need bit more:
   // 81us => 81000ns/(1/6.4) = 518 400 ticks
@@ -44,7 +45,8 @@ module anton_neopixel_apb_top #(
   reg [2:0]  testUnit; // TODO: disable when not in simulation/debug
 
   anton_neopixel_module #(
-    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END))
+    .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END)),
+    .VIRTUAL_END(`SANITIZE_BUFFER_END(VIRTUAL_END)),    
   ) neopixel(
     .clk6_4mhz(clk6_4mhz),
     .syncStart(syncStart),
