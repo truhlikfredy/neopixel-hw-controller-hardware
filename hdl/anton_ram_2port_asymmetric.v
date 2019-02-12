@@ -13,7 +13,7 @@ module anton_ram_2port_asymmetric #(
   input                     clk,
 
   input  [BUFFER_BITS-1:0]  rAddr,
-  output [BUFFER_WIDTH-1:0] dOut,
+  output [BUFFER_WIDTH-READ-1:0] dOut,
 
   input                     wr,
   input  [BUFFER_BITS-1:0]  wAddr,
@@ -22,21 +22,22 @@ module anton_ram_2port_asymmetric #(
 
 reg [BUFFER_BITS-1:0]  raddr_reg;
 reg [BUFFER_WIDTH_READ-1:0] mem [0:BUFFER_END-1];
-reg [BUFFER_WIDTH_READ-1:0] dOut;
-reg [BUFFER_WIDTH_READ-1:0] dOutB;
+reg [BUFFER_WIDTH_READ-1:0] dOutB1;
+reg [BUFFER_WIDTH_READ-1:0] dOutB2;
 
 always@ (posedge clk)
 begin
   raddr_reg <= rAddr;
-  dOutB <= mem[raddr_reg];
+  dOutB2 <= mem[raddr_reg];
   if (wr)
     mem[wAddr] <= dIn;
 end
 
 always@ (posedge clk)
 begin
-  dOut <= dOutB;
+  dOutB1 <= dOutB2;
 end
 
+assign dOutB = dOutB1;
 
 endmodule

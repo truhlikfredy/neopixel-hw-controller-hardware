@@ -21,21 +21,23 @@ module anton_ram_2port_symmetric #(
 
 reg [BUFFER_BITS-1:0]  raddr_reg;
 reg [BUFFER_WIDTH-1:0] mem [0:BUFFER_END-1];
-reg [BUFFER_WIDTH-1:0] dOut;
-reg [BUFFER_WIDTH-1:0] dOutB;
+reg [BUFFER_WIDTH-1:0] dOutB1;
+reg [BUFFER_WIDTH-1:0] dOutB2;
 
 always@ (posedge clk)
 begin
   raddr_reg <= rAddr;
-  dOutB <= mem[raddr_reg];
+  dOutB2 <= mem[raddr_reg];
   if (wr)
     mem[wAddr] <= dIn;
 end
 
 always@ (posedge clk)
 begin
-  dOut <= dOutB;
+  dOutB1 <= dOutB2;
 end
+
+assign dOut = dOutB1;
 
 
 endmodule
