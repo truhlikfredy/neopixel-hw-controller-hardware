@@ -120,7 +120,7 @@ module anton_neopixel_registers #(
       // 2nd Stage Virtual Write
       ramVirtualWrite <= 'b0;
       ramTwoPortWrite <= 'b1;
-      ramTwoPortAddr  <= ramVirtualB[BUFFER_BITS-1:0];
+      ramTwoPortAddr  <= ramVirtualB[7:0];
     end
 
     if (busWrite) begin

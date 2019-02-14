@@ -47,6 +47,7 @@ module anton_neopixel_apb_top #(
   anton_neopixel_module #(
     .BUFFER_END(`SANITIZE_BUFFER_END(BUFFER_END)),
     .VIRTUAL_END(`SANITIZE_BUFFER_END(VIRTUAL_END)),    
+    .RESET_DELAY(RESET_DELAY)
   ) neopixel(
     .clk6_4mhz(clk6_4mhz),
     .syncStart(syncStart),
