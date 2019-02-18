@@ -53,10 +53,12 @@ module anton_neopixel_registers #(
   
   reg                     ramDeltaWrite   = 'b0;
   reg  [16:0]             ramDeltaAccAddr = 'b0; // busAddr width - 1 as we do LOW/HIGH and do not need to keep least sig. bit TODO: use $bits and consider Virtual WIDTH
+  reg  [15:0]             ramDeltaB       = 'b0;
 
   reg                     ramVirtualWrite = 'b0;
   reg  [VIRTUAL_BITS-1:0] ramVirtualAddr  = 'b0;
-  reg  [7:0]              ramVirtualB     = 'b0;
+  reg  [15:0]             ramVirtualB     = 'b0;
+  reg  [1:0]              ramVirtualChan  = 'b0;
  
 
   // instantiate LSRAM 18K pipelined memory blocks, example #18, for the raw pixels
@@ -78,7 +80,7 @@ module anton_neopixel_registers #(
   // instantiate LSRAM 18K pipelined memory blocks, example #18, for the delta information
   anton_ram_2port_symmetric #(
     .BUFFER_END(`SANITIZE_BUFFER_END(VIRTUAL_END)),
-    .BUFFER_WIDTH(8)
+    .BUFFER_WIDTH(16)
   ) deltaRam(
     .clk(busClk), 
 
@@ -87,7 +89,7 @@ module anton_neopixel_registers #(
 
     .wr(ramDeltaWrite), 
     .wAddr(ramDeltaAccAddr[VIRTUAL_BITS-1:0]),
-    .dIn(busDataIn)
+    .dIn(ramDeltaB)
   );
 
   // TODO: detect verilator and use it only there
@@ -116,24 +118,36 @@ module anton_neopixel_registers #(
     ramTwoPortWrite <= 'b0;
     ramDeltaWrite   <= 'b0;
 
-    if (ramVirtualWrite == 'b1) begin
+    
+    if (ramVirtualWrite == 'b1) begin 
+
       // 2nd Stage Virtual Write
       ramVirtualWrite <= 'b0;
       ramTwoPortWrite <= 'b1;
-      ramTwoPortAddr  <= ramVirtualB[7:0];
+      ramTwoPortAddr  <= (regCtrl32bitB == 'b1) ? {ramVirtualB[BUFFER_BITS-1:2], ramVirtualChan} : ramVirtualB[BUFFER_BITS-1:0];
+      busReadyB       <= 'b1;
     end
 
     if (busWrite) begin
+
       if (busAddr[17:16] == 2'b00) begin
 
         // 1st stage Virtual writes first read the Delta index and then write to the Raw buffer
+        busReadyB       <= 'b0;
         ramVirtualWrite <= 'b1;
-        ramVirtualAddr  <= busAddr[VIRTUAL_BITS-1:0];
-
+        ramVirtualAddr  <= (regCtrl32bitB == 'b1) ? busAddr[VIRTUAL_BITS-1:2] : busAddr[VIRTUAL_BITS-1:0];
+        ramVirtualChan  <= busAddr[1:0];
       end else if (busAddr[17:16] == 2'b01) begin
 
-        ramDeltaAccAddr   <= busAddr[17:1];
-        ramDeltaWrite     <= 'b1;
+        // Populating Delta buffer, needs 2 write to populate one 16bit value
+        if (busAddr[0] == 'b0) begin
+
+          ramDeltaAccAddr <= busAddr[17:1];
+          ramDeltaB[7:0]  <= busDataIn;
+        end else begin
+          ramDeltaB[15:8] <= busDataIn;
+          ramDeltaWrite   <= 'b1;
+        end
 
       end else if (busAddr[17:16] == 2'b10) begin
         
