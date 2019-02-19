@@ -135,7 +135,7 @@ module anton_neopixel_registers #(
         // 1st stage Virtual writes first read the Delta index and then write to the Raw buffer
         busReadyB       <= 'b0;
         ramVirtualWrite <= 'b1;
-        ramVirtualAddr  <= (regCtrl32bitB == 'b1) ? busAddr[VIRTUAL_BITS-1:2] : busAddr[VIRTUAL_BITS-1:0];
+        ramVirtualAddr  <= (regCtrl32bitB == 'b1) ? busAddr[VIRTUAL_BITS-1+2:2] : busAddr[VIRTUAL_BITS-1:0];
         ramVirtualChan  <= busAddr[1:0];
       end else if (busAddr[17:16] == 2'b01) begin
 
