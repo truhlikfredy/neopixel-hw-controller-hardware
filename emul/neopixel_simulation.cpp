@@ -49,12 +49,28 @@ void cycleClocks() {
     simulationHardLimitReached();
   }
 
-  uut->apbPclk = 0;
+  uut->apbPclk = !uut->apbPclk;
   uut->eval();
   tfp->dump(sim_time += 25);
 
-  uut->apbPclk = 1;
+  uut->apbPclk = !uut->apbPclk;
+  uut->eval();
+  tfp->dump(sim_time += 25);
+
+  uut->apbPclk = !uut->apbPclk;
+  uut->eval();
+  tfp->dump(sim_time += 25);
+
   uut->clk6_4mhz = uut->clk6_4mhz ? 0 : 1;
+  uut->apbPclk = !uut->apbPclk;
+  uut->eval();
+  tfp->dump(sim_time += 25);
+
+  uut->apbPclk = !uut->apbPclk;
+  uut->eval();
+  tfp->dump(sim_time += 25);
+
+  uut->apbPclk = !uut->apbPclk;
   uut->eval();
   tfp->dump(sim_time += 25);
 }
