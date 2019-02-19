@@ -107,14 +107,30 @@ void test5() {
   driver->selfTestHardLimit8bit();
 }
 
-
 void test6() {
   testHeader(
-      "Test 6 - Keep 8bit mode, but enable looping and software limit, and "
-      "start it with a synch input");
+      "Test 6 - Delta/Virtual writes");
   uut->anton_neopixel_apb_top__DOT__testUnit = 6;
 
+  driver->selfTestVirtualWrites();
+}
+
+
+void test7() {
+  testHeader(
+      "Test 7 - Keep 8bit mode, but enable looping and software limit, and "
+      "start it with a synch input");
+  uut->anton_neopixel_apb_top__DOT__testUnit = 7;
+
   driver->selfTestSoftLimit8bitLoop();
+}
+
+
+void testDelay() {
+  // just add delay so it's more visible on gtk wave
+  for (uint32_t i = 0; i < 150; i++) {
+    cycleClocks();
+  }
 }
 
 
@@ -142,15 +158,22 @@ int main(int argc, char** argv) {
 
   testStart();
   test1();
+  testDelay();
+
   test2();
   test3();
+  testDelay();
+
   test4();
-  // just add delay so it's more visible on gtk wave
-  for (uint32_t i = 0; i < 150; i++) {
-    cycleClocks();
-  }
+  testDelay();
+
   test5();
+  testDelay();
+
   test6();
+  testDelay();
+
+  test7();
   testHeader("Tests finished without a failure");
 
   // Proper end of the simulation, if the simulation was shutdown sooner, due

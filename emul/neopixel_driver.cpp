@@ -107,15 +107,13 @@ void NeoPixelDriver::writeVirtualPixelByte(uint16_t pixel, uint8_t value) {
 
 
 void NeoPixelDriver::writeDelta(uint16_t index, uint16_t value) {
+  uint32_t offset = (((uint32_t)(index) << (1+2)) & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_DELTA;
+
   // Write LOW 8bit of the value
-  neopixelWriteApbByte(
-      ((index << 1 + 0) << 2 & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_DELTA,
-      value & 0xff);
+  neopixelWriteApbByte(offset,    value & 0xff);
 
   // Write HIGH 8bit of the value
-  neopixelWriteApbByte(
-      ((index << 1 + 1) << 2 & NEOPIXEL_MODE_MASK) | NEOPIXEL_MODE_DELTA,
-      value >> 8);
+  neopixelWriteApbByte(offset +4, value >> 8);
   }
 
 void NeoPixelDriver::writeRegisterLowHigh(NeoPixelReg::Type regLow,
@@ -197,14 +195,15 @@ void NeoPixelDriver::syncUpdateLeds() {
 void NeoPixelDriver::selfTestPopulatePixelBuffer() {
   initHardware();
 
+  writeRawPixelByte(0, neopixel_selftest_colors[0]);
+
   // write color values into the buffer
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
     writeRawPixelByte(i, neopixel_selftest_colors[i]);
   }
 
   // read from buffer is disabled, only 2 port mem block is used
-
-  // read back and and expect 0xff
+  // read back and and expect 0xff as they reads are unimplemented
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
     if (readRawPixelByte(i) != 0xff) {
       std::cout << "Pixel data @" << i << " doesn't match actual "
@@ -312,5 +311,33 @@ void NeoPixelDriver::selfTestSoftLimit8bitLoop() {
   }
 }
 
+
+void NeoPixelDriver::selfTestPopulateDeltas() {
+  for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
+    writeDelta(i, SELFTEST_MAX_COLORS - i);
+  }
+}
+
+
+void NeoPixelDriver::selfTestVirtualWrites() {
+  writeRegisterCtrl(NeoPixelCtrl::NONE);  // Clear previous states
+
+  selfTestPopulateDeltas();
+
+  for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
+    writeVirtualPixelByte(i, i);
+  }
+
+  writeRegisterCtrl(NeoPixelCtrl::LIMIT);
+  updateLeds();
+
+  testTimeoutStart(3000);
+  while (testRegisterCtrl(NeoPixelCtrl::RUN)) {
+    testAssertEquals<bool>("Finished before timeout", false,
+                           testTimeoutIsExpired(), false);
+
+    testWait();  // Wait for the next cycle to finish
+  }
+}
 
 #endif

@@ -32,6 +32,7 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.streamPixelOf"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.stream_logic.streamSyncOf"
 
 lappend signals "TOP.anton_neopixel_apb_top.apbPselx"
+lappend signals "TOP.anton_neopixel_apb_top.apbPready"
 lappend signals "TOP.anton_neopixel_apb_top.wrEnable"
 lappend signals "TOP.anton_neopixel_apb_top.rdEnable"
 lappend signals "TOP.anton_neopixel_apb_top.apbPwData"

@@ -119,6 +119,8 @@ class NeoPixelDriver {
   void selfTestSoftLimit32bit();
   void selfTestHardLimit8bit();
   void selfTestSoftLimit8bitLoop();
+  void selfTestPopulateDeltas();
+  void selfTestVirtualWrites();
 #endif
 };
 
