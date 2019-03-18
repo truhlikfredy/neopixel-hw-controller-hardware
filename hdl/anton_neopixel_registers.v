@@ -55,7 +55,7 @@ module anton_neopixel_registers #(
   reg  [14:0]             ramDeltaAccAddr = 'b0; // busAddr width - 1 as we do LOW/HIGH and do not need to keep least sig. bit. -2 because the top 2 bits used for mode selection TODO: use $bits and consider Virtual WIDTH
   reg  [15:0]             ramDeltaB       = 'b0;
 
-  reg                     ramVirtualWrite = 'b0;
+  reg  [2:0]              ramVirtualWrite = 'b0;
   reg  [VIRTUAL_BITS-1:0] ramVirtualAddr  = 'b0;
   reg  [15:0]             ramVirtualB     = 'b0;
   reg  [1:0]              ramVirtualChan  = 'b0;
@@ -121,10 +121,25 @@ module anton_neopixel_registers #(
 
     if (ramVirtualWrite == 'd1) begin
       // 2nd Stage Virtual Write
-      ramVirtualWrite <= 'b0;
-      ramTwoPortWrite <= 'b1;
+      ramVirtualWrite <= 'd2;
+    end else if (ramVirtualWrite == 'd2) begin
+      // 3rd Stage Virtual Write
+      ramVirtualWrite <= 'd3;
+    end else if (ramVirtualWrite == 'd3) begin
+      // Stage3
+      ramVirtualWrite <= 'd4;
+    end else if (ramVirtualWrite == 'd4) begin
+      // 4th Stage Virtual Write
       ramTwoPortAddr  <= (regCtrl32bitB == 'b1) ? {ramVirtualB[BUFFER_BITS-1:2], ramVirtualChan} : ramVirtualB[BUFFER_BITS-1:0];
+      ramVirtualWrite <= 'd5;
+    end else if (ramVirtualWrite == 'd5) begin
+      // 4th Stage Virtual Write
+      ramTwoPortWrite <= 'b1;  // it will be returned to 0 after 1 cycle
+      ramVirtualWrite <= 'd6;
+    end else if (ramVirtualWrite == 'd6) begin
+      // 4th Stage Virtual Write
       busReadyB       <= 'b1;
+      ramVirtualWrite <= 'd0;
     end
 
     if (busWrite) begin
