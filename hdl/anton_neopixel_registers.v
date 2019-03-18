@@ -52,7 +52,7 @@ module anton_neopixel_registers #(
   reg  [BUFFER_BITS-1:0]  ramTwoPortAddr  = 'b0;
   
   reg                     ramDeltaWrite   = 'b0;
-  reg  [16:0]             ramDeltaAccAddr = 'b0; // busAddr width - 1 as we do LOW/HIGH and do not need to keep least sig. bit TODO: use $bits and consider Virtual WIDTH
+  reg  [14:0]             ramDeltaAccAddr = 'b0; // busAddr width - 1 as we do LOW/HIGH and do not need to keep least sig. bit. -2 because the top 2 bits used for mode selection TODO: use $bits and consider Virtual WIDTH
   reg  [15:0]             ramDeltaB       = 'b0;
 
   reg                     ramVirtualWrite = 'b0;
@@ -118,9 +118,8 @@ module anton_neopixel_registers #(
     ramTwoPortWrite <= 'b0;
     ramDeltaWrite   <= 'b0;
 
-    
-    if (ramVirtualWrite == 'b1) begin 
 
+    if (ramVirtualWrite == 'd1) begin
       // 2nd Stage Virtual Write
       ramVirtualWrite <= 'b0;
       ramTwoPortWrite <= 'b1;
@@ -132,17 +131,19 @@ module anton_neopixel_registers #(
 
       if (busAddr[17:16] == 2'b00) begin
 
-        // 1st stage Virtual writes first read the Delta index and then write to the Raw buffer
-        busReadyB       <= 'b0;
-        ramVirtualWrite <= 'b1;
-        ramVirtualAddr  <= (regCtrl32bitB == 'b1) ? busAddr[VIRTUAL_BITS-1+2:2] : busAddr[VIRTUAL_BITS-1:0];
-        ramVirtualChan  <= busAddr[1:0];
+        if (ramVirtualWrite == 'd0) begin
+          // 1st stage Virtual writes first read the Delta index and then write to the Raw buffer
+          busReadyB       <= 'b0;
+          ramVirtualAddr  <= (regCtrl32bitB == 'b1) ? busAddr[VIRTUAL_BITS-1+2:2] : busAddr[VIRTUAL_BITS-1:0];
+          ramVirtualChan  <= busAddr[1:0];
+          ramVirtualWrite <= 'd1;
+        end
       end else if (busAddr[17:16] == 2'b01) begin
 
         // Populating Delta buffer, needs 2 write to populate one 16bit value
         if (busAddr[0] == 'b0) begin
 
-          ramDeltaAccAddr <= busAddr[17:1];
+          ramDeltaAccAddr <= busAddr[15:1];
           ramDeltaB[7:0]  <= busDataIn;
         end else begin
           ramDeltaB[15:8] <= busDataIn;
