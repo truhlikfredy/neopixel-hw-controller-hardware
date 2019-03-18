@@ -32,6 +32,10 @@ void accessApbByte(unsigned char isWrite,
   uut->apbPclk = 1;
   evalStep();
   evalStep();
+  while (!uut->apbPready) {
+    evalStep();
+    evalStep();
+  }
 
   if (!isWrite) {
     *data = uut->apbPrData;
