@@ -53,6 +53,8 @@ lappend signals "TOP.anton_neopixel_apb_top.neopixel.regCtrl32bit"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.regCtrlLimit"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.regCtrlInit"
 
+
+lappend signals "TOP.anton_neopixel_apb_top.neopixel.registers.ramTwoPortWrite"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.registers.ramTwoPortAddr"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.registers.ramVirtualWrite"
 lappend signals "TOP.anton_neopixel_apb_top.neopixel.registers.ramVirtualAddr"
