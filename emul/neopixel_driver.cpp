@@ -314,7 +314,7 @@ void NeoPixelDriver::selfTestSoftLimit8bitLoop() {
 
 void NeoPixelDriver::selfTestPopulateDeltas() {
   for (uint32_t i = 0; i < SELFTEST_MAX_COLORS; i++) {
-    writeDelta(i, SELFTEST_MAX_COLORS - i);
+    writeDelta(i, SELFTEST_MAX_COLORS - 1 - i);
   }
 }
 
